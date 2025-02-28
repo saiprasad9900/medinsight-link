@@ -21,14 +21,19 @@ import {
   FileText, 
   BarChart, 
   Image as ImageIcon, 
-  FileSpreadsheet 
+  FileSpreadsheet,
+  Brain,
+  Layers
 } from "lucide-react";
 import FileUpload from "@/components/records/FileUpload";
 import RecordCard from "@/components/records/RecordCard";
-import RecordInsight from "@/components/records/RecordInsight";
+import EnhancedRecordInsight from "@/components/records/EnhancedRecordInsight";
+import PredictiveInsights from "@/components/records/PredictiveInsights";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Record } from "@/types/records";
+import { analyzeRecord, predictOutcomes, categorizeRecord } from "@/services/analysisService";
 
 interface RecordFile {
   id: string;
@@ -36,17 +41,6 @@ interface RecordFile {
   file_type: string;
   created_at: string;
   file_path: string;
-}
-
-interface Record {
-  id: string;
-  title: string;
-  type: "Lab Result" | "Clinical Note" | "Medical Image" | "Prescription";
-  date: string;
-  patientName: string;
-  insights?: number;
-  status: "Analyzed" | "Pending" | "Processing";
-  filePath?: string;
 }
 
 const recordsData = [
@@ -58,6 +52,7 @@ const recordsData = [
     patientName: "Emma Thompson",
     insights: 5,
     status: "Analyzed" as const,
+    category: "Laboratory",
   },
   {
     id: "2",
@@ -67,6 +62,7 @@ const recordsData = [
     patientName: "Michael Chen",
     insights: 3,
     status: "Analyzed" as const,
+    category: "Cardiology",
   },
   {
     id: "3",
@@ -76,6 +72,7 @@ const recordsData = [
     patientName: "Robert Johnson",
     insights: 2,
     status: "Analyzed" as const,
+    category: "Radiology",
   },
   {
     id: "4",
@@ -84,6 +81,7 @@ const recordsData = [
     date: "Aug 10, 2023",
     patientName: "Sophia Rodriguez",
     status: "Pending" as const,
+    category: "Pharmacy",
   },
   {
     id: "5",
@@ -92,6 +90,7 @@ const recordsData = [
     date: "Aug 8, 2023",
     patientName: "Michael Chen",
     status: "Processing" as const,
+    category: "Laboratory",
   },
   {
     id: "6",
@@ -101,47 +100,19 @@ const recordsData = [
     patientName: "Sophia Rodriguez",
     insights: 4,
     status: "Analyzed" as const,
+    category: "Surgical",
   },
 ];
-
-const insightsData = {
-  title: "Blood Test Analysis - Emma Thompson",
-  summary: "The blood test results show elevated white blood cell count (12,500 cells/mcL) and C-reactive protein levels (15 mg/L), indicating an active inflammatory process. Kidney and liver function markers are within normal ranges. Further investigation recommended to identify the source of inflammation.",
-  insights: [
-    {
-      type: "warning" as const,
-      title: "Elevated WBC Count",
-      description: "White blood cell count of 12,500 cells/mcL is above the normal range (4,500-11,000 cells/mcL), suggesting an inflammatory response or possible infection.",
-    },
-    {
-      type: "warning" as const,
-      title: "Increased CRP Levels",
-      description: "C-reactive protein at 15 mg/L indicates significant inflammation and correlates with the elevated WBC count.",
-    },
-    {
-      type: "info" as const,
-      title: "Normal Kidney Function",
-      description: "Creatinine and BUN levels are within normal ranges, indicating proper kidney function.",
-    },
-    {
-      type: "info" as const,
-      title: "Normal Liver Enzymes",
-      description: "ALT, AST, and Bilirubin are within reference ranges, suggesting normal liver function.",
-    },
-    {
-      type: "success" as const,
-      title: "Improved Hemoglobin",
-      description: "Hemoglobin has increased from 11.2 g/dL to 12.4 g/dL since last measurement, showing good response to iron supplementation.",
-    },
-  ],
-};
 
 const Records = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("browse");
-  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
   const [userRecords, setUserRecords] = useState<Record[]>([]);
   const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [activeView, setActiveView] = useState<"analysis" | "prediction">("analysis");
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
 
   // Function to get file type category
   const getFileType = (fileType: string): Record["type"] => {
@@ -168,21 +139,32 @@ const Records = () => {
 
         if (data) {
           // Convert the records_files data to our Record interface format
-          const records: Record[] = data.map((file: RecordFile) => ({
-            id: file.id,
-            title: file.filename,
-            type: getFileType(file.file_type),
-            date: new Date(file.created_at).toLocaleDateString('en-US', {
-              month: 'short', 
-              day: 'numeric', 
-              year: 'numeric'
-            }),
-            patientName: user?.user_metadata?.first_name 
-              ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
-              : user.email?.split('@')[0] || 'Patient',
-            status: "Pending" as const,
-            filePath: file.file_path
-          }));
+          const records: Record[] = data.map((file: RecordFile) => {
+            const type = getFileType(file.file_type);
+            return {
+              id: file.id,
+              title: file.filename,
+              type,
+              date: new Date(file.created_at).toLocaleDateString('en-US', {
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric'
+              }),
+              patientName: user?.user_metadata?.first_name 
+                ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+                : user.email?.split('@')[0] || 'Patient',
+              status: "Pending" as const,
+              filePath: file.file_path,
+              category: categorizeRecord({ 
+                id: file.id, 
+                title: file.filename, 
+                type, 
+                date: '', 
+                patientName: '', 
+                status: "Pending" 
+              })
+            };
+          });
 
           setUserRecords(records);
         }
@@ -199,32 +181,82 @@ const Records = () => {
 
   const handleFileUpload = async (files: File[], filePaths: string[]) => {
     // Add newly uploaded files to the records list
-    const newRecords: Record[] = files.map((file, index) => ({
-      id: crypto.randomUUID(),
-      title: file.name,
-      type: getFileType(file.type),
-      date: new Date().toLocaleDateString('en-US', {
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric'
-      }),
-      patientName: user?.user_metadata?.first_name 
-        ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
-        : user?.email?.split('@')[0] || 'Patient',
-      status: "Pending" as const,
-      filePath: filePaths[index]
-    }));
+    const newRecords: Record[] = files.map((file, index) => {
+      const type = getFileType(file.type);
+      const record = {
+        id: crypto.randomUUID(),
+        title: file.name,
+        type,
+        date: new Date().toLocaleDateString('en-US', {
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric'
+        }),
+        patientName: user?.user_metadata?.first_name 
+          ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+          : user?.email?.split('@')[0] || 'Patient',
+        status: "Pending" as const,
+        filePath: filePaths[index]
+      };
+      
+      return {
+        ...record,
+        category: categorizeRecord(record)
+      };
+    });
 
     setUserRecords(prev => [...newRecords, ...prev]);
     setActiveTab("browse");
   };
 
-  const handleRecordClick = (recordId: string) => {
-    setSelectedRecordId(recordId === selectedRecordId ? null : recordId);
+  const handleRecordClick = async (record: Record) => {
+    if (selectedRecord?.id === record.id) {
+      setSelectedRecord(null);
+      return;
+    }
+    
+    setSelectedRecord(record);
+    
+    // If record doesn't have analysis or prediction yet, generate them
+    if (!record.analysis || !record.prediction) {
+      setAnalyzing(true);
+      
+      try {
+        // Run NLP analysis and predictive modeling in parallel
+        const [analysis, prediction] = await Promise.all([
+          analyzeRecord(record),
+          predictOutcomes(record)
+        ]);
+        
+        // Update the record with analysis and prediction results
+        const updatedRecord = { ...record, analysis, prediction };
+        
+        // Update in the records list
+        if (record.id.startsWith('user-')) {
+          setUserRecords(prev => 
+            prev.map(r => r.id === record.id ? updatedRecord : r)
+          );
+        }
+        
+        // Update selected record
+        setSelectedRecord(updatedRecord);
+        
+        // In a real implementation, save results to database
+        // await saveAnalysisResults(record.id, analysis, prediction);
+        
+      } catch (error: any) {
+        console.error("Analysis error:", error);
+        toast.error(`Error analyzing record: ${error.message}`);
+      } finally {
+        setAnalyzing(false);
+      }
+    }
   };
 
-  // Combine demo records with user's uploaded records
-  const allRecords = [...userRecords, ...recordsData];
+  // Filter records by category if a filter is selected
+  const filteredRecords = categoryFilter 
+    ? [...userRecords, ...recordsData].filter(record => record.category === categoryFilter)
+    : [...userRecords, ...recordsData];
 
   return (
     <Layout>
@@ -253,10 +285,24 @@ const Records = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>All Records</DropdownMenuItem>
-                <DropdownMenuItem>Recent Uploads</DropdownMenuItem>
-                <DropdownMenuItem>Analyzed Records</DropdownMenuItem>
-                <DropdownMenuItem>Pending Analysis</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCategoryFilter(null)}>
+                  All Categories
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCategoryFilter("Laboratory")}>
+                  Laboratory
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCategoryFilter("Radiology")}>
+                  Radiology
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCategoryFilter("Cardiology")}>
+                  Cardiology
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCategoryFilter("Pharmacy")}>
+                  Pharmacy
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCategoryFilter("Surgical")}>
+                  Surgical
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <Button variant="ghost" size="icon">
@@ -279,35 +325,99 @@ const Records = () => {
           
           <TabsContent value="browse" className="mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className={selectedRecordId ? "lg:col-span-2" : "lg:col-span-3"}>
+              <div className={selectedRecord ? "lg:col-span-2" : "lg:col-span-3"}>
                 {loading ? (
                   <div className="flex justify-center py-12">
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {allRecords.map((record) => (
+                    {filteredRecords.map((record) => (
                       <div 
                         key={record.id} 
-                        onClick={() => handleRecordClick(record.id)}
+                        onClick={() => handleRecordClick(record)}
                         className="cursor-pointer"
                       >
-                        <RecordCard 
-                          record={record} 
-                        />
+                        <RecordCard record={record} />
                       </div>
                     ))}
                   </div>
                 )}
               </div>
               
-              {selectedRecordId && (
+              {selectedRecord && (
                 <div className="lg:col-span-1">
-                  <RecordInsight 
-                    title={insightsData.title}
-                    summary={insightsData.summary}
-                    insights={insightsData.insights}
-                  />
+                  <div className="mb-4">
+                    <TabsList className="w-full grid grid-cols-2">
+                      <TabsTrigger 
+                        value="analysis" 
+                        className="flex gap-1 items-center"
+                        onClick={() => setActiveView("analysis")}
+                        data-state={activeView === "analysis" ? "active" : ""}
+                      >
+                        <Brain className="h-4 w-4" />
+                        Analysis
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="prediction" 
+                        className="flex gap-1 items-center"
+                        onClick={() => setActiveView("prediction")}
+                        data-state={activeView === "prediction" ? "active" : ""}
+                      >
+                        <Layers className="h-4 w-4" />
+                        Predictions
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                  
+                  {analyzing ? (
+                    <div className="p-8 border rounded-lg flex flex-col items-center justify-center space-y-4">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                      <p className="text-sm text-muted-foreground">Analyzing record...</p>
+                    </div>
+                  ) : (
+                    <>
+                      {activeView === "analysis" && selectedRecord.analysis && (
+                        <EnhancedRecordInsight 
+                          title={`${selectedRecord.type} Analysis - ${selectedRecord.patientName}`}
+                          analysis={selectedRecord.analysis}
+                        />
+                      )}
+                      
+                      {activeView === "prediction" && selectedRecord.prediction && (
+                        <PredictiveInsights 
+                          patientName={selectedRecord.patientName}
+                          prediction={selectedRecord.prediction}
+                        />
+                      )}
+                      
+                      {activeView === "analysis" && !selectedRecord.analysis && (
+                        <div className="p-8 border rounded-lg flex flex-col items-center justify-center space-y-4">
+                          <Brain className="h-16 w-16 text-muted-foreground" />
+                          <div className="text-center">
+                            <h3 className="font-medium">No Analysis Available</h3>
+                            <p className="text-sm text-muted-foreground mt-1">This record hasn't been analyzed yet.</p>
+                          </div>
+                          <Button onClick={() => handleRecordClick(selectedRecord)}>
+                            Analyze Now
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {activeView === "prediction" && !selectedRecord.prediction && (
+                        <div className="p-8 border rounded-lg flex flex-col items-center justify-center space-y-4">
+                          <Layers className="h-16 w-16 text-muted-foreground" />
+                          <div className="text-center">
+                            <h3 className="font-medium">No Predictions Available</h3>
+                            <p className="text-sm text-muted-foreground mt-1">Generate predictions to see future health insights.</p>
+                          </div>
+                          <Button onClick={() => handleRecordClick(selectedRecord)}>
+                            Generate Predictions
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
