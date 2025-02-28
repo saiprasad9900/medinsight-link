@@ -87,27 +87,27 @@ const insightsData = {
   summary: "The blood test results show elevated white blood cell count (12,500 cells/mcL) and C-reactive protein levels (15 mg/L), indicating an active inflammatory process. Kidney and liver function markers are within normal ranges. Further investigation recommended to identify the source of inflammation.",
   insights: [
     {
-      type: "warning",
+      type: "warning" as const,
       title: "Elevated WBC Count",
       description: "White blood cell count of 12,500 cells/mcL is above the normal range (4,500-11,000 cells/mcL), suggesting an inflammatory response or possible infection.",
     },
     {
-      type: "warning",
+      type: "warning" as const,
       title: "Increased CRP Levels",
       description: "C-reactive protein at 15 mg/L indicates significant inflammation and correlates with the elevated WBC count.",
     },
     {
-      type: "info",
+      type: "info" as const,
       title: "Normal Kidney Function",
       description: "Creatinine and BUN levels are within normal ranges, indicating proper kidney function.",
     },
     {
-      type: "info",
+      type: "info" as const,
       title: "Normal Liver Enzymes",
       description: "ALT, AST, and Bilirubin are within reference ranges, suggesting normal liver function.",
     },
     {
-      type: "success",
+      type: "success" as const,
       title: "Improved Hemoglobin",
       description: "Hemoglobin has increased from 11.2 g/dL to 12.4 g/dL since last measurement, showing good response to iron supplementation.",
     },
