@@ -6,12 +6,15 @@ import { cn } from "@/lib/utils";
 import { Upload, File, XCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FileUploadProps {
-  onUploadComplete?: (files: File[]) => void;
+  onUploadComplete?: (files: File[], filePaths: string[]) => void;
 }
 
 const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
+  const { user } = useAuth();
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -59,35 +62,91 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const simulateUpload = () => {
-    setUploading(true);
-    setProgress(0);
-    
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setUploading(false);
-          if (onUploadComplete) {
-            onUploadComplete(files);
-          }
-          toast.success("Files uploaded successfully", {
-            description: `${files.length} files have been uploaded and are ready for analysis.`
-          });
-          return 0;
-        }
-        return prev + 5;
-      });
-    }, 200);
+  const uploadFileToSupabase = async (file: File): Promise<string> => {
+    try {
+      // Create a unique file path using a timestamp and random string
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${user?.id}/${fileName}`;
+
+      // Upload file to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('medical_records')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Save metadata to the records_files table
+      const { error: dbError } = await supabase
+        .from('records_files')
+        .insert({
+          user_id: user?.id,
+          filename: file.name,
+          file_path: filePath,
+          file_type: file.type,
+          file_size: file.size
+        });
+
+      if (dbError) {
+        throw dbError;
+      }
+
+      return filePath;
+    } catch (error: any) {
+      console.error("Error uploading file:", error);
+      throw new Error(`File upload failed: ${error.message}`);
+    }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
+    if (!user) {
+      toast.error("You must be logged in to upload files.");
+      return;
+    }
+
     if (files.length === 0) {
       toast.error("Please select at least one file to upload");
       return;
     }
     
-    simulateUpload();
+    setUploading(true);
+    setProgress(0);
+    
+    try {
+      const filePaths: string[] = [];
+      let completed = 0;
+
+      // Upload files sequentially
+      for (const file of files) {
+        try {
+          const filePath = await uploadFileToSupabase(file);
+          filePaths.push(filePath);
+          completed++;
+          setProgress((completed / files.length) * 100);
+        } catch (error: any) {
+          toast.error(`Failed to upload ${file.name}: ${error.message}`);
+        }
+      }
+
+      if (filePaths.length > 0) {
+        if (onUploadComplete) {
+          onUploadComplete(files, filePaths);
+        }
+        toast.success("Files uploaded successfully", {
+          description: `${filePaths.length} of ${files.length} files have been uploaded and are ready for analysis.`
+        });
+        setFiles([]);
+      } else {
+        toast.error("All file uploads failed. Please try again.");
+      }
+    } catch (error: any) {
+      toast.error(`Upload failed: ${error.message}`);
+    } finally {
+      setUploading(false);
+      setProgress(0);
+    }
   };
 
   return (
@@ -174,7 +233,7 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
             <div className="space-y-2">
               <Progress value={progress} className="h-2" />
               <p className="text-xs text-muted-foreground text-right">
-                Uploading... {progress}%
+                Uploading... {Math.round(progress)}%
               </p>
             </div>
           ) : (

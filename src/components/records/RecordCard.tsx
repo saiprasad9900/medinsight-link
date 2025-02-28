@@ -2,7 +2,7 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, FileText, Eye, Download, MoreHorizontal } from "lucide-react";
+import { BarChart3, FileText, Eye, Download, MoreHorizontal, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -10,6 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface RecordCardProps {
   record: {
@@ -20,6 +22,7 @@ interface RecordCardProps {
     patientName: string;
     insights?: number;
     status: "Analyzed" | "Pending" | "Processing";
+    filePath?: string;
   };
 }
 
@@ -44,8 +47,70 @@ const RecordCard = ({ record }: RecordCardProps) => {
       case "Clinical Note":
       case "Prescription":
         return <FileText className="h-4 w-4" />;
+      case "Medical Image":
+        return <ImageIcon className="h-4 w-4" />;
       default:
         return <FileText className="h-4 w-4" />;
+    }
+  };
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!record.filePath) {
+      toast.error("No file available for download");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('medical_records')
+        .download(record.filePath);
+
+      if (error) {
+        throw error;
+      }
+
+      // Create a download link and trigger the download
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = record.title;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success("File download started");
+    } catch (error: any) {
+      console.error("Download error:", error);
+      toast.error(`Failed to download file: ${error.message}`);
+    }
+  };
+
+  const handleView = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!record.filePath) {
+      toast.error("No file available for viewing");
+      return;
+    }
+
+    try {
+      // Get a signed URL for the file
+      const { data, error } = await supabase.storage
+        .from('medical_records')
+        .createSignedUrl(record.filePath, 60); // 60 seconds expiry
+
+      if (error) {
+        throw error;
+      }
+
+      // Open the file in a new tab
+      window.open(data.signedUrl, '_blank');
+    } catch (error: any) {
+      console.error("View error:", error);
+      toast.error(`Failed to view file: ${error.message}`);
     }
   };
 
@@ -81,12 +146,22 @@ const RecordCard = ({ record }: RecordCardProps) => {
         </div>
       </CardContent>
       <CardFooter className="px-6 py-4 border-t border-border flex justify-between">
-        <Button variant="outline" size="sm" className="gap-1">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="gap-1"
+          onClick={(e) => handleView(e)}
+        >
           <Eye className="h-4 w-4" />
           View
         </Button>
         <div className="flex gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={(e) => handleDownload(e)}
+          >
             <Download className="h-4 w-4" />
           </Button>
           <DropdownMenu>

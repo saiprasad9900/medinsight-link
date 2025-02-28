@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { 
   Tabs, 
@@ -26,6 +26,28 @@ import {
 import FileUpload from "@/components/records/FileUpload";
 import RecordCard from "@/components/records/RecordCard";
 import RecordInsight from "@/components/records/RecordInsight";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
+interface RecordFile {
+  id: string;
+  filename: string;
+  file_type: string;
+  created_at: string;
+  file_path: string;
+}
+
+interface Record {
+  id: string;
+  title: string;
+  type: "Lab Result" | "Clinical Note" | "Medical Image" | "Prescription";
+  date: string;
+  patientName: string;
+  insights?: number;
+  status: "Analyzed" | "Pending" | "Processing";
+  filePath?: string;
+}
 
 const recordsData = [
   {
@@ -115,17 +137,94 @@ const insightsData = {
 };
 
 const Records = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("browse");
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  const [userRecords, setUserRecords] = useState<Record[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleFileUpload = (files: File[]) => {
-    console.log("Files uploaded:", files);
+  // Function to get file type category
+  const getFileType = (fileType: string): Record["type"] => {
+    if (fileType.includes('image')) return 'Medical Image';
+    if (fileType.includes('pdf')) return 'Clinical Note';
+    return 'Lab Result';
+  };
+
+  // Fetch user's uploaded files on component mount
+  useEffect(() => {
+    const fetchUserRecords = async () => {
+      if (!user) return;
+
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('records_files')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          // Convert the records_files data to our Record interface format
+          const records: Record[] = data.map((file: RecordFile) => ({
+            id: file.id,
+            title: file.filename,
+            type: getFileType(file.file_type),
+            date: new Date(file.created_at).toLocaleDateString('en-US', {
+              month: 'short', 
+              day: 'numeric', 
+              year: 'numeric'
+            }),
+            patientName: user?.user_metadata?.first_name 
+              ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+              : user.email?.split('@')[0] || 'Patient',
+            status: "Pending" as const,
+            filePath: file.file_path
+          }));
+
+          setUserRecords(records);
+        }
+      } catch (error: any) {
+        console.error('Error fetching records:', error);
+        toast.error(`Error loading records: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserRecords();
+  }, [user]);
+
+  const handleFileUpload = async (files: File[], filePaths: string[]) => {
+    // Add newly uploaded files to the records list
+    const newRecords: Record[] = files.map((file, index) => ({
+      id: crypto.randomUUID(),
+      title: file.name,
+      type: getFileType(file.type),
+      date: new Date().toLocaleDateString('en-US', {
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric'
+      }),
+      patientName: user?.user_metadata?.first_name 
+        ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+        : user?.email?.split('@')[0] || 'Patient',
+      status: "Pending" as const,
+      filePath: filePaths[index]
+    }));
+
+    setUserRecords(prev => [...newRecords, ...prev]);
     setActiveTab("browse");
   };
 
   const handleRecordClick = (recordId: string) => {
     setSelectedRecordId(recordId === selectedRecordId ? null : recordId);
   };
+
+  // Combine demo records with user's uploaded records
+  const allRecords = [...userRecords, ...recordsData];
 
   return (
     <Layout>
@@ -181,19 +280,25 @@ const Records = () => {
           <TabsContent value="browse" className="mt-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className={selectedRecordId ? "lg:col-span-2" : "lg:col-span-3"}>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {recordsData.map((record) => (
-                    <div 
-                      key={record.id} 
-                      onClick={() => handleRecordClick(record.id)}
-                      className="cursor-pointer"
-                    >
-                      <RecordCard 
-                        record={record} 
-                      />
-                    </div>
-                  ))}
-                </div>
+                {loading ? (
+                  <div className="flex justify-center py-12">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {allRecords.map((record) => (
+                      <div 
+                        key={record.id} 
+                        onClick={() => handleRecordClick(record.id)}
+                        className="cursor-pointer"
+                      >
+                        <RecordCard 
+                          record={record} 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               
               {selectedRecordId && (
