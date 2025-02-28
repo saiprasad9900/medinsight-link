@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bell, Search, Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
+import UserMenu from "./UserMenu";
 
 const TopNav = () => {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -49,6 +50,8 @@ const TopNav = () => {
           <Bell className="h-5 w-5" />
           <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary"></span>
         </Button>
+        
+        <UserMenu />
       </div>
     </header>
   );
