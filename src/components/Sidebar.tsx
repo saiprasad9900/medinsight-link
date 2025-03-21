@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   LayoutDashboard, 
-  FileMedical, 
+  FileText, // Replaced FileMedical with FileText
   LineChart, 
   MessagesSquare, 
   Users, 
@@ -27,7 +27,7 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
     },
     {
       label: "Medical Records",
-      icon: <FileMedical className="h-5 w-5" />,
+      icon: <FileText className="h-5 w-5" />, // Updated icon
       href: "/records",
       active: pathname === "/records",
     },
