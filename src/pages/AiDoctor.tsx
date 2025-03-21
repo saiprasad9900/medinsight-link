@@ -2,7 +2,7 @@
 import Layout from "@/components/Layout";
 import ChatBot from "@/components/chat/ChatBot";
 import { useEffect } from "react";
-import { Stethoscope, ShieldAlert, Brain, Heart, Lungs } from "lucide-react";
+import { Stethoscope, ShieldAlert, Brain, Heart, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const AiDoctor = () => {
@@ -62,7 +62,7 @@ const AiDoctor = () => {
             <p className="text-sm opacity-90">Understand your symptoms</p>
           </div>
           <div className="col-span-1 md:col-span-1 p-4 rounded-xl gradient-green text-white flex flex-col items-center justify-center text-center stagger-item slide-left">
-            <Lungs className="h-8 w-8 mb-2" />
+            <Activity className="h-8 w-8 mb-2" />
             <h3 className="font-medium">Wellness</h3>
             <p className="text-sm opacity-90">Lifestyle and prevention</p>
           </div>
