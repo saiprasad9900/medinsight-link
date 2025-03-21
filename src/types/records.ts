@@ -18,6 +18,12 @@ export interface Analysis {
       referenceRange?: string;
     }[];
     diagnosticCodes?: string[];
+    vitalSigns?: {
+      name: string;
+      value: string;
+      unit: string;
+    }[];
+    findings?: string[];
   };
 }
 
