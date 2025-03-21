@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Info, AlertTriangle, CheckCircle, XCircle, Copy, Tag, FileMedical, Activity, FileText } from "lucide-react";
+import { Info, AlertTriangle, CheckCircle, XCircle, Copy, Tag, PillIcon, Activity, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Analysis } from "@/types/records";
@@ -135,7 +135,7 @@ const EnhancedRecordInsight = ({ title, analysis }: EnhancedRecordInsightProps) 
               {extractedData.medications && extractedData.medications.length > 0 && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <FileMedical className="h-4 w-4 text-purple-500" />
+                    <PillIcon className="h-4 w-4 text-purple-500" />
                     <h5 className="font-medium text-sm">Medications</h5>
                   </div>
                   <div className="flex flex-wrap gap-2 pl-6">
