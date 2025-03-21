@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +40,172 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Hospital Records Management System UI Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slideFromLeft {
+  0% { transform: translateX(-50px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideFromRight {
+  0% { transform: translateX(50px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+.pulse-animation {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.slide-left {
+  animation: slideFromLeft 0.6s ease-out forwards;
+}
+
+.slide-right {
+  animation: slideFromRight 0.6s ease-out forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.scale-in {
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+/* Sequential staggered animations */
+.stagger-item:nth-child(1) { animation-delay: 0.1s; }
+.stagger-item:nth-child(2) { animation-delay: 0.2s; }
+.stagger-item:nth-child(3) { animation-delay: 0.3s; }
+.stagger-item:nth-child(4) { animation-delay: 0.4s; }
+.stagger-item:nth-child(5) { animation-delay: 0.5s; }
+.stagger-item:nth-child(6) { animation-delay: 0.6s; }
+
+/* Gradient backgrounds */
+.gradient-blue {
+  background: linear-gradient(135deg, #2a85ff 0%, #5165f6 100%);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, #2dd4bf 0%, #22c55e 100%);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #c084fc 100%);
+}
+
+.gradient-orange {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+}
+
+.gradient-card {
+  transition: all 0.3s ease;
+  background-size: 200% 200%;
+  background-position: 0% 0%;
+}
+
+.gradient-card:hover {
+  background-position: 100% 100%;
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Glass morphism effects */
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+}
+
+.dark .glass-card {
+  background: rgba(30, 30, 30, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Card hover effects */
+.hover-card {
+  transition: all 0.3s ease;
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Colorful status indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.status-dot.critical { background-color: #ef4444; }
+.status-dot.warning { background-color: #f59e0b; }
+.status-dot.stable { background-color: #22c55e; }
+.status-dot.improving { background-color: #3b82f6; }
+
+/* Notification badge with animation */
+.notification-badge {
+  position: relative;
+}
+
+.notification-badge::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+/* Progress indicators */
+.progress-ring {
+  transition: stroke-dashoffset 0.5s ease;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* Interactive elements */
+.interactive-element {
+  transition: all 0.2s ease;
+}
+
+.interactive-element:hover {
+  transform: scale(1.05);
+}
+
+.interactive-element:active {
+  transform: scale(0.95);
 }

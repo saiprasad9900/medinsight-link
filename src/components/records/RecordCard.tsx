@@ -1,8 +1,19 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, FileText, Eye, Download, MoreHorizontal, Image as ImageIcon } from "lucide-react";
+import { 
+  BarChart3, 
+  FileText, 
+  Eye, 
+  Download, 
+  MoreHorizontal, 
+  Image as ImageIcon,
+  Calendar,
+  Clock,
+  AlertCircle
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -23,10 +34,13 @@ interface RecordCardProps {
     insights?: number;
     status: "Analyzed" | "Pending" | "Processing";
     filePath?: string;
+    category?: string;
   };
 }
 
 const RecordCard = ({ record }: RecordCardProps) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Analyzed":
@@ -45,12 +59,32 @@ const RecordCard = ({ record }: RecordCardProps) => {
       case "Lab Result":
         return <BarChart3 className="h-4 w-4" />;
       case "Clinical Note":
-      case "Prescription":
         return <FileText className="h-4 w-4" />;
       case "Medical Image":
         return <ImageIcon className="h-4 w-4" />;
+      case "Prescription":
+        return <FileText className="h-4 w-4" strokeWidth={1.5} />; 
       default:
         return <FileText className="h-4 w-4" />;
+    }
+  };
+
+  const getCategoryColor = (category?: string) => {
+    if (!category) return "";
+    
+    switch (category) {
+      case "Laboratory":
+        return "from-blue-500 to-blue-600";
+      case "Radiology":
+        return "from-purple-500 to-purple-600";
+      case "Cardiology":
+        return "from-red-500 to-red-600";
+      case "Pharmacy":
+        return "from-green-500 to-green-600";
+      case "Surgical":
+        return "from-amber-500 to-amber-600";
+      default:
+        return "from-gray-500 to-gray-600";
     }
   };
 
@@ -115,10 +149,25 @@ const RecordCard = ({ record }: RecordCardProps) => {
   };
 
   return (
-    <Card className="transition-all hover:shadow-md">
+    <Card 
+      className={cn(
+        "transition-all duration-300 hover-card stagger-item slide-left",
+        isHovered ? "shadow-lg" : "shadow-sm"
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {record.category && (
+        <div 
+          className={cn(
+            "h-2 w-full bg-gradient-to-r rounded-t-md",
+            getCategoryColor(record.category)
+          )}
+        />
+      )}
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
-          <Badge variant="outline" className="font-normal flex items-center gap-1">
+          <Badge variant="outline" className="font-normal flex items-center gap-1 interactive-element">
             {getTypeIcon(record.type)}
             {record.type}
           </Badge>
@@ -126,17 +175,35 @@ const RecordCard = ({ record }: RecordCardProps) => {
             variant="outline" 
             className={cn("font-normal", getStatusColor(record.status))}
           >
+            {record.status === "Processing" && (
+              <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+            )}
+            {record.status === "Pending" && (
+              <Clock className="mr-1.5 h-3 w-3" />
+            )}
+            {record.status === "Analyzed" && (
+              <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-green-500"></span>
+            )}
             {record.status}
           </Badge>
         </div>
         
-        <h3 className="font-medium text-lg mb-1 line-clamp-1">{record.title}</h3>
+        <h3 className="font-medium text-lg mb-1 line-clamp-1">
+          {isHovered ? (
+            <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
+              {record.title}
+            </span>
+          ) : record.title}
+        </h3>
         <p className="text-sm text-muted-foreground mb-4">
           Patient: {record.patientName}
         </p>
         
         <div className="flex justify-between items-center text-xs text-muted-foreground">
-          <span>Added: {record.date}</span>
+          <span className="flex items-center gap-1">
+            <Calendar className="h-3.5 w-3.5" />
+            {record.date}
+          </span>
           {record.insights && (
             <span className="flex items-center gap-1">
               <BarChart3 className="h-3.5 w-3.5" />
@@ -149,7 +216,7 @@ const RecordCard = ({ record }: RecordCardProps) => {
         <Button 
           variant="outline" 
           size="sm" 
-          className="gap-1"
+          className="gap-1 interactive-element"
           onClick={(e) => handleView(e)}
         >
           <Eye className="h-4 w-4" />
@@ -159,21 +226,30 @@ const RecordCard = ({ record }: RecordCardProps) => {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-8 w-8"
+            className="h-8 w-8 interactive-element"
             onClick={(e) => handleDownload(e)}
           >
             <Download className="h-4 w-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8 interactive-element">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Reanalyze</DropdownMenuItem>
-              <DropdownMenuItem>Share</DropdownMenuItem>
-              <DropdownMenuItem>Archive</DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-48 animate-fade-in">
+              <DropdownMenuItem className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                Reanalyze
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                Share
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Archive
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
