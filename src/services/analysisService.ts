@@ -1,5 +1,5 @@
 
-import { Analysis, Prediction, Record } from "@/types/records";
+import { Analysis, Prediction, Record as MedicalRecord } from "@/types/records";
 import { supabase } from "@/integrations/supabase/client";
 
 // Sample data for demonstration purposes
@@ -179,7 +179,7 @@ const mockedPredictions: Record<string, Prediction> = {
 };
 
 // This function simulates NLP analysis of medical documents
-export const analyzeRecord = async (record: Record): Promise<Analysis> => {
+export const analyzeRecord = async (record: MedicalRecord): Promise<Analysis> => {
   // In a real implementation, this would call an actual NLP service or API
   console.log(`Analyzing record: ${record.title}`);
   
@@ -202,7 +202,7 @@ export const analyzeRecord = async (record: Record): Promise<Analysis> => {
 };
 
 // This function simulates predictive modeling
-export const predictOutcomes = async (record: Record, patientHistory?: Record[]): Promise<Prediction> => {
+export const predictOutcomes = async (record: MedicalRecord, patientHistory?: MedicalRecord[]): Promise<Prediction> => {
   // In a real implementation, this would use ML models to generate predictions
   console.log(`Generating predictions for: ${record.title}`);
   
@@ -221,7 +221,7 @@ export const predictOutcomes = async (record: Record, patientHistory?: Record[])
 };
 
 // Function to categorize medical records based on content
-export const categorizeRecord = (record: Record): string => {
+export const categorizeRecord = (record: MedicalRecord): string => {
   // In a real implementation, this would use more sophisticated text classification
   const title = record.title.toLowerCase();
   
