@@ -14,6 +14,7 @@ import Patients from "./pages/Patients";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import AiDoctor from "./pages/AiDoctor";
 
 // Components
 import Layout from "./components/Layout";
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/patients" element={<Patients />} />
+                <Route path="/ai-doctor" element={<AiDoctor />} />
                 <Route path="/settings" element={<Settings />} />
               </Route>
               

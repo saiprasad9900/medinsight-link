@@ -1,123 +1,112 @@
 
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  LayoutDashboard,
-  FileText,
-  BarChart3,
-  MessageCircle,
-  Users,
+import { buttonVariants } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  LayoutDashboard, 
+  FileMedical, 
+  LineChart, 
+  MessagesSquare, 
+  Users, 
   Settings,
-  Menu,
-  X
+  Bot
 } from "lucide-react";
 
-const Sidebar = () => {
-  const [expanded, setExpanded] = useState(true);
-  const location = useLocation();
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-  const toggleSidebar = () => {
-    setExpanded(!expanded);
-  };
+export default function Sidebar({ className, ...props }: SidebarProps) {
+  const { pathname } = useLocation();
 
-  const navItems = [
+  const routes = [
     {
-      name: "Dashboard",
+      label: "Dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      path: "/",
+      href: "/",
+      active: pathname === "/",
     },
     {
-      name: "Records",
-      icon: <FileText className="h-5 w-5" />,
-      path: "/records",
+      label: "Medical Records",
+      icon: <FileMedical className="h-5 w-5" />,
+      href: "/records",
+      active: pathname === "/records",
     },
     {
-      name: "Analytics",
-      icon: <BarChart3 className="h-5 w-5" />,
-      path: "/analytics",
+      label: "Analytics",
+      icon: <LineChart className="h-5 w-5" />,
+      href: "/analytics",
+      active: pathname === "/analytics",
     },
     {
-      name: "Messages",
-      icon: <MessageCircle className="h-5 w-5" />,
-      path: "/messages",
+      label: "Messages",
+      icon: <MessagesSquare className="h-5 w-5" />,
+      href: "/messages",
+      active: pathname === "/messages",
     },
     {
-      name: "Patients",
+      label: "Patients",
       icon: <Users className="h-5 w-5" />,
-      path: "/patients",
+      href: "/patients",
+      active: pathname === "/patients",
     },
     {
-      name: "Settings",
-      icon: <Settings className="h-5 w-5" />,
-      path: "/settings",
+      label: "AI Doctor",
+      icon: <Bot className="h-5 w-5" />,
+      href: "/ai-doctor",
+      active: pathname === "/ai-doctor",
     },
+    {
+      label: "Settings",
+      icon: <Settings className="h-5 w-5" />,
+      href: "/settings",
+      active: pathname === "/settings",
+    }
   ];
 
   return (
-    <aside
-      className={cn(
-        "transition-all duration-300 ease-in-out bg-sidebar border-r border-border h-screen flex flex-col z-30",
-        expanded ? "w-64" : "w-[70px]"
-      )}
-    >
-      <div className="flex items-center justify-between h-16 px-4 border-b border-border">
-        {expanded ? (
-          <div className="font-semibold text-lg">
-            <span className="text-primary">Medi</span>
-            <span className="font-bold">Predict</span>
-          </div>
-        ) : (
-          <div className="w-full flex justify-center text-primary text-xl font-bold">M</div>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={toggleSidebar}
-        >
-          {expanded ? <X size={18} /> : <Menu size={18} />}
-        </Button>
+    <div className="flex h-full flex-col border-r bg-background">
+      <div className="p-6">
+        <Link to="/" className="flex items-center gap-2 font-semibold">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-6 w-6 text-primary"
+          >
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+            <path d="M3.22 12H9.5l.5-1 .5 1h6.28" />
+          </svg>
+          <span className="text-xl font-bold tracking-tight">MediPredict</span>
+        </Link>
       </div>
-      <nav className="flex-1 py-4 px-2 overflow-y-auto">
-        <ul className="space-y-1">
-          {navItems.map((item) => (
-            <li key={item.name}>
-              <Link to={item.path}>
-                <Button
-                  variant={location.pathname === item.path ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full justify-start gap-3 font-medium",
-                    location.pathname === item.path 
-                      ? "bg-secondary text-secondary-foreground" 
-                      : "hover:bg-secondary/50",
-                    !expanded && "justify-center px-2"
-                  )}
-                >
-                  {item.icon}
-                  {expanded && <span>{item.name}</span>}
-                </Button>
-              </Link>
-            </li>
+      <ScrollArea className="flex-1">
+        <nav className="grid items-start px-2 text-sm font-medium">
+          {routes.map((route, index) => (
+            <Link
+              key={index}
+              to={route.href}
+              className={cn(
+                buttonVariants({
+                  variant: route.active ? "default" : "ghost",
+                  size: "lg",
+                }),
+                route.active
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-muted hover:text-foreground",
+                "justify-start gap-3",
+                "h-12 px-4"
+              )}
+            >
+              {route.icon}
+              {route.label}
+            </Link>
           ))}
-        </ul>
-      </nav>
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-            <span className="font-medium text-sm">DR</span>
-          </div>
-          {expanded && (
-            <div className="overflow-hidden">
-              <p className="font-medium text-sm truncate">Dr. Rebecca Lee</p>
-              <p className="text-xs text-muted-foreground truncate">Cardiologist</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </aside>
+        </nav>
+      </ScrollArea>
+    </div>
   );
-};
-
-export default Sidebar;
+}
