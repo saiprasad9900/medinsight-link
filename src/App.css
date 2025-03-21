@@ -109,19 +109,19 @@
 
 /* Gradient backgrounds */
 .gradient-blue {
-  background: linear-gradient(135deg, #2a85ff 0%, #5165f6 100%);
+  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
 }
 
 .gradient-green {
-  background: linear-gradient(135deg, #2dd4bf 0%, #22c55e 100%);
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
 }
 
 .gradient-purple {
-  background: linear-gradient(135deg, #8b5cf6 0%, #c084fc 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
 }
 
 .gradient-orange {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
 }
 
 .gradient-card {
