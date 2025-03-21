@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2, Bot, User } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +24,6 @@ const ChatBot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     scrollToBottom();
@@ -46,7 +45,9 @@ const ChatBot = () => {
     setIsLoading(true);
 
     try {
-      // Format chat history for the API
+      console.log("Sending message to AI:", userMessage);
+      
+      // Format chat history for the API - only include content and role
       const chatHistory = messages.map(msg => ({
         role: msg.role,
         content: msg.content
@@ -60,17 +61,28 @@ const ChatBot = () => {
         }
       });
 
-      if (error) throw error;
+      console.log("Response from AI:", data);
+
+      if (error) {
+        console.error("Error from Edge Function:", error);
+        throw error;
+      }
+
+      if (!data || !data.reply) {
+        throw new Error("No response received from AI");
+      }
 
       // Add AI response to chat
       setMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error calling AI:", error);
-      toast({
-        title: "Error",
-        description: "Failed to get a response. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Failed to get a response. Please try again.");
+      
+      // Add error message to chat so user knows what happened
+      setMessages(prev => [...prev, { 
+        role: "assistant", 
+        content: "I'm sorry, I encountered an error while processing your request. Please try again or check your connection." 
+      }]);
     } finally {
       setIsLoading(false);
     }

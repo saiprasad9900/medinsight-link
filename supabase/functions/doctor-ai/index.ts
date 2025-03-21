@@ -38,6 +38,8 @@ Important guidelines:
 6. Do not diagnose specific conditions or prescribe specific medications
 7. Use simple, patient-friendly language
 8. Ask clarifying questions when needed to provide better guidance
+9. For every user question, make sure to provide a thoughtful, detailed response
+10. ALWAYS give a response to the user's questions - never refuse to answer
 
 Remember to always start your response with a clear disclaimer that you're an AI assistant and not a licensed medical professional.`
       },
@@ -47,6 +49,9 @@ Remember to always start your response with a clear disclaimer that you're an AI
         content: message
       }
     ];
+
+    console.log("Sending request to OpenAI with message:", message);
+    console.log("Chat history length:", chatHistory.length);
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -65,11 +70,16 @@ Remember to always start your response with a clear disclaimer that you're an AI
     const data = await response.json();
     
     if (data.error) {
+      console.error("OpenAI API error:", data.error);
       throw new Error(data.error.message);
     }
 
+    console.log("Received response from OpenAI");
+    const aiResponse = data.choices[0].message.content;
+    console.log("AI response first 100 chars:", aiResponse.substring(0, 100));
+
     return new Response(JSON.stringify({ 
-      reply: data.choices[0].message.content 
+      reply: aiResponse 
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
