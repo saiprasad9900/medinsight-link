@@ -66,8 +66,18 @@ const Auth = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-primary">MedInsight</CardTitle>
-          <CardDescription>Access your healthcare portal</CardDescription>
+          <div className="flex flex-col items-center justify-center space-y-2">
+            <div className="relative">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-medinsight-600 to-purple-500 bg-clip-text text-transparent animate-pulse-slow">
+                <span className="animate-fade-in">Medi</span>
+                <span className="text-primary font-extrabold animate-slide-in">Predict</span>
+              </CardTitle>
+              <div className="absolute -bottom-1 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer"></div>
+            </div>
+            <CardDescription className="animate-fade-in opacity-0" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
+              Access your healthcare analytics platform
+            </CardDescription>
+          </div>
         </CardHeader>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
@@ -115,7 +125,7 @@ const Auth = () => {
               <CardFooter>
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-medinsight-600 to-primary hover:opacity-90 transition-all"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Signing in..." : "Sign In"}
@@ -174,7 +184,7 @@ const Auth = () => {
               <CardFooter>
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-medinsight-600 to-primary hover:opacity-90 transition-all"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Creating Account..." : "Create Account"}

@@ -64,7 +64,10 @@ const Sidebar = () => {
     >
       <div className="flex items-center justify-between h-16 px-4 border-b border-border">
         {expanded ? (
-          <div className="font-semibold text-lg text-primary">MedInsight</div>
+          <div className="font-semibold text-lg">
+            <span className="text-primary">Medi</span>
+            <span className="font-bold">Predict</span>
+          </div>
         ) : (
           <div className="w-full flex justify-center text-primary text-xl font-bold">M</div>
         )}
