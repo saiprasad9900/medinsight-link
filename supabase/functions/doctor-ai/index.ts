@@ -7,6 +7,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Fallback response when API key is missing
+const generateFallbackResponse = (message: string) => {
+  console.log("Generating fallback response for:", message);
+  
+  const responses = [
+    "I'm currently experiencing some technical difficulties, but I'd be happy to assist you once I'm back online. In the meantime, please remember that for any urgent medical concerns, you should contact a healthcare professional.",
+    "It seems I'm having trouble connecting to my knowledge base at the moment. For general health questions, reliable sources include the CDC, WHO, or talking to your doctor.",
+    "I apologize, but I'm unable to provide a detailed response right now. Remember that maintaining a balanced diet, regular exercise, and adequate sleep are foundational to good health.",
+    "I'm sorry for the inconvenience. My systems are currently undergoing maintenance. For health emergencies, please call your local emergency services immediately.",
+    "Thanks for your question. Unfortunately, I can't access my full capabilities right now. Please try again later, or consult with a healthcare provider for immediate concerns."
+  ];
+  
+  // Choose a response based on the length of the message for some variety
+  const index = message.length % responses.length;
+  return responses[index];
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -20,8 +37,17 @@ serve(async (req) => {
     const apiKey = Deno.env.get('OPENAI_API_KEY');
     
     if (!apiKey) {
-      console.error("Missing OpenAI API key");
-      throw new Error("Missing OpenAI API key");
+      console.error("Missing OpenAI API key - using fallback response system");
+      
+      // Generate a fallback response without using OpenAI
+      const fallbackResponse = generateFallbackResponse(message);
+      
+      return new Response(JSON.stringify({ 
+        reply: fallbackResponse,
+        source: "fallback" 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
     }
 
     console.log("Processing request with message:", message.substring(0, 50) + "...");
@@ -72,31 +98,60 @@ Remember to always start your response with a clear disclaimer that you're an AI
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("OpenAI API error:", errorData);
-        throw new Error(`OpenAI API error: ${errorData.error?.message || response.statusText}`);
+        console.error("OpenAI API response status:", response.status);
+        console.error("OpenAI API response status text:", response.statusText);
+        
+        // Try to get error message
+        let errorMessage = "Unknown error occurred";
+        try {
+          const errorData = await response.json();
+          console.error("OpenAI API error:", errorData);
+          errorMessage = errorData.error?.message || response.statusText;
+        } catch (e) {
+          console.error("Failed to parse error response:", e);
+        }
+        
+        throw new Error(`OpenAI API error: ${errorMessage}`);
       }
 
       const data = await response.json();
+      
+      if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.error("Unexpected response format from OpenAI:", data);
+        throw new Error("Received invalid response format from OpenAI");
+      }
       
       console.log("Received response from OpenAI");
       const aiResponse = data.choices[0].message.content;
       console.log("AI response first 100 chars:", aiResponse.substring(0, 100));
 
       return new Response(JSON.stringify({ 
-        reply: aiResponse 
+        reply: aiResponse,
+        source: "openai" 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     } catch (fetchError) {
       console.error("Fetch error:", fetchError);
-      throw new Error(`Error fetching from OpenAI: ${fetchError.message}`);
+      
+      // Generate a fallback response in case of API errors
+      const fallbackResponse = generateFallbackResponse(message) + 
+        " (I'm currently experiencing connection issues with my knowledge base.)";
+      
+      return new Response(JSON.stringify({ 
+        reply: fallbackResponse,
+        source: "fallback",
+        error: fetchError.message
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
     }
   } catch (error) {
     console.error("Error in doctor-ai function:", error);
     
     return new Response(JSON.stringify({ 
-      error: error.message || "An error occurred while processing your request" 
+      error: error.message || "An error occurred while processing your request",
+      reply: "I apologize, but I encountered a technical issue. Please try again in a moment."
     }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" }

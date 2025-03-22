@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Loader2, Bot, User, AlertTriangle } from "lucide-react";
+import { Send, Loader2, Bot, User, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,7 @@ const ChatBot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,7 +76,17 @@ const ChatBot = () => {
         throw new Error("No response received from AI service");
       }
 
+      // Check if we got a fallback response due to missing API key
+      if (data.source === "fallback" && !apiKeyMissing) {
+        setApiKeyMissing(true);
+        console.warn("Using fallback responses due to missing OpenAI API key");
+        toast.warning("AI running in limited mode due to configuration issues", {
+          description: "Please contact site administrator to set up OpenAI API key for full functionality."
+        });
+      }
+
       if (data.error) {
+        console.error("Error in AI response:", data.error);
         throw new Error(data.error);
       }
 
@@ -90,7 +101,16 @@ const ChatBot = () => {
       
       const errorMsg = error.message || "Failed to get a response. Please try again.";
       setErrorMessage(errorMsg);
-      toast.error(errorMsg);
+      
+      if (errorMsg.includes("API key")) {
+        toast.error("AI service configuration issue", {
+          description: "The AI service is missing its API key configuration."
+        });
+      } else {
+        toast.error("Communication error", {
+          description: "Failed to get a response from the AI. Please try again."
+        });
+      }
       
       // Add error message to chat so user knows what happened
       setMessages(prev => [...prev, { 
@@ -108,6 +128,11 @@ const ChatBot = () => {
         <CardTitle className="flex items-center gap-2">
           <Bot className="h-5 w-5 text-primary" />
           Dr. MediPredict
+          {apiKeyMissing && (
+            <span className="text-xs bg-amber-100 text-amber-800 py-1 px-2 rounded-full flex items-center ml-2">
+              <Info className="h-3 w-3 mr-1" /> Limited Mode
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
