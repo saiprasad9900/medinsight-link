@@ -2,8 +2,10 @@
 import Layout from "@/components/Layout";
 import ChatBot from "@/components/chat/ChatBot";
 import { useEffect } from "react";
-import { Stethoscope, ShieldAlert, Brain, Heart, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import DoctorHeader from "@/components/doctor/DoctorHeader";
+import MedicalDisclaimer from "@/components/doctor/MedicalDisclaimer";
+import HealthInfoGrid from "@/components/doctor/HealthInfoGrid";
 
 const AiDoctor = () => {
   useEffect(() => {
@@ -24,54 +26,9 @@ const AiDoctor = () => {
   return (
     <Layout>
       <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center gap-4 slide-left">
-          <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center pulse-animation">
-            <Stethoscope className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              AI Health Assistant
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Get helpful health guidance and information from Dr. MediPredict
-            </p>
-          </div>
-        </div>
-        
-        <div className="alert text-sm p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-md mb-6 flex gap-4 shadow-md slide-right">
-          <ShieldAlert className="h-10 w-10 text-amber-600 flex-shrink-0 mt-0.5 float-animation" />
-          <div>
-            <p className="font-semibold text-amber-800 text-lg mb-2">Important Medical Disclaimer:</p>
-            <p className="text-amber-700 leading-relaxed">
-              This AI assistant provides general health information only and is not a substitute for professional medical advice, 
-              diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any 
-              questions you may have regarding a medical condition.
-            </p>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 fade-in">
-          <div className="col-span-1 md:col-span-1 p-4 rounded-xl gradient-purple text-white flex flex-col items-center justify-center text-center stagger-item slide-left">
-            <Brain className="h-8 w-8 mb-2" />
-            <h3 className="font-medium">General Health</h3>
-            <p className="text-sm opacity-90">Ask about general health topics</p>
-          </div>
-          <div className="col-span-1 md:col-span-1 p-4 rounded-xl gradient-blue text-white flex flex-col items-center justify-center text-center stagger-item slide-left">
-            <Heart className="h-8 w-8 mb-2" />
-            <h3 className="font-medium">Symptoms</h3>
-            <p className="text-sm opacity-90">Understand your symptoms</p>
-          </div>
-          <div className="col-span-1 md:col-span-1 p-4 rounded-xl gradient-green text-white flex flex-col items-center justify-center text-center stagger-item slide-left">
-            <Activity className="h-8 w-8 mb-2" />
-            <h3 className="font-medium">Wellness</h3>
-            <p className="text-sm opacity-90">Lifestyle and prevention</p>
-          </div>
-          <div className="col-span-1 md:col-span-1 p-4 rounded-xl gradient-orange text-white flex flex-col items-center justify-center text-center stagger-item slide-left">
-            <Stethoscope className="h-8 w-8 mb-2" />
-            <h3 className="font-medium">Medical Terms</h3>
-            <p className="text-sm opacity-90">Explain medical terminology</p>
-          </div>
-        </div>
+        <DoctorHeader />
+        <MedicalDisclaimer />
+        <HealthInfoGrid />
         
         <div className="scale-in">
           <ChatBot />
