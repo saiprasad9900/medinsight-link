@@ -52,6 +52,7 @@ serve(async (req) => {
 
     console.log("Processing request with message:", message.substring(0, 50) + "...");
     console.log("Chat history length:", chatHistory.length);
+    console.log("API key available:", !!apiKey);
 
     // Construct the conversation with system message and history
     const messages = [
