@@ -20,8 +20,12 @@ serve(async (req) => {
     const apiKey = Deno.env.get('OPENAI_API_KEY');
     
     if (!apiKey) {
+      console.error("Missing OpenAI API key");
       throw new Error("Missing OpenAI API key");
     }
+
+    console.log("Processing request with message:", message.substring(0, 50) + "...");
+    console.log("Chat history length:", chatHistory.length);
 
     // Construct the conversation with system message and history
     const messages = [
@@ -50,39 +54,44 @@ Remember to always start your response with a clear disclaimer that you're an AI
       }
     ];
 
-    console.log("Sending request to OpenAI with message:", message);
-    console.log("Chat history length:", chatHistory.length);
+    console.log("Sending request to OpenAI API");
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages,
-        temperature: 0.7,
-        max_tokens: 800
-      })
-    });
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages,
+          temperature: 0.7,
+          max_tokens: 800
+        })
+      });
 
-    const data = await response.json();
-    
-    if (data.error) {
-      console.error("OpenAI API error:", data.error);
-      throw new Error(data.error.message);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("OpenAI API error:", errorData);
+        throw new Error(`OpenAI API error: ${errorData.error?.message || response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      console.log("Received response from OpenAI");
+      const aiResponse = data.choices[0].message.content;
+      console.log("AI response first 100 chars:", aiResponse.substring(0, 100));
+
+      return new Response(JSON.stringify({ 
+        reply: aiResponse 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    } catch (fetchError) {
+      console.error("Fetch error:", fetchError);
+      throw new Error(`Error fetching from OpenAI: ${fetchError.message}`);
     }
-
-    console.log("Received response from OpenAI");
-    const aiResponse = data.choices[0].message.content;
-    console.log("AI response first 100 chars:", aiResponse.substring(0, 100));
-
-    return new Response(JSON.stringify({ 
-      reply: aiResponse 
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
   } catch (error) {
     console.error("Error in doctor-ai function:", error);
     

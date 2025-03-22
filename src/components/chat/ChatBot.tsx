@@ -4,10 +4,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Loader2, Bot, User } from "lucide-react";
+import { Send, Loader2, Bot, User, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Message {
   role: "assistant" | "user";
@@ -23,6 +24,7 @@ const ChatBot = () => {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,6 +41,7 @@ const ChatBot = () => {
 
     const userMessage = input.trim();
     setInput("");
+    setErrorMessage(null);
     
     // Add user message to chat
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
@@ -65,18 +68,29 @@ const ChatBot = () => {
 
       if (error) {
         console.error("Error from Edge Function:", error);
-        throw error;
+        throw new Error(`Error from service: ${error.message}`);
       }
 
-      if (!data || !data.reply) {
-        throw new Error("No response received from AI");
+      if (!data) {
+        throw new Error("No response received from AI service");
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data.reply) {
+        throw new Error("AI response is empty");
       }
 
       // Add AI response to chat
       setMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
     } catch (error: any) {
       console.error("Error calling AI:", error);
-      toast.error("Failed to get a response. Please try again.");
+      
+      const errorMsg = error.message || "Failed to get a response. Please try again.";
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
       
       // Add error message to chat so user knows what happened
       setMessages(prev => [...prev, { 
@@ -97,6 +111,13 @@ const ChatBot = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+        {errorMessage && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+        
         {messages.map((message, index) => (
           <div
             key={index}
