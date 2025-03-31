@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,9 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { AddPatientForm } from "@/components/patients/AddPatientForm";
+import { toast } from "sonner";
 
 interface Patient {
   id: string;
@@ -42,83 +45,58 @@ interface Patient {
   doctor: string;
 }
 
-const patientsData: Patient[] = [
-  {
-    id: "PT001",
-    name: "Emma Thompson",
-    age: 67,
-    gender: "Female",
-    condition: "Cardiac Arrhythmia",
-    status: "Critical",
-    lastVisit: "Today",
-    doctor: "Dr. Rebecca Lee",
-  },
-  {
-    id: "PT002",
-    name: "Michael Chen",
-    age: 54,
-    gender: "Male",
-    condition: "Type 2 Diabetes",
-    status: "Stable",
-    lastVisit: "Yesterday",
-    doctor: "Dr. James Wilson",
-  },
-  {
-    id: "PT003",
-    name: "Sophia Rodriguez",
-    age: 42,
-    gender: "Female",
-    condition: "Post-surgery Recovery",
-    status: "Improved",
-    lastVisit: "3 days ago",
-    doctor: "Dr. Maria Garcia",
-  },
-  {
-    id: "PT004",
-    name: "Robert Johnson",
-    age: 61,
-    gender: "Male",
-    condition: "Hypertension",
-    status: "Stable",
-    lastVisit: "1 week ago",
-    doctor: "Dr. Robert Chen",
-  },
-  {
-    id: "PT005",
-    name: "Alex Thompson",
-    age: 8,
-    gender: "Male",
-    condition: "Asthma",
-    status: "Improved",
-    lastVisit: "2 weeks ago",
-    doctor: "Dr. Maria Garcia",
-  },
-  {
-    id: "PT006",
-    name: "Olivia Martinez",
-    age: 35,
-    gender: "Female",
-    condition: "Migraine",
-    status: "Stable",
-    lastVisit: "1 month ago",
-    doctor: "Dr. James Wilson",
-  },
-  {
-    id: "PT007",
-    name: "William Davis",
-    age: 72,
-    gender: "Male",
-    condition: "Parkinson's Disease",
-    status: "Critical",
-    lastVisit: "2 days ago",
-    doctor: "Dr. James Wilson",
-  },
-];
-
 const Patients = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [addPatientOpen, setAddPatientOpen] = useState(false);
   
-  const filteredPatients = patientsData.filter(
+  // Fetch patients from Supabase
+  const fetchPatients = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from("patients")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        // Format the data to match our Patient interface
+        const formattedPatients = data.map((patient) => ({
+          id: patient.id,
+          name: patient.name,
+          age: patient.age,
+          gender: patient.gender,
+          condition: patient.condition,
+          status: patient.status as "Critical" | "Stable" | "Improved",
+          lastVisit: new Date(patient.last_visit).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }),
+          doctor: patient.doctor || "Unassigned",
+        }));
+        setPatients(formattedPatients);
+      }
+    } catch (error: any) {
+      toast.error(`Failed to fetch patients: ${error.message}`);
+      console.error("Error fetching patients:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  // Filter patients based on search query
+  const filteredPatients = patients.filter(
     (patient) =>
       patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       patient.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -149,7 +127,11 @@ const Patients = () => {
             </p>
           </div>
           <div className="flex gap-2 self-start">
-            <Button variant="default" className="gap-2">
+            <Button 
+              variant="default" 
+              className="gap-2"
+              onClick={() => setAddPatientOpen(true)}
+            >
               <UserPlus className="h-4 w-4" />
               Add Patient
             </Button>
@@ -187,66 +169,87 @@ const Patients = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPatients.map((patient) => (
-                <TableRow key={patient.id}>
-                  <TableCell className="font-medium">{patient.id}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          {patient.name.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{patient.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{patient.age} / {patient.gender}</TableCell>
-                  <TableCell>{patient.condition}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant="outline" 
-                      className={cn("font-normal", getStatusColor(patient.status))}
-                    >
-                      {patient.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{patient.lastVisit}</TableCell>
-                  <TableCell>{patient.doctor}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <BarChart3 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Calendar className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Profile</DropdownMenuItem>
-                          <DropdownMenuItem>Edit Details</DropdownMenuItem>
-                          <DropdownMenuItem>View History</DropdownMenuItem>
-                          <DropdownMenuItem>Discharge Patient</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center">
+                    Loading patients...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filteredPatients.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center">
+                    No patients found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredPatients.map((patient) => (
+                  <TableRow key={patient.id}>
+                    <TableCell className="font-medium">{patient.id.substring(0, 8)}...</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {patient.name.split(" ").map(n => n[0]).join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{patient.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{patient.age} / {patient.gender}</TableCell>
+                    <TableCell>{patient.condition}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant="outline" 
+                        className={cn("font-normal", getStatusColor(patient.status))}
+                      >
+                        {patient.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{patient.lastVisit}</TableCell>
+                    <TableCell>{patient.doctor}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <BarChart3 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Calendar className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>View Profile</DropdownMenuItem>
+                            <DropdownMenuItem>Edit Details</DropdownMenuItem>
+                            <DropdownMenuItem>View History</DropdownMenuItem>
+                            <DropdownMenuItem>Discharge Patient</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
       </div>
+
+      {/* Add Patient Form Dialog */}
+      <AddPatientForm 
+        open={addPatientOpen} 
+        onOpenChange={setAddPatientOpen} 
+        onSuccess={fetchPatients}
+      />
     </Layout>
   );
 };
