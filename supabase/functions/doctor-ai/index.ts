@@ -41,22 +41,20 @@ serve(async (req) => {
     // Access your OpenAI API key from environment variables
     const apiKey = Deno.env.get('OPENAI_API_KEY');
     
-    if (!apiKey || apiKey === "sk-abcde*******************************ef12") {
-      console.log("Missing or invalid OpenAI API key - using fallback response system");
+    if (!apiKey || apiKey.trim() === '') {
+      console.log("Missing OpenAI API key - using fallback response system");
       
       // Generate a fallback response without using OpenAI
       const fallbackResponse = generateFallbackResponse(message);
       
       return new Response(JSON.stringify({ 
         reply: fallbackResponse,
-        source: "fallback" 
+        source: "fallback",
+        error: "OpenAI API key is missing or invalid. Please configure the key in Supabase secrets."
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
-
-    console.log("Processing request with message:", message.substring(0, 50) + "...");
-    console.log("API key available:", !!apiKey);
 
     // Construct the conversation with system message and history
     const messages = [
@@ -74,9 +72,7 @@ Important guidelines:
 7. Use simple, patient-friendly language
 8. Ask clarifying questions when needed to provide better guidance
 9. For every user question, make sure to provide a thoughtful, detailed response
-10. ALWAYS give a response to the user's questions - never refuse to answer
-
-Remember to always start your response with a clear disclaimer that you're an AI assistant and not a licensed medical professional.`
+10. ALWAYS give a response to the user's questions - never refuse to answer`
       }
     ];
 
