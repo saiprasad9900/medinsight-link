@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { UserRole } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Stethoscope } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -25,7 +25,6 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState("login");
   const [asDoctor, setAsDoctor] = useState(isDoctor);
 
-  // Redirect if user is already logged in
   if (user && !loading) {
     navigate("/");
     return null;
@@ -43,7 +42,6 @@ const Auth = () => {
       await signIn(email, password);
       navigate("/");
     } catch (error) {
-      // Error is handled in the auth context
     } finally {
       setIsSubmitting(false);
     }
@@ -62,7 +60,6 @@ const Auth = () => {
       await signUp(email, password, firstName, lastName, role);
       setActiveTab("login");
     } catch (error) {
-      // Error is handled in the auth context
     } finally {
       setIsSubmitting(false);
     }
@@ -73,10 +70,10 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex flex-col items-center justify-center space-y-2">
-            <div className="relative">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-medinsight-600 to-purple-500 bg-clip-text text-transparent animate-pulse-slow">
-                <span className="animate-fade-in">Medi</span>
-                <span className="text-primary font-extrabold animate-slide-in">Predict</span>
+            <div className="relative flex items-center gap-2">
+              <Stethoscope className="h-8 w-8 text-primary" />
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-pulse-slow">
+                Medi Predict
               </CardTitle>
               <div className="absolute -bottom-1 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer"></div>
             </div>

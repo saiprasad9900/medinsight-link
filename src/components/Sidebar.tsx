@@ -11,7 +11,7 @@ import {
   Users, 
   Settings,
   Bot,
-  Heart
+  Stethoscope
 } from "lucide-react";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -69,10 +69,10 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
       <div className="p-6">
         <Link to="/" className="flex items-center gap-2 font-semibold">
           <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10">
-            <Heart className="h-5 w-5 text-primary" fill="currentColor" strokeWidth={1.5} />
+            <Stethoscope className="h-5 w-5 text-primary" fill="currentColor" strokeWidth={1.5} />
           </div>
           <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            MediPredict
+            Medi Predict
           </span>
         </Link>
       </div>
@@ -103,3 +103,4 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
     </div>
   );
 }
+
