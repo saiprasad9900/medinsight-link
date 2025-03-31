@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,10 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { UserRole } from "@/contexts/AuthContext";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn, signUp, loading, user } = useAuth();
+  const isDoctor = location.search.includes("doctor=true");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +23,7 @@ const Auth = () => {
   const [lastName, setLastName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
+  const [asDoctor, setAsDoctor] = useState(isDoctor);
 
   // Redirect if user is already logged in
   if (user && !loading) {
@@ -53,7 +58,8 @@ const Auth = () => {
 
     try {
       setIsSubmitting(true);
-      await signUp(email, password, firstName, lastName);
+      const role: UserRole = asDoctor ? "doctor" : "patient";
+      await signUp(email, password, firstName, lastName, role);
       setActiveTab("login");
     } catch (error) {
       // Error is handled in the auth context
@@ -75,7 +81,7 @@ const Auth = () => {
               <div className="absolute -bottom-1 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer"></div>
             </div>
             <CardDescription className="animate-fade-in opacity-0" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
-              Access your healthcare analytics platform
+              {asDoctor ? "Doctor Portal Access" : "Access your healthcare analytics platform"}
             </CardDescription>
           </div>
         </CardHeader>
@@ -120,6 +126,19 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="doctor-login" 
+                    checked={asDoctor} 
+                    onCheckedChange={(checked) => setAsDoctor(checked === true)}
+                  />
+                  <label
+                    htmlFor="doctor-login"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Login as Doctor
+                  </label>
                 </div>
               </CardContent>
               <CardFooter>
@@ -180,6 +199,27 @@ const Auth = () => {
                     required
                   />
                 </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="doctor-signup" 
+                    checked={asDoctor} 
+                    onCheckedChange={(checked) => setAsDoctor(checked === true)}
+                  />
+                  <label
+                    htmlFor="doctor-signup"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Register as Doctor
+                  </label>
+                </div>
+                {asDoctor && (
+                  <div className="rounded-md bg-amber-50 p-4 border border-amber-200">
+                    <p className="text-sm text-amber-700">
+                      Note: Doctor accounts require verification by administrators.
+                      Your account will be limited until verification is complete.
+                    </p>
+                  </div>
+                )}
               </CardContent>
               <CardFooter>
                 <Button

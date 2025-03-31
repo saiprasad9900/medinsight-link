@@ -16,9 +16,14 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import AiDoctor from "./pages/AiDoctor";
 
+// Doctor Pages
+import DoctorDashboard from "./pages/doctor/DoctorDashboard";
+import PatientDetails from "./pages/doctor/PatientDetails";
+
 // Components
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import DoctorRoute from "./components/DoctorRoute";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -42,6 +47,13 @@ function App() {
                 <Route path="/patients" element={<Patients />} />
                 <Route path="/ai-doctor" element={<AiDoctor />} />
                 <Route path="/settings" element={<Settings />} />
+              </Route>
+              
+              {/* Doctor routes */}
+              <Route element={<DoctorRoute />}>
+                <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+                <Route path="/doctor/patients/:id" element={<PatientDetails />} />
+                {/* Add more doctor routes as needed */}
               </Route>
               
               {/* Catch-all route */}
