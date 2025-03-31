@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Users, FileText, MessagesSquare, Calendar } from "lucide-react";
-import { RecordCard } from "@/components/records/RecordCard";
+import RecordCard from "@/components/records/RecordCard";
 import { Record } from "@/types/records";
 
 const DoctorDashboard = () => {

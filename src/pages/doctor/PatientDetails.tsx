@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Phone, Mail, Calendar, FileText, Activity, MessageSquare, User } from "lucide-react";
 import { toast } from "sonner";
-import { RecordCard } from "@/components/records/RecordCard";
+import RecordCard from "@/components/records/RecordCard";
 import { Record } from "@/types/records";
 import EnhancedRecordInsight from "@/components/records/EnhancedRecordInsight";
 
