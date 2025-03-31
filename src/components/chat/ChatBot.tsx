@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +12,11 @@ interface Message {
   content: string;
 }
 
-const ChatBot = () => {
+interface ChatBotProps {
+  isWarmingUp?: boolean;
+}
+
+const ChatBot = ({ isWarmingUp = false }: ChatBotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -24,6 +28,11 @@ const ChatBot = () => {
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
 
   const handleSendMessage = async (userMessage: string) => {
+    if (isWarmingUp) {
+      toast.warning("AI system is still warming up. Please try again in a moment.");
+      return;
+    }
+    
     setErrorMessage(null);
     
     // Add user message to chat
@@ -106,7 +115,7 @@ const ChatBot = () => {
 
   return (
     <Card className="w-full h-[calc(100vh-12rem)] flex flex-col shadow-lg">
-      <ChatHeader apiKeyMissing={apiKeyMissing} />
+      <ChatHeader apiKeyMissing={apiKeyMissing} isWarmingUp={isWarmingUp} />
       <CardContent className="p-0 flex-1 overflow-hidden">
         <ChatMessages 
           messages={messages} 
@@ -118,6 +127,7 @@ const ChatBot = () => {
         <ChatInput 
           onSendMessage={handleSendMessage} 
           isLoading={isLoading} 
+          disabled={isWarmingUp}
         />
       </CardFooter>
     </Card>

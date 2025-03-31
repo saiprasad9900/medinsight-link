@@ -1,22 +1,36 @@
 
 import Layout from "@/components/Layout";
 import ChatBot from "@/components/chat/ChatBot";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DoctorHeader from "@/components/doctor/DoctorHeader";
 import MedicalDisclaimer from "@/components/doctor/MedicalDisclaimer";
 import HealthInfoGrid from "@/components/doctor/HealthInfoGrid";
+import { toast } from "sonner";
 
 const AiDoctor = () => {
+  const [isWarmingUp, setIsWarmingUp] = useState(true);
+
   useEffect(() => {
     const pingFunction = async () => {
+      setIsWarmingUp(true);
       try {
-        await supabase.functions.invoke('doctor-ai', {
+        console.log("Warming up doctor-ai function...");
+        const { data, error } = await supabase.functions.invoke('doctor-ai', {
           body: { message: "ping", chatHistory: [] }
         });
-        console.log("Warmed up doctor-ai function");
+        
+        if (error) {
+          console.error("Error warming up function:", error);
+          toast.error("AI service is currently experiencing issues. Some features may be limited.");
+        } else {
+          console.log("Warmed up doctor-ai function successfully", data);
+        }
       } catch (error) {
-        console.error("Error warming up function:", error);
+        console.error("Exception warming up function:", error);
+        toast.error("Failed to connect to AI service. Please try again later.");
+      } finally {
+        setIsWarmingUp(false);
       }
     };
     
@@ -31,7 +45,7 @@ const AiDoctor = () => {
         <HealthInfoGrid />
         
         <div className="scale-in">
-          <ChatBot />
+          <ChatBot isWarmingUp={isWarmingUp} />
         </div>
       </div>
     </Layout>

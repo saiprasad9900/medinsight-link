@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Fallback response when API key is missing
+// Fallback response when API key is missing or invalid
 const generateFallbackResponse = (message: string) => {
   console.log("Generating fallback response for:", message);
   
@@ -31,13 +31,18 @@ serve(async (req) => {
   }
 
   try {
-    const { message, chatHistory } = await req.json();
+    console.log("Received request:", req.method);
+    const requestData = await req.json();
+    const { message, chatHistory } = requestData;
+    
+    console.log("Message received:", message);
+    console.log("Chat history length:", chatHistory?.length || 0);
     
     // Access your OpenAI API key from environment variables
     const apiKey = Deno.env.get('OPENAI_API_KEY');
     
-    if (!apiKey) {
-      console.error("Missing OpenAI API key - using fallback response system");
+    if (!apiKey || apiKey === "sk-abcde*******************************ef12") {
+      console.log("Missing or invalid OpenAI API key - using fallback response system");
       
       // Generate a fallback response without using OpenAI
       const fallbackResponse = generateFallbackResponse(message);
@@ -51,7 +56,6 @@ serve(async (req) => {
     }
 
     console.log("Processing request with message:", message.substring(0, 50) + "...");
-    console.log("Chat history length:", chatHistory.length);
     console.log("API key available:", !!apiKey);
 
     // Construct the conversation with system message and history
@@ -73,13 +77,19 @@ Important guidelines:
 10. ALWAYS give a response to the user's questions - never refuse to answer
 
 Remember to always start your response with a clear disclaimer that you're an AI assistant and not a licensed medical professional.`
-      },
-      ...chatHistory,
-      {
-        role: "user",
-        content: message
       }
     ];
+
+    // Add chat history if it exists and is not empty
+    if (chatHistory && Array.isArray(chatHistory) && chatHistory.length > 0) {
+      messages.push(...chatHistory);
+    }
+    
+    // Add the current user message
+    messages.push({
+      role: "user",
+      content: message
+    });
 
     console.log("Sending request to OpenAI API");
 
@@ -98,6 +108,8 @@ Remember to always start your response with a clear disclaimer that you're an AI
         })
       });
 
+      console.log("OpenAI response status:", response.status);
+      
       if (!response.ok) {
         console.error("OpenAI API response status:", response.status);
         console.error("OpenAI API response status text:", response.statusText);
@@ -106,7 +118,7 @@ Remember to always start your response with a clear disclaimer that you're an AI
         let errorMessage = "Unknown error occurred";
         try {
           const errorData = await response.json();
-          console.error("OpenAI API error:", errorData);
+          console.error("OpenAI API error:", JSON.stringify(errorData));
           errorMessage = errorData.error?.message || response.statusText;
         } catch (e) {
           console.error("Failed to parse error response:", e);
@@ -116,13 +128,13 @@ Remember to always start your response with a clear disclaimer that you're an AI
       }
 
       const data = await response.json();
+      console.log("OpenAI response received:", data ? "yes" : "no");
       
       if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
-        console.error("Unexpected response format from OpenAI:", data);
+        console.error("Unexpected response format from OpenAI:", JSON.stringify(data));
         throw new Error("Received invalid response format from OpenAI");
       }
       
-      console.log("Received response from OpenAI");
       const aiResponse = data.choices[0].message.content;
       console.log("AI response first 100 chars:", aiResponse.substring(0, 100));
 

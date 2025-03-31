@@ -7,14 +7,15 @@ import { Send, Loader2 } from "lucide-react";
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   isLoading: boolean;
+  disabled?: boolean;
 }
 
-const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
+const ChatInput = ({ onSendMessage, isLoading, disabled = false }: ChatInputProps) => {
   const [input, setInput] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim() === "" || isLoading) return;
+    if (input.trim() === "" || isLoading || disabled) return;
     
     onSendMessage(input.trim());
     setInput("");
@@ -34,11 +35,12 @@ const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
         }}
         className="flex-1 resize-none"
         rows={1}
+        disabled={disabled}
       />
       <Button 
         type="submit" 
         size="icon" 
-        disabled={input.trim() === "" || isLoading}
+        disabled={input.trim() === "" || isLoading || disabled}
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />

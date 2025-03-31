@@ -5,12 +5,13 @@ import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   LayoutDashboard, 
-  FileText, // Replaced FileMedical with FileText
+  FileText,
   LineChart, 
   MessagesSquare, 
   Users, 
   Settings,
-  Bot
+  Bot,
+  Heart
 } from "lucide-react";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -27,7 +28,7 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
     },
     {
       label: "Medical Records",
-      icon: <FileText className="h-5 w-5" />, // Updated icon
+      icon: <FileText className="h-5 w-5" />,
       href: "/records",
       active: pathname === "/records",
     },
@@ -67,20 +68,12 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
     <div className="flex h-full flex-col border-r bg-background">
       <div className="p-6">
         <Link to="/" className="flex items-center gap-2 font-semibold">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-6 w-6 text-primary"
-          >
-            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-            <path d="M3.22 12H9.5l.5-1 .5 1h6.28" />
-          </svg>
-          <span className="text-xl font-bold tracking-tight">MediPredict</span>
+          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10">
+            <Heart className="h-5 w-5 text-primary" fill="currentColor" strokeWidth={1.5} />
+          </div>
+          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            MediPredict
+          </span>
         </Link>
       </div>
       <ScrollArea className="flex-1">
