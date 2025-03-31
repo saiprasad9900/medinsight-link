@@ -36,9 +36,10 @@ interface RecordCardProps {
     filePath?: string;
     category?: string;
   };
+  isSelected?: boolean;
 }
 
-const RecordCard = ({ record }: RecordCardProps) => {
+const RecordCard = ({ record, isSelected = false }: RecordCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const getStatusColor = (status: string) => {
@@ -152,7 +153,8 @@ const RecordCard = ({ record }: RecordCardProps) => {
     <Card 
       className={cn(
         "transition-all duration-300 hover-card stagger-item slide-left",
-        isHovered ? "shadow-lg" : "shadow-sm"
+        isHovered ? "shadow-lg" : "shadow-sm",
+        isSelected ? "ring-2 ring-primary ring-offset-2" : ""
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
