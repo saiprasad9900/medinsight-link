@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -9,13 +10,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { UserRole } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Stethoscope } from "lucide-react";
+import { Stethoscope, User, ShieldAlert } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn, signUp, loading, user } = useAuth();
-  const isDoctor = location.search.includes("doctor=true");
+  const searchParams = new URLSearchParams(location.search);
+  const isDoctor = searchParams.get("redirect") === "doctor";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +27,11 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const [asDoctor, setAsDoctor] = useState(isDoctor);
+
+  useEffect(() => {
+    // Update asDoctor state when the URL param changes
+    setAsDoctor(isDoctor);
+  }, [isDoctor]);
 
   if (user && !loading) {
     navigate("/");
@@ -40,8 +48,13 @@ const Auth = () => {
     try {
       setIsSubmitting(true);
       await signIn(email, password);
-      navigate("/");
+      if (asDoctor) {
+        navigate("/doctor/dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
+      // Error is handled in AuthContext
     } finally {
       setIsSubmitting(false);
     }
@@ -60,6 +73,7 @@ const Auth = () => {
       await signUp(email, password, firstName, lastName, role);
       setActiveTab("login");
     } catch (error) {
+      // Error is handled in AuthContext
     } finally {
       setIsSubmitting(false);
     }
@@ -71,17 +85,34 @@ const Auth = () => {
         <CardHeader className="text-center">
           <div className="flex flex-col items-center justify-center space-y-2">
             <div className="relative flex items-center gap-2">
-              <Stethoscope className="h-8 w-8 text-primary" />
+              {asDoctor ? (
+                <Stethoscope className="h-8 w-8 text-primary" />
+              ) : (
+                <User className="h-8 w-8 text-primary" />
+              )}
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-pulse-slow">
                 Medi Predict
               </CardTitle>
               <div className="absolute -bottom-1 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer"></div>
             </div>
             <CardDescription className="animate-fade-in opacity-0" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
-              {asDoctor ? "Doctor Portal Access" : "Access your healthcare analytics platform"}
+              {asDoctor ? "Doctor Portal Access" : "Patient Health Management"}
             </CardDescription>
           </div>
         </CardHeader>
+        
+        {asDoctor && (
+          <div className="px-6 mb-4">
+            <Alert className="bg-amber-50 border-amber-200">
+              <ShieldAlert className="h-4 w-4 text-amber-500" />
+              <AlertTitle className="text-amber-800">Doctor Access</AlertTitle>
+              <AlertDescription className="text-amber-700">
+                You are accessing the doctor portal. Only authorized medical practitioners should proceed.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+        
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Login</TabsTrigger>
@@ -141,7 +172,7 @@ const Auth = () => {
               <CardFooter>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-medinsight-600 to-primary hover:opacity-90 transition-all"
+                  className={`w-full bg-gradient-to-r ${asDoctor ? 'from-blue-600 to-primary' : 'from-medinsight-600 to-primary'} hover:opacity-90 transition-all`}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Signing in..." : "Sign In"}
@@ -210,18 +241,18 @@ const Auth = () => {
                   </label>
                 </div>
                 {asDoctor && (
-                  <div className="rounded-md bg-amber-50 p-4 border border-amber-200">
-                    <p className="text-sm text-amber-700">
-                      Note: Doctor accounts require verification by administrators.
-                      Your account will be limited until verification is complete.
+                  <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+                    <p className="text-sm">
+                      Note: Doctor accounts require verification. 
+                      Your account will have limited access until verification is complete.
                     </p>
-                  </div>
+                  </Alert>
                 )}
               </CardContent>
               <CardFooter>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-medinsight-600 to-primary hover:opacity-90 transition-all"
+                  className={`w-full bg-gradient-to-r ${asDoctor ? 'from-blue-600 to-primary' : 'from-medinsight-600 to-primary'} hover:opacity-90 transition-all`}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Creating Account..." : "Create Account"}

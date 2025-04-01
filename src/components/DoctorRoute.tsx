@@ -1,7 +1,6 @@
 
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import Layout from "./Layout";
 
 interface DoctorRouteProps {
   children?: React.ReactNode;
@@ -21,7 +20,7 @@ const DoctorRoute = ({ children }: DoctorRouteProps) => {
 
   // Redirect to login if not authenticated
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth?redirect=doctor" replace />;
   }
 
   // Redirect to home if authenticated but not a doctor
@@ -30,7 +29,7 @@ const DoctorRoute = ({ children }: DoctorRouteProps) => {
   }
 
   // Render the protected content for doctors
-  return children ? <Layout>{children}</Layout> : <Outlet />;
+  return children ? children : <Outlet />;
 };
 
 export default DoctorRoute;
