@@ -1,9 +1,10 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, PaperclipIcon, SendIcon, PhoneIcon, VideoIcon, InfoIcon, Smile } from "lucide-react";
+import { Search, PaperclipIcon, SendIcon, PhoneIcon, VideoIcon, InfoIcon, Smile, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
