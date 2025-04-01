@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, MessageSquare, Calendar, PlusCircle, UserPlus, History, Share } from "lucide-react";
+import { FileText, MessageSquare, Calendar, PlusCircle, UserPlus, History, Share, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -37,7 +36,6 @@ const PatientRecordsView = ({ patientId, onMessagePatient }: PatientRecordsViewP
   const [analyzing, setAnalyzing] = useState(false);
   
   useEffect(() => {
-    // Reset state when patient changes
     setSelectedRecord(null);
     
     if (!patientId) return;
@@ -45,7 +43,6 @@ const PatientRecordsView = ({ patientId, onMessagePatient }: PatientRecordsViewP
     const fetchPatientData = async () => {
       setLoading(true);
       try {
-        // Fetch patient details
         const { data: patientData, error: patientError } = await supabase
           .from('patients')
           .select('*')
@@ -55,7 +52,6 @@ const PatientRecordsView = ({ patientId, onMessagePatient }: PatientRecordsViewP
         if (patientError) throw patientError;
         setPatient(patientData);
         
-        // Fetch patient records
         const { data: recordsData, error: recordsError } = await supabase
           .from('records_files')
           .select('*')
@@ -65,7 +61,6 @@ const PatientRecordsView = ({ patientId, onMessagePatient }: PatientRecordsViewP
         if (recordsError) throw recordsError;
         
         if (recordsData) {
-          // Convert to Record format
           const formattedRecords: Record[] = recordsData.map((file) => {
             const type = getFileType(file.file_type);
             return {
@@ -118,7 +113,6 @@ const PatientRecordsView = ({ patientId, onMessagePatient }: PatientRecordsViewP
     
     setSelectedRecord(record);
     
-    // If record doesn't have analysis, generate it
     if (!record.analysis) {
       setAnalyzing(true);
       
@@ -126,12 +120,10 @@ const PatientRecordsView = ({ patientId, onMessagePatient }: PatientRecordsViewP
         const analysis = await analyzeRecord(record);
         const updatedRecord = { ...record, analysis };
         
-        // Update in the records list
         setRecords(prev => 
           prev.map(r => r.id === record.id ? updatedRecord : r)
         );
         
-        // Update selected record
         setSelectedRecord(updatedRecord);
         
       } catch (error: any) {

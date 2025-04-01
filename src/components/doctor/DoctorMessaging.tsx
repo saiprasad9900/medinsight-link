@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -80,14 +79,12 @@ const DoctorMessaging = ({ selectedPatientId }: DoctorMessagingProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Set active patient based on prop
   useEffect(() => {
     if (selectedPatientId) {
       setActivePatientId(selectedPatientId);
     }
   }, [selectedPatientId]);
   
-  // Fetch patients list
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -100,7 +97,6 @@ const DoctorMessaging = ({ selectedPatientId }: DoctorMessagingProps) => {
         
         if (data) {
           setPatients(data);
-          // If no active patient and we have patients, select the first one
           if (!activePatientId && data.length > 0 && !selectedPatientId) {
             setActivePatientId(data[0].id);
           }
@@ -114,20 +110,15 @@ const DoctorMessaging = ({ selectedPatientId }: DoctorMessagingProps) => {
     fetchPatients();
   }, []);
   
-  // Filter patients based on search
   const filteredPatients = patients.filter(patient => 
     patient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  // Get active patient details
   const activePatient = patients.find(p => p.id === activePatientId);
   
-  // Fetch messages when active patient changes
   useEffect(() => {
     if (!activePatientId || !user) return;
     
-    // In a real app, fetch actual messages from database
-    // For now, generate some mock messages
     const mockMessages: Message[] = [
       {
         id: '1',
@@ -174,7 +165,6 @@ const DoctorMessaging = ({ selectedPatientId }: DoctorMessagingProps) => {
     setMessages(mockMessages);
   }, [activePatientId, user]);
   
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -182,7 +172,6 @@ const DoctorMessaging = ({ selectedPatientId }: DoctorMessagingProps) => {
   const handleSendMessage = () => {
     if (!newMessage.trim() || !user || !activePatientId) return;
     
-    // In a real app, save message to database
     const newMsg: Message = {
       id: Date.now().toString(),
       sender_id: user.id,
@@ -326,7 +315,9 @@ const DoctorMessaging = ({ selectedPatientId }: DoctorMessagingProps) => {
         ) : (
           <div className="h-full flex items-center justify-center">
             <div className="text-center p-6">
-              <MessageDisplay className="h-12 w-12 text-muted-foreground mb-4 mx-auto" />
+              <div className="h-12 w-12 text-muted-foreground mb-4 mx-auto">
+                <MessageSquare className="h-full w-full" />
+              </div>
               <h3 className="font-medium text-lg mb-2">No Conversation Selected</h3>
               <p className="text-muted-foreground max-w-md">
                 Select a patient from the list to view and send messages.
