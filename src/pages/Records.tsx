@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Tabs, 
@@ -5,7 +6,7 @@ import {
   TabsList, 
   TabsTrigger 
 } from "@/components/ui/tabs";
-import { FileText, Upload } from "lucide-react";
+import { FileText, Upload, AlertCircle } from "lucide-react";
 import FileUpload from "@/components/records/FileUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
