@@ -1,84 +1,25 @@
 
-import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, PaperclipIcon, SendIcon, PhoneIcon, VideoIcon, InfoIcon, Smile, MessageSquare } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Card, CardFooter } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface Patient {
-  id: string;
-  name: string;
-  avatar?: string;
-}
-
-interface Message {
-  id: string;
-  sender_id: string;
-  receiver_id: string;
-  content: string;
-  timestamp: Date;
-  read: boolean;
-}
-
-interface MessageDisplayProps {
-  content: string;
-  timestamp: Date;
-  isCurrentUser: boolean;
-  senderName: string;
-  senderAvatar?: string;
-}
+import { PatientList } from "./messaging/PatientList";
+import { MessageHeader } from "./messaging/MessageHeader";
+import { ConversationView } from "./messaging/ConversationView";
+import { MessageInputField } from "./messaging/MessageInputField";
+import { EmptyConversation } from "./messaging/EmptyConversation";
+import { Message, Patient } from "./messaging/types";
 
 interface DoctorMessagingProps {
   selectedPatientId: string | null;
 }
-
-// Message component
-const MessageDisplay = ({ content, timestamp, isCurrentUser, senderName, senderAvatar }: MessageDisplayProps) => {
-  return (
-    <div
-      className={cn(
-        "flex gap-3 max-w-[85%]",
-        isCurrentUser ? "ml-auto flex-row-reverse" : ""
-      )}
-    >
-      <Avatar className="h-8 w-8 flex-shrink-0">
-        <AvatarImage src={senderAvatar} />
-        <AvatarFallback>
-          {senderName.split(" ").map(n => n[0]).join("")}
-        </AvatarFallback>
-      </Avatar>
-      <div className="space-y-1">
-        <div
-          className={cn(
-            "p-3 rounded-lg",
-            isCurrentUser
-              ? "bg-primary text-primary-foreground"
-              : "bg-secondary text-secondary-foreground"
-          )}
-        >
-          {content}
-        </div>
-        <p className="text-xs text-muted-foreground px-1">
-          {timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </p>
-      </div>
-    </div>
-  );
-};
 
 const DoctorMessaging = ({ selectedPatientId }: DoctorMessagingProps) => {
   const { user } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [activePatientId, setActivePatientId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     if (selectedPatientId) {
@@ -110,10 +51,6 @@ const DoctorMessaging = ({ selectedPatientId }: DoctorMessagingProps) => {
     
     fetchPatients();
   }, []);
-  
-  const filteredPatients = patients.filter(patient => 
-    patient.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
   
   const activePatient = patients.find(p => p.id === activePatientId);
   
@@ -166,165 +103,47 @@ const DoctorMessaging = ({ selectedPatientId }: DoctorMessagingProps) => {
     setMessages(mockMessages);
   }, [activePatientId, user]);
   
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-  
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !user || !activePatientId) return;
+  const handleSendMessage = (newMessage: string) => {
+    if (!user || !activePatientId) return;
     
     const newMsg: Message = {
       id: Date.now().toString(),
       sender_id: user.id,
       receiver_id: activePatientId,
-      content: newMessage.trim(),
+      content: newMessage,
       timestamp: new Date(),
       read: false
     };
     
     setMessages(prev => [...prev, newMsg]);
-    setNewMessage("");
-  };
-  
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
   };
   
   if (!user) return null;
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-[calc(100vh-22rem)]">
-      <Card className="md:col-span-1 flex flex-col h-full">
-        <CardHeader className="px-4">
-          <CardTitle className="text-lg">Patient Messages</CardTitle>
-          <div className="relative mt-2">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search patients..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </CardHeader>
-        <CardContent className="p-0 overflow-auto flex-1">
-          <div className="divide-y">
-            {filteredPatients.length === 0 ? (
-              <div className="px-4 py-6 text-center text-muted-foreground">
-                No patients found
-              </div>
-            ) : (
-              filteredPatients.map(patient => (
-                <div
-                  key={patient.id}
-                  className={cn(
-                    "p-4 hover:bg-accent/50 cursor-pointer transition-colors",
-                    activePatientId === patient.id && "bg-accent"
-                  )}
-                  onClick={() => setActivePatientId(patient.id)}
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarFallback>
-                        {patient.name.split(" ").map(n => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{patient.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        Patient
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <PatientList 
+        patients={patients}
+        activePatientId={activePatientId}
+        onSelectPatient={setActivePatientId}
+        selectedPatientId={selectedPatientId}
+      />
       
       <Card className="md:col-span-3 flex flex-col h-full">
         {activePatient ? (
           <>
-            <CardHeader className="px-6 py-4 flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar>
-                  <AvatarFallback>
-                    {activePatient.name.split(" ").map(n => n[0]).join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle className="text-base">{activePatient.name}</CardTitle>
-                  <CardDescription>Patient</CardDescription>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon">
-                  <PhoneIcon className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <VideoIcon className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <InfoIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6 overflow-auto flex-1">
-              <div className="space-y-6">
-                {messages.map(message => (
-                  <MessageDisplay
-                    key={message.id}
-                    content={message.content}
-                    timestamp={message.timestamp}
-                    isCurrentUser={message.sender_id === user.id}
-                    senderName={message.sender_id === user.id ? "Me" : activePatient.name}
-                    senderAvatar={message.sender_id === user.id ? "" : activePatient.avatar}
-                  />
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            </CardContent>
+            <MessageHeader patient={activePatient} />
+            <ConversationView 
+              messages={messages} 
+              activePatientName={activePatient.name}
+              activePatientAvatar={activePatient.avatar}
+            />
             <CardFooter className="p-4 border-t">
-              <div className="flex gap-2 w-full">
-                <Button variant="ghost" size="icon">
-                  <PaperclipIcon className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Smile className="h-5 w-5" />
-                </Button>
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Type your message..."
-                  className="flex-1"
-                />
-                <Button 
-                  size="icon" 
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
-                >
-                  <SendIcon className="h-5 w-5" />
-                </Button>
-              </div>
+              <MessageInputField onSendMessage={handleSendMessage} />
             </CardFooter>
           </>
         ) : (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center p-6">
-              <div className="h-12 w-12 text-muted-foreground mb-4 mx-auto">
-                <MessageSquare className="h-full w-full" />
-              </div>
-              <h3 className="font-medium text-lg mb-2">No Conversation Selected</h3>
-              <p className="text-muted-foreground max-w-md">
-                Select a patient from the list to view and send messages.
-              </p>
-            </div>
-          </div>
+          <EmptyConversation />
         )}
       </Card>
     </div>
