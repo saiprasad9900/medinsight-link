@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Tabs, 
@@ -6,35 +5,18 @@ import {
   TabsList, 
   TabsTrigger 
 } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { 
-  Upload, 
-  Filter, 
-  SlidersHorizontal, 
-  FileText, 
-  BarChart, 
-  Image as ImageIcon, 
-  FileSpreadsheet,
-  Brain,
-  Layers,
-  Alert
-} from "lucide-react";
+import { FileText, Upload } from "lucide-react";
 import FileUpload from "@/components/records/FileUpload";
-import RecordCard from "@/components/records/RecordCard";
-import EnhancedRecordInsight from "@/components/records/EnhancedRecordInsight";
-import PredictiveInsights from "@/components/records/PredictiveInsights";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Record } from "@/types/records";
 import { analyzeRecord, predictOutcomes, categorizeRecord } from "@/services/analysisService";
-import { Alert as AlertComponent } from "@/components/ui/alert";
+import RecordsList from "@/components/records/RecordsList";
+import RecordDetails from "@/components/records/RecordDetails";
+import RecordFilters from "@/components/records/RecordFilters";
+import RecordTypeSelector from "@/components/records/RecordTypeSelector";
+import PatientDisclaimer from "@/components/records/PatientDisclaimer";
 
 interface RecordFile {
   id: string;
@@ -113,7 +95,6 @@ const Records = () => {
   const [userRecords, setUserRecords] = useState<Record[]>([]);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
-  const [activeView, setActiveView] = useState<"analysis" | "prediction">("analysis");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const isDoctor = userRole === "doctor";
 
@@ -131,10 +112,17 @@ const Records = () => {
 
       try {
         setLoading(true);
-        const { data, error } = await supabase
+        let query = supabase
           .from('records_files')
           .select('*')
           .order('created_at', { ascending: false });
+          
+        // If user is not a doctor, only fetch their own records
+        if (!isDoctor) {
+          query = query.eq('user_id', user.id);
+        }
+        
+        const { data, error } = await query;
 
         if (error) {
           throw error;
@@ -180,7 +168,7 @@ const Records = () => {
     };
 
     fetchUserRecords();
-  }, [user]);
+  }, [user, isDoctor]);
 
   const handleFileUpload = async (files: File[], filePaths: string[]) => {
     // Add newly uploaded files to the records list
@@ -284,55 +272,14 @@ const Records = () => {
               : "Upload, analyze, and manage your medical records"}
           </p>
         </div>
-        <div className="flex gap-2 self-start">
-          <Button 
-            variant={activeTab === "upload" ? "default" : "outline"} 
-            className="gap-2"
-            onClick={() => setActiveTab("upload")}
-          >
-            <Upload className="h-4 w-4" />
-            Upload
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Filter className="h-4 w-4" />
-                Filter
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setCategoryFilter(null)}>
-                All Categories
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCategoryFilter("Laboratory")}>
-                Laboratory
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCategoryFilter("Radiology")}>
-                Radiology
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCategoryFilter("Cardiology")}>
-                Cardiology
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCategoryFilter("Pharmacy")}>
-                Pharmacy
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCategoryFilter("Surgical")}>
-                Surgical
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="ghost" size="icon">
-            <SlidersHorizontal className="h-5 w-5" />
-          </Button>
-        </div>
+        <RecordFilters 
+          onFilterChange={setCategoryFilter} 
+          onUploadClick={() => setActiveTab("upload")} 
+          activeTab={activeTab}
+        />
       </div>
       
-      {!isDoctor && (
-        <AlertComponent className="bg-blue-50 border-blue-200 text-blue-800">
-          <Alert className="h-4 w-4 mr-2" />
-          As a patient, you can only view and manage your own medical records.
-        </AlertComponent>
-      )}
+      <PatientDisclaimer isDoctor={isDoctor} />
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full md:w-auto grid-cols-2 md:inline-flex">
@@ -349,114 +296,22 @@ const Records = () => {
         <TabsContent value="browse" className="mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className={selectedRecord ? "lg:col-span-2" : "lg:col-span-3"}>
-              {loading ? (
-                <div className="flex justify-center py-12">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                </div>
-              ) : filteredRecords.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium">No Records Found</h3>
-                  <p className="text-muted-foreground mt-2 max-w-md">
-                    {isDoctor 
-                      ? "There are no medical records available that match your criteria." 
-                      : "You haven't uploaded any medical records yet. Click the 'Upload' tab to add your first record."}
-                  </p>
-                  <Button 
-                    onClick={() => setActiveTab("upload")} 
-                    className="mt-4"
-                  >
-                    Upload Records
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {filteredRecords.map((record) => (
-                    <div 
-                      key={record.id} 
-                      onClick={() => handleRecordClick(record)}
-                      className="cursor-pointer"
-                    >
-                      <RecordCard record={record} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              <RecordsList 
+                records={filteredRecords}
+                loading={loading}
+                onRecordClick={handleRecordClick}
+                selectedRecordId={selectedRecord?.id || null}
+                onUploadClick={() => setActiveTab("upload")}
+              />
             </div>
             
             {selectedRecord && (
               <div className="lg:col-span-1">
-                <div className="mb-4">
-                  <TabsList className="w-full grid grid-cols-2">
-                    <TabsTrigger 
-                      value="analysis" 
-                      className="flex gap-1 items-center"
-                      onClick={() => setActiveView("analysis")}
-                      data-state={activeView === "analysis" ? "active" : ""}
-                    >
-                      <Brain className="h-4 w-4" />
-                      Analysis
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="prediction" 
-                      className="flex gap-1 items-center"
-                      onClick={() => setActiveView("prediction")}
-                      data-state={activeView === "prediction" ? "active" : ""}
-                    >
-                      <Layers className="h-4 w-4" />
-                      Predictions
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-                
-                {analyzing ? (
-                  <div className="p-8 border rounded-lg flex flex-col items-center justify-center space-y-4">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                    <p className="text-sm text-muted-foreground">Analyzing record...</p>
-                  </div>
-                ) : (
-                  <>
-                    {activeView === "analysis" && selectedRecord.analysis && (
-                      <EnhancedRecordInsight 
-                        title={`${selectedRecord.type} Analysis - ${selectedRecord.patientName}`}
-                        analysis={selectedRecord.analysis}
-                      />
-                    )}
-                    
-                    {activeView === "prediction" && selectedRecord.prediction && (
-                      <PredictiveInsights 
-                        patientName={selectedRecord.patientName}
-                        prediction={selectedRecord.prediction}
-                      />
-                    )}
-                    
-                    {activeView === "analysis" && !selectedRecord.analysis && (
-                      <div className="p-8 border rounded-lg flex flex-col items-center justify-center space-y-4">
-                        <Brain className="h-16 w-16 text-muted-foreground" />
-                        <div className="text-center">
-                          <h3 className="font-medium">No Analysis Available</h3>
-                          <p className="text-sm text-muted-foreground mt-1">This record hasn't been analyzed yet.</p>
-                        </div>
-                        <Button onClick={() => handleRecordClick(selectedRecord)}>
-                          Analyze Now
-                        </Button>
-                      </div>
-                    )}
-                    
-                    {activeView === "prediction" && !selectedRecord.prediction && (
-                      <div className="p-8 border rounded-lg flex flex-col items-center justify-center space-y-4">
-                        <Layers className="h-16 w-16 text-muted-foreground" />
-                        <div className="text-center">
-                          <h3 className="font-medium">No Predictions Available</h3>
-                          <p className="text-sm text-muted-foreground mt-1">Generate predictions to see future health insights.</p>
-                        </div>
-                        <Button onClick={() => handleRecordClick(selectedRecord)}>
-                          Generate Predictions
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                )}
+                <RecordDetails 
+                  record={selectedRecord}
+                  analyzing={analyzing}
+                  onAnalyzeClick={() => handleRecordClick(selectedRecord)}
+                />
               </div>
             )}
           </div>
@@ -464,43 +319,7 @@ const Records = () => {
         
         <TabsContent value="upload" className="mt-6 max-w-3xl mx-auto">
           <div className="space-y-6">
-            <div className="bg-accent/50 p-4 rounded-lg border border-border flex items-center gap-4">
-              <div className="flex gap-3 flex-wrap">
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1 bg-background hover:bg-background shadow-sm"
-                >
-                  <FileText className="h-4 w-4" />
-                  Documents
-                </Button>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1 bg-background hover:bg-background shadow-sm"
-                >
-                  <BarChart className="h-4 w-4" />
-                  Lab Results
-                </Button>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1 bg-background hover:bg-background shadow-sm"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                  Medical Images
-                </Button>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1 bg-background hover:bg-background shadow-sm"
-                >
-                  <FileSpreadsheet className="h-4 w-4" />
-                  Datasets
-                </Button>
-              </div>
-            </div>
-            
+            <RecordTypeSelector />
             <FileUpload onUploadComplete={handleFileUpload} />
           </div>
         </TabsContent>
