@@ -40,19 +40,19 @@ function App() {
               
               {/* Protected routes with Layout */}
               <Route element={<ProtectedRoute />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/records" element={<Records />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/patients" element={<Patients />} />
-                <Route path="/ai-doctor" element={<AiDoctor />} />
-                <Route path="/settings" element={<Settings />} />
+                <Route path="/" element={<Layout><Dashboard /></Layout>} />
+                <Route path="/records" element={<Layout><Records /></Layout>} />
+                <Route path="/analytics" element={<Layout><Analytics /></Layout>} />
+                <Route path="/messages" element={<Layout><Messages /></Layout>} />
+                <Route path="/patients" element={<Layout><Patients /></Layout>} />
+                <Route path="/ai-doctor" element={<Layout><AiDoctor /></Layout>} />
+                <Route path="/settings" element={<Layout><Settings /></Layout>} />
               </Route>
               
               {/* Doctor routes */}
               <Route element={<DoctorRoute />}>
-                <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-                <Route path="/doctor/patients/:id" element={<PatientDetails />} />
+                <Route path="/doctor/dashboard" element={<Layout><DoctorDashboard /></Layout>} />
+                <Route path="/doctor/patients/:id" element={<Layout><PatientDetails /></Layout>} />
                 {/* Add more doctor routes as needed */}
               </Route>
               
