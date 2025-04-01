@@ -19,6 +19,7 @@ import AiDoctor from "./pages/AiDoctor";
 // Doctor Pages
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import PatientDetails from "./pages/doctor/PatientDetails";
+import MedicalDashboard from "./pages/doctor/MedicalDashboard";
 
 // Components
 import Layout from "./components/Layout";
@@ -53,6 +54,7 @@ function App() {
               <Route element={<DoctorRoute />}>
                 <Route path="/doctor/dashboard" element={<Layout><DoctorDashboard /></Layout>} />
                 <Route path="/doctor/patients/:id" element={<Layout><PatientDetails /></Layout>} />
+                <Route path="/doctor/medical-staff" element={<Layout><MedicalDashboard /></Layout>} />
                 {/* Add more doctor routes as needed */}
               </Route>
               

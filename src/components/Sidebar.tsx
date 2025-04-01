@@ -11,13 +11,17 @@ import {
   Users, 
   Settings,
   Bot,
-  Stethoscope
+  Stethoscope,
+  UserCog
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export default function Sidebar({ className, ...props }: SidebarProps) {
   const { pathname } = useLocation();
+  const { userRole } = useAuth();
+  const isDoctor = userRole === "doctor";
 
   const routes = [
     {
@@ -44,6 +48,14 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
       href: "/messages",
       active: pathname === "/messages",
     },
+    ...(isDoctor ? [
+      {
+        label: "Medical Staff",
+        icon: <UserCog className="h-5 w-5" />,
+        href: "/doctor/medical-staff",
+        active: pathname === "/doctor/medical-staff",
+      }
+    ] : []),
     {
       label: "Patients",
       icon: <Users className="h-5 w-5" />,
@@ -103,4 +115,3 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
     </div>
   );
 }
-
