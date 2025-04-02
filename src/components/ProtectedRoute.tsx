@@ -1,7 +1,6 @@
 
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import Layout from "./Layout";
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
@@ -25,7 +24,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   // Render the protected content
-  return children ? <Layout>{children}</Layout> : <Outlet />;
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;
