@@ -27,25 +27,25 @@ const Dashboard = () => {
             title="Total Records"
             value="1,248"
             icon={<FileText className="h-5 w-5" />}
-            trend={{ value: 12, isPositive: true }}
+            trend={{ value: 12, isPositive: true, prefix: "from last month" }}
           />
           <StatCard
             title="Active Patients"
             value="358"
             icon={<Users className="h-5 w-5" />}
-            trend={{ value: 8, isPositive: true }}
+            trend={{ value: 8, isPositive: true, prefix: "from last month" }}
           />
           <StatCard
             title="Appointments"
             value="24"
             icon={<Calendar className="h-5 w-5" />}
-            trend={{ value: 2, isPositive: false }}
+            trend={{ value: 2, isPositive: false, prefix: "from last month" }}
           />
           <StatCard
             title="Insights Generated"
             value="842"
             icon={<BarChart3 className="h-5 w-5" />}
-            trend={{ value: 16, isPositive: true }}
+            trend={{ value: 16, isPositive: true, prefix: "from last month" }}
           />
         </div>
         
