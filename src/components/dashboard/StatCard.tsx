@@ -10,6 +10,7 @@ interface StatCardProps {
   trend?: {
     value: number;
     isPositive: boolean;
+    prefix?: string;
   };
   className?: string;
   color?: "blue" | "green" | "purple" | "orange" | "default";
@@ -59,7 +60,7 @@ const StatCard = ({ title, value, icon, trend, className, color = "default" }: S
             isGradient && (trend.isPositive ? "text-green-200" : "text-red-200")
           )}>
             <span className="mr-1">{trend.isPositive ? "↑" : "↓"}</span>
-            {trend.value}% from last month
+            {trend.value}% {trend.prefix || ""}
           </p>
         )}
       </CardContent>
