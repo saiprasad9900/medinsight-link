@@ -1,6 +1,4 @@
-
 import { useState } from "react";
-import Layout from "@/components/Layout";
 import ContactList from "@/components/messages/ContactList";
 import MessageThread from "@/components/messages/MessageThread";
 
@@ -63,29 +61,27 @@ const Messages = () => {
   );
 
   return (
-    <Layout>
-      <div className="flex flex-col h-[calc(100vh-8rem)] animate-fade-in">
-        <div className="mb-4">
-          <h1 className="text-3xl font-bold">Secure Messaging</h1>
-          <p className="text-muted-foreground mt-1">
-            Communicate securely with other healthcare professionals
-          </p>
+    <div className="flex flex-col h-[calc(100vh-8rem)] animate-fade-in">
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold">Secure Messaging</h1>
+        <p className="text-muted-foreground mt-1">
+          Communicate securely with other healthcare professionals
+        </p>
+      </div>
+      
+      <div className="flex h-full overflow-hidden border border-border rounded-lg shadow-sm">
+        <div className="w-full md:w-80 lg:w-96 flex-shrink-0">
+          <ContactList 
+            contacts={contactsData} 
+            activeContactId={activeContactId}
+            onSelectContact={setActiveContactId} 
+          />
         </div>
-        
-        <div className="flex h-full overflow-hidden border border-border rounded-lg shadow-sm">
-          <div className="w-full md:w-80 lg:w-96 flex-shrink-0">
-            <ContactList 
-              contacts={contactsData} 
-              activeContactId={activeContactId}
-              onSelectContact={setActiveContactId} 
-            />
-          </div>
-          <div className="hidden md:flex flex-1">
-            {activeContact && <MessageThread contact={activeContact} />}
-          </div>
+        <div className="hidden md:flex flex-1">
+          {activeContact && <MessageThread contact={activeContact} />}
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

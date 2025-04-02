@@ -1,8 +1,6 @@
-
-import Layout from "@/components/Layout";
-import ChatBot from "@/components/chat/ChatBot";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import ChatBot from "@/components/chat/ChatBot";
 import DoctorHeader from "@/components/doctor/DoctorHeader";
 import MedicalDisclaimer from "@/components/doctor/MedicalDisclaimer";
 import HealthInfoGrid from "@/components/doctor/HealthInfoGrid";
@@ -38,17 +36,15 @@ const AiDoctor = () => {
   }, []);
 
   return (
-    <Layout>
-      <div className="space-y-6 animate-fade-in">
-        <DoctorHeader />
-        <MedicalDisclaimer />
-        <HealthInfoGrid />
-        
-        <div className="scale-in">
-          <ChatBot isWarmingUp={isWarmingUp} />
-        </div>
+    <div className="space-y-6 animate-fade-in">
+      <DoctorHeader />
+      <MedicalDisclaimer />
+      <HealthInfoGrid />
+      
+      <div className="scale-in">
+        <ChatBot isWarmingUp={isWarmingUp} />
       </div>
-    </Layout>
+    </div>
   );
 };
 
