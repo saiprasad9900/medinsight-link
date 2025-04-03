@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
+import DoctorAnimation from "./animations/DoctorAnimation";
 
 interface LayoutProps {
   children?: ReactNode;
@@ -11,6 +12,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden">
+      <DoctorAnimation />
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <TopNav />
