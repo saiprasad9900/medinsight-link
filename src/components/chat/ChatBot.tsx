@@ -21,9 +21,15 @@ interface ChatBotProps {
     conditions?: string[];
     medications?: string[];
   };
+  modelName?: string;
 }
 
-const ChatBot = ({ isWarmingUp = false, includeHealthContext = false, userContext }: ChatBotProps) => {
+const ChatBot = ({ 
+  isWarmingUp = false, 
+  includeHealthContext = false, 
+  userContext,
+  modelName = "GPT-4o"
+}: ChatBotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -33,6 +39,7 @@ const ChatBot = ({ isWarmingUp = false, includeHealthContext = false, userContex
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
+  const [detectedIntent, setDetectedIntent] = useState<string | null>(null);
 
   // Track if this is the first message to send health context
   const firstMessageSentRef = useRef(false);
@@ -44,6 +51,23 @@ const ChatBot = ({ isWarmingUp = false, includeHealthContext = false, userContex
     }
     
     setErrorMessage(null);
+    
+    // Simple intent detection for UI feedback
+    const intentKeywords = {
+      "symptoms": ["symptom", "feeling", "pain", "ache", "sore", "hurt"],
+      "diagnosis": ["diagnose", "what is", "do I have", "could it be"],
+      "treatment": ["treatment", "medicine", "remedy", "cure", "how to treat"],
+      "prevention": ["prevent", "avoid", "stop", "risk", "chances"]
+    };
+    
+    // Very basic intent detection for UI purposes
+    const messageLower = userMessage.toLowerCase();
+    for (const [intent, keywords] of Object.entries(intentKeywords)) {
+      if (keywords.some(keyword => messageLower.includes(keyword))) {
+        setDetectedIntent(intent);
+        break;
+      }
+    }
     
     // Add user message to chat
     setMessages(prev => [...prev, { role: "user", content: userMessage }]);
@@ -139,12 +163,18 @@ const ChatBot = ({ isWarmingUp = false, includeHealthContext = false, userContex
 
   return (
     <Card className="w-full h-[calc(100vh-12rem)] flex flex-col shadow-lg">
-      <ChatHeader apiKeyMissing={apiKeyMissing} isWarmingUp={isWarmingUp} includeHealthContext={includeHealthContext} />
+      <ChatHeader 
+        apiKeyMissing={apiKeyMissing} 
+        isWarmingUp={isWarmingUp} 
+        includeHealthContext={includeHealthContext}
+        modelName={modelName} 
+      />
       <CardContent className="p-0 flex-1 overflow-hidden">
         <ChatMessages 
           messages={messages} 
           isLoading={isLoading} 
-          errorMessage={errorMessage} 
+          errorMessage={errorMessage}
+          detectedIntent={detectedIntent}
         />
       </CardContent>
       <CardFooter className="p-4 pt-0 border-t">

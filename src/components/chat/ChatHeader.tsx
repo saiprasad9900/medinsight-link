@@ -1,5 +1,5 @@
 
-import { Bot, Info, Loader2, Brain } from "lucide-react";
+import { Bot, Info, Loader2, Brain, Sparkles, Shield } from "lucide-react";
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -7,9 +7,15 @@ interface ChatHeaderProps {
   apiKeyMissing: boolean;
   isWarmingUp?: boolean;
   includeHealthContext?: boolean;
+  modelName?: string;
 }
 
-const ChatHeader = ({ apiKeyMissing, isWarmingUp = false, includeHealthContext = false }: ChatHeaderProps) => {
+const ChatHeader = ({ 
+  apiKeyMissing, 
+  isWarmingUp = false, 
+  includeHealthContext = false,
+  modelName = "GPT-4o"
+}: ChatHeaderProps) => {
   return (
     <CardHeader className="bg-primary/5 border-b">
       <CardTitle className="flex items-center gap-2">
@@ -30,10 +36,20 @@ const ChatHeader = ({ apiKeyMissing, isWarmingUp = false, includeHealthContext =
             <Brain className="h-3 w-3 mr-1" /> Personalized
           </Badge>
         )}
+        {!apiKeyMissing && !isWarmingUp && (
+          <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200 ml-2">
+            <Sparkles className="h-3 w-3 mr-1" /> Powered by {modelName}
+          </Badge>
+        )}
       </CardTitle>
       <CardDescription className="mt-2 text-sm">
-        Ask questions about symptoms, treatments, or general health information. 
-        Remember that this AI assistant provides general guidance and is not a replacement for professional medical advice.
+        <div className="flex items-start gap-2">
+          <Shield className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <span>
+            Ask about symptoms, treatments, or general health information. 
+            This AI assistant uses advanced NLP to provide context-aware medical guidance, but is not a replacement for professional medical advice.
+          </span>
+        </div>
       </CardDescription>
     </CardHeader>
   );

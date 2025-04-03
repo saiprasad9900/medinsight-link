@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { SearchIcon, AlertCircle, Check, X } from "lucide-react";
+import { SearchIcon, AlertCircle, Check, X, Brain, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MedicalSymptom } from "@/types/patients";
+import { toast } from "sonner";
 
 // Sample symptoms data - in a real app, this would come from an API
 const sampleSymptoms: MedicalSymptom[] = [
@@ -44,13 +45,53 @@ const sampleSymptoms: MedicalSymptom[] = [
     description: "Difficult or labored breathing", 
     bodyArea: "Chest", 
     severity: "Severe" 
+  },
+  { 
+    id: "6", 
+    name: "Sore Throat", 
+    description: "Pain or irritation in the throat", 
+    bodyArea: "Throat", 
+    severity: "Mild" 
+  },
+  { 
+    id: "7", 
+    name: "Nausea", 
+    description: "Feeling of sickness with an inclination to vomit", 
+    bodyArea: "Stomach", 
+    severity: "Moderate" 
+  },
+  { 
+    id: "8", 
+    name: "Dizziness", 
+    description: "Feeling faint, woozy, or unsteady", 
+    bodyArea: "Head", 
+    severity: "Moderate" 
+  },
+  { 
+    id: "9", 
+    name: "Chest Pain", 
+    description: "Discomfort or pain in the chest area", 
+    bodyArea: "Chest", 
+    severity: "Severe" 
+  },
+  { 
+    id: "10", 
+    name: "Joint Pain", 
+    description: "Discomfort in the joints", 
+    bodyArea: "Extremities", 
+    severity: "Moderate" 
   }
 ];
 
-const SymptomChecker = () => {
+interface SymptomCheckerProps {
+  onConsultAI?: (symptoms: MedicalSymptom[]) => void;
+}
+
+const SymptomChecker = ({ onConsultAI }: SymptomCheckerProps = {}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSymptoms, setSelectedSymptoms] = useState<MedicalSymptom[]>([]);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const filteredSymptoms = sampleSymptoms.filter(symptom => 
     symptom.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -68,23 +109,44 @@ const SymptomChecker = () => {
 
   const handleAnalyzeSymptoms = () => {
     // In a real app, this would call an AI service to analyze symptoms
-    // For now, we're using a simple rule-based approach
-    
     if (selectedSymptoms.length === 0) {
       setAnalysisResult("Please select at least one symptom to analyze.");
       return;
     }
     
-    const hasHighSeverity = selectedSymptoms.some(s => s.severity === "Severe");
-    const hasRespiratorySymptoms = selectedSymptoms.some(s => s.bodyArea === "Chest");
-    const hasFever = selectedSymptoms.some(s => s.name === "Fever");
+    setIsAnalyzing(true);
     
-    if (hasHighSeverity) {
-      setAnalysisResult("Your symptoms include one or more severe conditions. We recommend seeking immediate medical attention.");
-    } else if (hasRespiratorySymptoms && hasFever) {
-      setAnalysisResult("Your combination of respiratory symptoms and fever could indicate an infection. Please consult with a healthcare provider within the next 24 hours.");
+    // Simulate analysis time
+    setTimeout(() => {
+      const hasHighSeverity = selectedSymptoms.some(s => s.severity === "Severe");
+      const hasRespiratorySymptoms = selectedSymptoms.some(s => s.bodyArea === "Chest");
+      const hasFever = selectedSymptoms.some(s => s.name === "Fever");
+      
+      if (hasHighSeverity) {
+        setAnalysisResult("Your symptoms include one or more severe conditions. We recommend seeking immediate medical attention.");
+      } else if (hasRespiratorySymptoms && hasFever) {
+        setAnalysisResult("Your combination of respiratory symptoms and fever could indicate an infection. Please consult with a healthcare provider within the next 24 hours.");
+      } else {
+        setAnalysisResult("Based on the symptoms you've selected, you may have a mild condition. Rest, stay hydrated, and monitor your symptoms. If they worsen, please consult a healthcare provider.");
+      }
+      
+      setIsAnalyzing(false);
+    }, 1500);
+  };
+
+  const handleConsultAI = () => {
+    if (selectedSymptoms.length === 0) {
+      toast.warning("Please select at least one symptom first.");
+      return;
+    }
+    
+    if (onConsultAI) {
+      onConsultAI(selectedSymptoms);
     } else {
-      setAnalysisResult("Based on the symptoms you've selected, you may have a mild condition. Rest, stay hydrated, and monitor your symptoms. If they worsen, please consult a healthcare provider.");
+      // Default behavior if no handler is provided
+      toast.info("Discuss your symptoms with Dr. MediPredict by switching to the Chat tab.", {
+        description: "The AI can provide more detailed information about your symptoms."
+      });
     }
   };
 
@@ -167,9 +229,9 @@ const SymptomChecker = () => {
               <Button 
                 onClick={handleAnalyzeSymptoms} 
                 className="flex-1"
-                disabled={selectedSymptoms.length === 0}
+                disabled={selectedSymptoms.length === 0 || isAnalyzing}
               >
-                Analyze Symptoms
+                {isAnalyzing ? "Analyzing..." : "Analyze Symptoms"}
               </Button>
               <Button 
                 variant="outline" 
@@ -198,6 +260,18 @@ const SymptomChecker = () => {
                 <p className="font-medium">Preliminary Assessment</p>
                 <p className="mt-1">{analysisResult}</p>
                 <p className="mt-3 text-sm font-medium">Remember: This is not a medical diagnosis. When in doubt, always consult a healthcare professional.</p>
+              
+                <div className="mt-4 pt-3 border-t border-gray-200">
+                  <Button 
+                    onClick={handleConsultAI}
+                    variant="outline" 
+                    className="w-full flex items-center justify-center gap-2"
+                  >
+                    <Brain className="h-4 w-4" />
+                    <span>Discuss Symptoms with AI Doctor</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
