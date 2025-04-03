@@ -24,6 +24,25 @@ const generateFallbackResponse = (message: string) => {
   return responses[index];
 };
 
+// Function to detect emergency medical concerns
+const detectMedicalEmergency = (message: string): boolean => {
+  const emergencyKeywords = [
+    "heart attack", "stroke", "bleeding", "unconscious", "fainted", "suicide", 
+    "seizure", "overdose", "poisoning", "breathing difficulty", "severe pain",
+    "emergency", "dying", "extremely dizzy", "blacking out"
+  ];
+  
+  const messageLower = message.toLowerCase();
+  return emergencyKeywords.some(keyword => messageLower.includes(keyword));
+};
+
+// Function to generate emergency warning message
+const generateEmergencyWarning = (): string => {
+  return "⚠️ **MEDICAL EMERGENCY WARNING**: It sounds like you may be describing a medical emergency. " + 
+    "If you or someone else is experiencing a medical emergency, please call emergency services (like 911) " +
+    "immediately or go to the nearest emergency room. Do not wait for an AI response in emergency situations.";
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -37,6 +56,17 @@ serve(async (req) => {
     
     console.log("Message received:", message);
     console.log("Chat history length:", chatHistory?.length || 0);
+    
+    // Check for medical emergency keywords
+    if (detectMedicalEmergency(message)) {
+      console.log("DETECTED POTENTIAL MEDICAL EMERGENCY");
+      return new Response(JSON.stringify({ 
+        reply: generateEmergencyWarning(),
+        source: "emergency-detection"
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
     
     // Access your OpenAI API key from environment variables
     const apiKey = Deno.env.get('OPENAI_API_KEY');
@@ -56,25 +86,28 @@ serve(async (req) => {
       });
     }
 
-    // Construct the conversation with system message and history
-    const messages = [
-      {
-        role: "system",
-        content: `You are Dr. MediPredict, an AI medical assistant designed to provide helpful medical information and guidance. 
+    // Enhanced system message with medical focus
+    const systemMessage = {
+      role: "system",
+      content: `You are Dr. MediPredict, an AI medical assistant designed to provide helpful medical information and guidance.
 
 Important guidelines:
-1. Always be compassionate and understanding
-2. Provide evidence-based information when possible
+1. Always be compassionate, empathetic and understanding
+2. Provide evidence-based information using the latest medical knowledge
 3. Emphasize that you are an AI and not a replacement for professional medical care
 4. Recommend seeking proper medical attention for serious symptoms
 5. Focus on lifestyle advice, general health education, and wellness tips
-6. Do not diagnose specific conditions or prescribe specific medications
-7. Use simple, patient-friendly language
+6. Do not make definitive diagnoses but can discuss possible explanations for symptoms
+7. Use patient-friendly language and avoid excessive medical jargon
 8. Ask clarifying questions when needed to provide better guidance
-9. For every user question, make sure to provide a thoughtful, detailed response
-10. ALWAYS give a response to the user's questions - never refuse to answer`
-      }
-    ];
+9. If you detect a potential emergency situation, advise the user to seek immediate medical help
+10. Pay attention to any user health context provided to personalize your responses
+
+Remember that health questions should be taken seriously, but also that you should not cause unnecessary alarm or anxiety.`
+    };
+
+    // Construct the conversation with system message and history
+    const messages = [systemMessage];
 
     // Add chat history if it exists and is not empty
     if (chatHistory && Array.isArray(chatHistory) && chatHistory.length > 0) {

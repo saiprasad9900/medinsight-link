@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,15 +8,22 @@ import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 
 interface Message {
-  role: "assistant" | "user";
+  role: "assistant" | "user" | "system";
   content: string;
 }
 
 interface ChatBotProps {
   isWarmingUp?: boolean;
+  includeHealthContext?: boolean;
+  userContext?: {
+    age?: number;
+    gender?: string;
+    conditions?: string[];
+    medications?: string[];
+  };
 }
 
-const ChatBot = ({ isWarmingUp = false }: ChatBotProps) => {
+const ChatBot = ({ isWarmingUp = false, includeHealthContext = false, userContext }: ChatBotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -26,6 +33,9 @@ const ChatBot = ({ isWarmingUp = false }: ChatBotProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
+
+  // Track if this is the first message to send health context
+  const firstMessageSentRef = useRef(false);
 
   const handleSendMessage = async (userMessage: string) => {
     if (isWarmingUp) {
@@ -43,10 +53,24 @@ const ChatBot = ({ isWarmingUp = false }: ChatBotProps) => {
       console.log("Sending message to AI:", userMessage);
       
       // Format chat history for the API - only include content and role
-      const chatHistory = messages.map(msg => ({
+      let chatHistory = messages.map(msg => ({
         role: msg.role,
         content: msg.content
       }));
+
+      // If this is the first message and we have health context, add it as system message
+      if (includeHealthContext && userContext && !firstMessageSentRef.current) {
+        firstMessageSentRef.current = true;
+        
+        // Create a system message with the user's health context
+        const healthContextMsg = {
+          role: "system" as const,
+          content: `User context: ${userContext.age ? `Age: ${userContext.age}. ` : ''}${userContext.gender ? `Gender: ${userContext.gender}. ` : ''}${userContext.conditions?.length ? `Medical conditions: ${userContext.conditions.join(', ')}. ` : ''}${userContext.medications?.length ? `Medications: ${userContext.medications.join(', ')}.` : ''}`
+        };
+        
+        // Add it to the beginning of the chat history
+        chatHistory = [healthContextMsg, ...chatHistory];
+      }
 
       // Call the Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('doctor-ai', {
@@ -115,7 +139,7 @@ const ChatBot = ({ isWarmingUp = false }: ChatBotProps) => {
 
   return (
     <Card className="w-full h-[calc(100vh-12rem)] flex flex-col shadow-lg">
-      <ChatHeader apiKeyMissing={apiKeyMissing} isWarmingUp={isWarmingUp} />
+      <ChatHeader apiKeyMissing={apiKeyMissing} isWarmingUp={isWarmingUp} includeHealthContext={includeHealthContext} />
       <CardContent className="p-0 flex-1 overflow-hidden">
         <ChatMessages 
           messages={messages} 
