@@ -9,10 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { UserRole } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Stethoscope, User, ShieldAlert } from "lucide-react";
+import { Stethoscope, User, ShieldAlert, FileText, BarChart3 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ProjectShowcase from "@/components/auth/ProjectShowcase";
-import { FileText, BarChart3 } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();

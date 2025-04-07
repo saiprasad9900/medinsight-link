@@ -1,9 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Stethoscope, BarChart3, FileText, MessageSquare, ShieldCheck } from "lucide-react";
+import placeholder from "/placeholder.svg";
 
-// Import screenshots - these files need to be added to the project
-// The paths are relative to the public folder
+// Define the screenshots data
 const SCREENSHOTS = [
   {
     title: "AI-Powered Dashboard",
@@ -76,6 +76,30 @@ const FeatureList = () => {
 
 const ProjectShowcase = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState(Array(SCREENSHOTS.length).fill(false));
+  const [error, setError] = useState(Array(SCREENSHOTS.length).fill(false));
+
+  useEffect(() => {
+    // Preload images
+    SCREENSHOTS.forEach((screenshot, index) => {
+      const img = new Image();
+      img.src = screenshot.image;
+      img.onload = () => {
+        setImagesLoaded(prev => {
+          const newState = [...prev];
+          newState[index] = true;
+          return newState;
+        });
+      };
+      img.onerror = () => {
+        setError(prev => {
+          const newState = [...prev];
+          newState[index] = true;
+          return newState;
+        });
+      };
+    });
+  }, []);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % SCREENSHOTS.length);
@@ -84,6 +108,15 @@ const ProjectShowcase = () => {
   const prevSlide = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + SCREENSHOTS.length) % SCREENSHOTS.length);
   };
+
+  // Auto-advance slides every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      nextSlide();
+    }, 5000);
+    
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -96,11 +129,20 @@ const ProjectShowcase = () => {
 
       <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-primary/5 to-accent/5 p-1">
         <div className="relative aspect-video rounded-lg overflow-hidden border shadow-md">
+          {/* Image with fallback */}
           <img 
-            src={SCREENSHOTS[currentIndex].image} 
+            src={error[currentIndex] ? placeholder : SCREENSHOTS[currentIndex].image} 
             alt={SCREENSHOTS[currentIndex].title} 
             className="w-full h-full object-cover object-top"
+            onError={(e) => {
+              e.currentTarget.src = placeholder;
+            }}
           />
+          {!imagesLoaded[currentIndex] && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+            </div>
+          )}
           <div className="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent p-4 text-white">
             <h3 className="font-bold">{SCREENSHOTS[currentIndex].title}</h3>
             <p className="text-sm opacity-90">{SCREENSHOTS[currentIndex].description}</p>
@@ -109,6 +151,7 @@ const ProjectShowcase = () => {
           <button 
             onClick={prevSlide}
             className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full"
+            aria-label="Previous screenshot"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -116,6 +159,7 @@ const ProjectShowcase = () => {
           <button 
             onClick={nextSlide}
             className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full"
+            aria-label="Next screenshot"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -125,7 +169,8 @@ const ProjectShowcase = () => {
               <button 
                 key={index} 
                 onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full ${index === currentIndex ? 'bg-white' : 'bg-white/50'}`}
+                className={`w-2 h-2 rounded-full transition-colors ${index === currentIndex ? 'bg-white' : 'bg-white/50'}`}
+                aria-label={`Go to screenshot ${index + 1}`}
               />
             ))}
           </div>
@@ -137,11 +182,25 @@ const ProjectShowcase = () => {
         <FeatureList />
       </div>
 
-      <div className="bg-primary/5 border rounded-lg p-4">
-        <h3 className="font-semibold mb-2">Ready to transform healthcare analytics?</h3>
-        <p className="text-sm text-muted-foreground mb-3">
+      <div className="bg-primary/5 border rounded-lg p-6">
+        <h3 className="font-semibold mb-2 text-lg">Ready to transform healthcare analytics?</h3>
+        <p className="text-muted-foreground mb-4">
           Sign in or create an account to experience the power of AI-driven medical insights.
         </p>
+        <div className="flex flex-col sm:flex-row gap-3 mt-2">
+          <div className="flex items-center gap-2 text-sm">
+            <FileText className="h-4 w-4 text-primary" />
+            <span>HIPAA Compliant</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            <span>Bank-level Security</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <span>AI-Powered Analysis</span>
+          </div>
+        </div>
       </div>
     </div>
   );
