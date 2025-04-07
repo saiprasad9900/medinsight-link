@@ -7,7 +7,14 @@ import ChatHeader from "./ChatHeader";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 
-interface Message {
+// Define a ChatMessage interface that's compatible with what ChatMessages expects
+interface ChatMessage {
+  role: "assistant" | "user";
+  content: string;
+}
+
+// Define a separate interface for API communication that includes system messages
+interface ApiMessage {
   role: "assistant" | "user" | "system";
   content: string;
 }
@@ -30,7 +37,7 @@ const ChatBot = ({
   userContext,
   modelName = "GPT-4o"
 }: ChatBotProps) => {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
       content: "Hello! I'm Dr. MediPredict, your AI health assistant. How can I help you today? Remember, I'm here to provide general health information, but I'm not a replacement for professional medical advice."
@@ -77,7 +84,8 @@ const ChatBot = ({
       console.log("Sending message to AI:", userMessage);
       
       // Format chat history for the API - only include content and role
-      let chatHistory = messages.map(msg => ({
+      // Convert our ChatMessages to ApiMessages for backend communication
+      const chatHistory: ApiMessage[] = messages.map(msg => ({
         role: msg.role,
         content: msg.content
       }));
@@ -87,13 +95,13 @@ const ChatBot = ({
         firstMessageSentRef.current = true;
         
         // Create a system message with the user's health context
-        const healthContextMsg = {
-          role: "system" as const,
+        const healthContextMsg: ApiMessage = {
+          role: "system",
           content: `User context: ${userContext.age ? `Age: ${userContext.age}. ` : ''}${userContext.gender ? `Gender: ${userContext.gender}. ` : ''}${userContext.conditions?.length ? `Medical conditions: ${userContext.conditions.join(', ')}. ` : ''}${userContext.medications?.length ? `Medications: ${userContext.medications.join(', ')}.` : ''}`
         };
         
         // Add it to the beginning of the chat history
-        chatHistory = [healthContextMsg, ...chatHistory];
+        chatHistory.unshift(healthContextMsg);
       }
 
       // Call the Supabase Edge Function

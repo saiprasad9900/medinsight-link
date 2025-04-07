@@ -125,8 +125,8 @@ const RecordsDataService = () => {
       };
     });
 
-    // Fixed the type error by explicitly casting to Record[]
-    setUserRecords((prev: Record[]) => [...newRecords, ...prev]);
+    // Fix the type error by using the current records array and adding to it
+    setUserRecords([...newRecords, ...userRecords]);
     setSelectedRecord(null);
   };
 
