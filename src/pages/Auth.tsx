@@ -12,8 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Stethoscope, User, ShieldAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ProjectShowcase from "@/components/auth/ProjectShowcase";
-import FileText from "lucide-react/FileText";
-import BarChart3 from "lucide-react/BarChart3";
+import { FileText, BarChart3 } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
