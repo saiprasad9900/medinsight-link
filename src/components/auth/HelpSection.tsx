@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { HelpCircle, Phone, Mail } from "lucide-react";
+import { HelpCircle, Phone, Mail, ChevronDown, ChevronUp } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const HelpSection = () => {
   const [open, setOpen] = useState(false);
@@ -14,6 +15,25 @@ const HelpSection = () => {
     phone: "9014810434",
     email: "saiprasadvannada123@gmail.com"
   };
+
+  const faqs = [
+    {
+      question: "How do I access my patient records?",
+      answer: "Login to your account, navigate to the Records tab in the dashboard to view all your medical records. You can filter by date, type, or provider."
+    },
+    {
+      question: "How secure is my medical data?",
+      answer: "MediPredict uses industry-standard encryption and complies with all medical privacy regulations to ensure your data remains secure and private."
+    },
+    {
+      question: "Can I share my records with other healthcare providers?",
+      answer: "Yes, you can securely share your records with authorized healthcare providers directly through the platform using the Share feature on any record."
+    },
+    {
+      question: "How do I upload new medical documents?",
+      answer: "Go to the Records section and click the 'Upload' button. You can upload images, PDFs, and other document formats directly from your device."
+    }
+  ];
 
   if (!isMobile) {
     return (
@@ -59,6 +79,20 @@ const HelpSection = () => {
                   </a>
                 </div>
               </div>
+            </div>
+            
+            <div className="mt-6">
+              <h3 className="text-sm font-medium mb-2">Frequently Asked Questions</h3>
+              <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq, index) => (
+                  <AccordionItem key={index} value={`faq-${index}`}>
+                    <AccordionTrigger className="text-sm">{faq.question}</AccordionTrigger>
+                    <AccordionContent className="text-sm text-muted-foreground">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
             
             <div className="text-xs text-muted-foreground mt-4">
@@ -119,6 +153,20 @@ const HelpSection = () => {
                   </a>
                 </div>
               </div>
+            </div>
+            
+            <div className="mt-6">
+              <h3 className="text-sm font-medium mb-2 text-center">Frequently Asked Questions</h3>
+              <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq, index) => (
+                  <AccordionItem key={index} value={`faq-${index}`}>
+                    <AccordionTrigger className="text-sm">{faq.question}</AccordionTrigger>
+                    <AccordionContent className="text-sm text-muted-foreground">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
             
             <div className="text-xs text-muted-foreground mt-4 text-center">
