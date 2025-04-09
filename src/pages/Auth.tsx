@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Stethoscope, User, ShieldAlert, FileText, BarChart3 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ProjectShowcase from "@/components/auth/ProjectShowcase";
+import HelpSection from "@/components/auth/HelpSection";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -86,6 +88,9 @@ const Auth = () => {
       
       <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
+          {/* Add HelpSection component */}
+          <HelpSection />
+          
           <CardHeader className="text-center">
             <div className="flex flex-col items-center justify-center space-y-2">
               <div className="relative flex items-center gap-2">
