@@ -102,6 +102,13 @@ const Auth = () => {
               <CardDescription className="animate-fade-in opacity-0" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
                 {asDoctor ? "Doctor Portal Access" : "Patient Health Management"}
               </CardDescription>
+              
+              <CardDescription 
+                className="text-sm text-muted-foreground mt-2 text-center"
+                style={{ animationDelay: "300ms", animationFillMode: "forwards" }}
+              >
+                Created by Saiprasad | AI-Powered Healthcare Platform
+              </CardDescription>
             </div>
           </CardHeader>
           
