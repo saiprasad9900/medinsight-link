@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
