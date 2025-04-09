@@ -3,19 +3,19 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { HelpCircle, Phone, Mail, X } from "lucide-react";
-import { useMobileScreen } from "@/hooks/use-mobile";
+import { HelpCircle, Phone, Mail } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const HelpSection = () => {
   const [open, setOpen] = useState(false);
-  const isDesktop = useMobileScreen("min-width: 768px");
+  const isMobile = useIsMobile();
   
   const contactDetails = {
     phone: "9014810434",
     email: "saiprasadvannada123@gmail.com"
   };
 
-  if (isDesktop) {
+  if (!isMobile) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
