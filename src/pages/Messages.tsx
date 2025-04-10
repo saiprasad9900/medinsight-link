@@ -92,6 +92,32 @@ const Messages = () => {
     );
   };
 
+  const handleSendMessage = (message: string) => {
+    if (activeContact) {
+      updateLastMessage(activeContact.id, message);
+      toast.success("Message sent successfully");
+    }
+  };
+
+  useEffect(() => {
+    // Mark messages as read when selecting a contact
+    if (activeContact?.lastMessage.unread) {
+      setContactsData(prevContacts =>
+        prevContacts.map(contact =>
+          contact.id === activeContactId
+            ? {
+                ...contact,
+                lastMessage: {
+                  ...contact.lastMessage,
+                  unread: false
+                }
+              }
+            : contact
+        )
+      );
+    }
+  }, [activeContactId, activeContact]);
+
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] animate-fade-in">
       <div className="mb-4">
@@ -113,10 +139,7 @@ const Messages = () => {
           {activeContact && (
             <MessageThread 
               contact={activeContact} 
-              onSendMessage={(message) => {
-                updateLastMessage(activeContact.id, message);
-                toast.success("Message sent successfully");
-              }}
+              onSendMessage={handleSendMessage}
             />
           )}
         </div>

@@ -17,6 +17,10 @@ export const MessageDisplay = ({
   senderName, 
   senderAvatar 
 }: MessageDisplayProps) => {
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
     <div
       className={cn(
@@ -42,7 +46,7 @@ export const MessageDisplay = ({
           {content}
         </div>
         <p className="text-xs text-muted-foreground px-1">
-          {timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {formatTime(timestamp)}
         </p>
       </div>
     </div>

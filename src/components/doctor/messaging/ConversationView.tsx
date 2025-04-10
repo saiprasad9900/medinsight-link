@@ -44,7 +44,7 @@ export const ConversationView = ({
             <MessageDisplay
               key={message.id}
               content={message.content}
-              timestamp={message.timestamp}
+              timestamp={message.timestamp instanceof Date ? message.timestamp : new Date(message.timestamp)}
               isCurrentUser={message.sender_id === user.id}
               senderName={message.sender_id === user.id ? "Me" : activePatientName}
               senderAvatar={message.sender_id === user.id ? "" : activePatientAvatar}

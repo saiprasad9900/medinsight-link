@@ -17,7 +17,6 @@ export const MessageInputField = ({ onSendMessage, disabled = false }: MessageIn
     if (!newMessage.trim()) return;
     onSendMessage(newMessage.trim());
     setNewMessage("");
-    toast.success("Message sent successfully");
   };
   
   const handleKeyPress = (e: React.KeyboardEvent) => {
