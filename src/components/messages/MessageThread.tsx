@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Paperclip, Send, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Message {
   id: string;
@@ -26,9 +27,11 @@ interface MessageThreadProps {
     avatar: string;
     status: "online" | "offline";
   };
+  onSendMessage?: (message: string) => void;
 }
 
-const MessageThread = ({ contact }: MessageThreadProps) => {
+const MessageThread = ({ contact, onSendMessage }: MessageThreadProps) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -83,7 +86,7 @@ const MessageThread = ({ contact }: MessageThreadProps) => {
       id: Date.now().toString(),
       sender: {
         id: "1",
-        name: "Dr. Rebecca Lee",
+        name: user?.email || "Dr. Rebecca Lee",
         avatar: "",
         isCurrentUser: true,
       },
@@ -93,6 +96,39 @@ const MessageThread = ({ contact }: MessageThreadProps) => {
     
     setMessages([...messages, newMsg]);
     setNewMessage("");
+    
+    if (onSendMessage) {
+      onSendMessage(newMessage.trim());
+    }
+    
+    // Simulate response after delay
+    if (contact.status === "online") {
+      setTimeout(() => {
+        const responseMessages = [
+          "I'll check on that right away.",
+          "Thank you for letting me know. I'll follow up with the patient.",
+          "Got it. Let's discuss this at the next staff meeting too.",
+          "I've made a note in the system. We should monitor this closely.",
+          "I appreciate your attention to this case.",
+        ];
+        
+        const response = responseMessages[Math.floor(Math.random() * responseMessages.length)];
+        
+        const responseMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          sender: {
+            id: "2",
+            name: contact.name,
+            avatar: contact.avatar,
+            isCurrentUser: false,
+          },
+          content: response,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        
+        setMessages(prev => [...prev, responseMsg]);
+      }, 1500 + Math.random() * 2000);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
