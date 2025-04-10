@@ -3,9 +3,10 @@ import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Paperclip, Send, Lock } from "lucide-react";
+import { Paperclip, Send, Lock, Image, Smile, Mic, CheckCheck, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
   id: string;
@@ -17,6 +18,7 @@ interface Message {
   };
   content: string;
   timestamp: string;
+  status?: "sent" | "delivered" | "read";
 }
 
 interface MessageThreadProps {
@@ -43,6 +45,7 @@ const MessageThread = ({ contact, onSendMessage }: MessageThreadProps) => {
       },
       content: "I've reviewed the lab results for Emma Thompson. The cardiac enzyme levels are concerning, can you take a look?",
       timestamp: "10:32 AM",
+      status: "read"
     },
     {
       id: "2",
@@ -54,6 +57,7 @@ const MessageThread = ({ contact, onSendMessage }: MessageThreadProps) => {
       },
       content: "I'll review them right away. Has she been experiencing any chest pain or shortness of breath?",
       timestamp: "10:35 AM",
+      status: "read"
     },
     {
       id: "3",
@@ -69,6 +73,7 @@ const MessageThread = ({ contact, onSendMessage }: MessageThreadProps) => {
   ]);
   
   const [newMessage, setNewMessage] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -77,6 +82,10 @@ const MessageThread = ({ contact, onSendMessage }: MessageThreadProps) => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const formatTime = () => {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   const handleSendMessage = () => {
@@ -91,7 +100,8 @@ const MessageThread = ({ contact, onSendMessage }: MessageThreadProps) => {
         isCurrentUser: true,
       },
       content: newMessage.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: formatTime(),
+      status: "sent"
     };
     
     setMessages([...messages, newMsg]);
@@ -101,34 +111,47 @@ const MessageThread = ({ contact, onSendMessage }: MessageThreadProps) => {
       onSendMessage(newMessage.trim());
     }
     
-    // Simulate response after delay
-    if (contact.status === "online") {
-      setTimeout(() => {
-        const responseMessages = [
-          "I'll check on that right away.",
-          "Thank you for letting me know. I'll follow up with the patient.",
-          "Got it. Let's discuss this at the next staff meeting too.",
-          "I've made a note in the system. We should monitor this closely.",
-          "I appreciate your attention to this case.",
-        ];
-        
-        const response = responseMessages[Math.floor(Math.random() * responseMessages.length)];
-        
-        const responseMsg: Message = {
-          id: (Date.now() + 1).toString(),
-          sender: {
-            id: "2",
-            name: contact.name,
-            avatar: contact.avatar,
-            isCurrentUser: false,
-          },
-          content: response,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
-        
-        setMessages(prev => [...prev, responseMsg]);
-      }, 1500 + Math.random() * 2000);
-    }
+    // Simulate message status updates
+    setTimeout(() => {
+      setMessages(prev => prev.map(msg => 
+        msg.id === newMsg.id ? { ...msg, status: "delivered" } : msg
+      ));
+      
+      // Simulate response after delay if contact is online
+      if (contact.status === "online") {
+        setTimeout(() => {
+          const responseMessages = [
+            "I'll check on that right away.",
+            "Thank you for letting me know. I'll follow up with the patient.",
+            "Got it. Let's discuss this at the next staff meeting too.",
+            "I've made a note in the system. We should monitor this closely.",
+            "I appreciate your attention to this case.",
+          ];
+          
+          const response = responseMessages[Math.floor(Math.random() * responseMessages.length)];
+          
+          // Update the sent message to "read" first
+          setMessages(prev => prev.map(msg => 
+            msg.id === newMsg.id ? { ...msg, status: "read" } : msg
+          ));
+          
+          // Add response message
+          const responseMsg: Message = {
+            id: (Date.now() + 1).toString(),
+            sender: {
+              id: "2",
+              name: contact.name,
+              avatar: contact.avatar,
+              isCurrentUser: false,
+            },
+            content: response,
+            timestamp: formatTime(),
+          };
+          
+          setMessages(prev => [...prev, responseMsg]);
+        }, 1500 + Math.random() * 2000);
+      }
+    }, 1000);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -136,6 +159,33 @@ const MessageThread = ({ contact, onSendMessage }: MessageThreadProps) => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const simulateVoiceRecording = () => {
+    setIsRecording(true);
+    // Simulate recording for 2 seconds
+    setTimeout(() => {
+      setIsRecording(false);
+      
+      const newMsg: Message = {
+        id: Date.now().toString(),
+        sender: {
+          id: "1",
+          name: user?.email || "Dr. Rebecca Lee",
+          avatar: "",
+          isCurrentUser: true,
+        },
+        content: "🎤 Voice message (0:02)",
+        timestamp: formatTime(),
+        status: "sent"
+      };
+      
+      setMessages([...messages, newMsg]);
+      
+      if (onSendMessage) {
+        onSendMessage("Voice message");
+      }
+    }, 2000);
   };
 
   return (
@@ -164,61 +214,110 @@ const MessageThread = ({ contact, onSendMessage }: MessageThreadProps) => {
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={cn(
-              "flex gap-3 max-w-[85%]",
-              message.sender.isCurrentUser ? "ml-auto flex-row-reverse" : ""
-            )}
-          >
-            <Avatar className="h-8 w-8 flex-shrink-0">
-              <AvatarImage src={message.sender.avatar} />
-              <AvatarFallback>
-                {message.sender.name.split(" ").map(n => n[0]).join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-1">
-              <div
-                className={cn(
-                  "p-3 rounded-lg",
-                  message.sender.isCurrentUser
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground"
-                )}
-              >
-                {message.content}
-              </div>
-              <p className="text-xs text-muted-foreground px-1">
-                {message.timestamp}
-              </p>
-            </div>
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-6">
+          <div className="flex justify-center">
+            <span className="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-full">
+              Today
+            </span>
           </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
+          
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                "flex gap-3 max-w-[85%]",
+                message.sender.isCurrentUser ? "ml-auto flex-row-reverse" : ""
+              )}
+            >
+              <Avatar className="h-8 w-8 flex-shrink-0">
+                <AvatarImage src={message.sender.avatar} />
+                <AvatarFallback>
+                  {message.sender.name.split(" ").map(n => n[0]).join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div className="space-y-1">
+                <div
+                  className={cn(
+                    "p-3 rounded-lg",
+                    message.sender.isCurrentUser
+                      ? "bg-primary text-primary-foreground rounded-br-none"
+                      : "bg-secondary text-secondary-foreground rounded-bl-none"
+                  )}
+                >
+                  {message.content}
+                </div>
+                <div className={cn(
+                  "flex items-center gap-1 px-1",
+                  message.sender.isCurrentUser ? "justify-end" : ""
+                )}>
+                  <span className="text-xs text-muted-foreground">
+                    {message.timestamp}
+                  </span>
+                  {message.sender.isCurrentUser && message.status && (
+                    <span className="text-muted-foreground">
+                      {message.status === "read" ? (
+                        <CheckCheck className="h-3 w-3 text-blue-500" />
+                      ) : message.status === "delivered" ? (
+                        <CheckCheck className="h-3 w-3" />
+                      ) : (
+                        <Check className="h-3 w-3" />
+                      )}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
       
       <div className="p-4 border-t border-border">
-        <div className="flex gap-2">
-          <Button variant="ghost" size="icon" className="flex-shrink-0">
-            <Paperclip className="h-5 w-5" />
-          </Button>
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="Type your message..."
-            className="flex-1"
-          />
+        <div className={cn(
+          "flex gap-2 items-center rounded-lg",
+          isRecording ? "bg-red-50 p-1" : ""
+        )}>
+          {isRecording ? (
+            <div className="flex-1 flex items-center justify-center text-sm text-red-500 animate-pulse">
+              Recording voice message...
+            </div>
+          ) : (
+            <>
+              <div className="flex gap-1">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Paperclip className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Image className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Smile className="h-5 w-5" />
+                </Button>
+              </div>
+              <Input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="Type a message..."
+                className="flex-1 rounded-full"
+              />
+            </>
+          )}
           <Button 
-            variant="default" 
+            variant="ghost"
             size="icon" 
-            className="flex-shrink-0" 
-            onClick={handleSendMessage}
-            disabled={newMessage.trim() === ""}
+            className="h-9 w-9"
+            onClick={newMessage.trim() ? handleSendMessage : simulateVoiceRecording}
           >
-            <Send className="h-5 w-5" />
+            {newMessage.trim() ? (
+              <Send className="h-5 w-5 text-primary" />
+            ) : (
+              <Mic className={cn(
+                "h-5 w-5",
+                isRecording ? "text-red-500 animate-pulse" : ""
+              )} />
+            )}
           </Button>
         </div>
       </div>
