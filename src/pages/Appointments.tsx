@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { AppointmentService, Appointment } from "@/services/AppointmentService";
 
 // Form schema for appointment validation
 const appointmentFormSchema = z.object({
@@ -38,50 +39,31 @@ const AppointmentsPage = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [view, setView] = useState<"upcoming" | "past" | "all">("upcoming");
   const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
-  const [appointments, setAppointments] = useState([
-    {
-      id: 1,
-      patient: "Emma Thompson",
-      date: "2025-04-11",
-      time: "09:00 AM",
-      type: "Check-up",
-      status: "Confirmed",
-      doctor: "Dr. Jane Smith"
-    },
-    {
-      id: 2,
-      patient: "Michael Chen",
-      date: "2025-04-10",
-      time: "11:30 AM",
-      type: "Follow-up",
-      status: "Completed",
-      doctor: "Dr. John Johnson"
-    },
-    {
-      id: 3,
-      patient: "Sarah Wilson",
-      date: "2025-04-12",
-      time: "02:15 PM",
-      type: "Consultation",
-      status: "Pending",
-      doctor: "Dr. Jane Smith"
-    },
-    {
-      id: 4,
-      patient: "Robert Davis",
-      date: "2025-04-14",
-      time: "10:45 AM",
-      type: "Check-up",
-      status: "Confirmed",
-      doctor: "Dr. Patel"
-    }
-  ]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const searchForm = useForm({
     defaultValues: {
       search: "",
     }
   });
+
+  // Fetch appointments from the database
+  const fetchAppointments = async () => {
+    setIsLoading(true);
+    try {
+      const data = await AppointmentService.fetchAppointments();
+      setAppointments(data);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
 
   // Form for new appointment
   const appointmentForm = useForm<AppointmentFormValues>({
@@ -95,27 +77,28 @@ const AppointmentsPage = () => {
     },
   });
 
-  const onSubmitAppointment = (data: AppointmentFormValues) => {
-    // Create new appointment object
-    const newAppointment = {
-      id: appointments.length + 1,
+  const onSubmitAppointment = async (data: AppointmentFormValues) => {
+    // Format date for database
+    const formattedDate = data.date.toISOString().split('T')[0];
+    
+    // Save appointment to database
+    const success = await AppointmentService.addAppointment({
       patient: data.patientName,
-      date: data.date.toISOString().split('T')[0],
+      date: formattedDate,
       time: data.time,
       type: data.type,
       status: "Pending",
       doctor: data.doctor
-    };
+    });
     
-    // Add to appointments array
-    setAppointments([...appointments, newAppointment]);
-    
-    // Close dialog and reset form
-    setIsNewAppointmentOpen(false);
-    appointmentForm.reset();
-    
-    // Show success notification
-    toast.success("New appointment created successfully");
+    if (success) {
+      // Refresh appointments list
+      fetchAppointments();
+      
+      // Close dialog and reset form
+      setIsNewAppointmentOpen(false);
+      appointmentForm.reset();
+    }
   };
 
   return (
@@ -320,27 +303,37 @@ const AppointmentsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {appointments.map((appointment) => (
-                  <TableRow key={appointment.id}>
-                    <TableCell className="font-medium">{appointment.patient}</TableCell>
-                    <TableCell>{appointment.date}</TableCell>
-                    <TableCell>{appointment.time}</TableCell>
-                    <TableCell>{appointment.type}</TableCell>
-                    <TableCell>{appointment.doctor}</TableCell>
-                    <TableCell>
-                      <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        appointment.status === 'Confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
-                        appointment.status === 'Completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
-                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                      }`}>
-                        {appointment.status}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">Edit</Button>
-                    </TableCell>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">Loading appointments...</TableCell>
                   </TableRow>
-                ))}
+                ) : appointments.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">No appointments found</TableCell>
+                  </TableRow>
+                ) : (
+                  appointments.map((appointment) => (
+                    <TableRow key={appointment.id}>
+                      <TableCell className="font-medium">{appointment.patient}</TableCell>
+                      <TableCell>{appointment.date}</TableCell>
+                      <TableCell>{appointment.time}</TableCell>
+                      <TableCell>{appointment.type}</TableCell>
+                      <TableCell>{appointment.doctor}</TableCell>
+                      <TableCell>
+                        <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          appointment.status === 'Confirmed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                          appointment.status === 'Completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
+                          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                        }`}>
+                          {appointment.status}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm">Edit</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>
