@@ -5,6 +5,7 @@ import { Patient } from "@/types/patients";
 import { AddPatientForm } from "@/components/patients/AddPatientForm";
 import PatientsHeader from "@/components/patients/PatientsHeader";
 import PatientList from "@/components/patients/PatientList";
+import { toast } from "sonner";
 
 const Patients = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,14 +15,25 @@ const Patients = () => {
   
   const fetchPatients = async () => {
     setIsLoading(true);
-    const data = await PatientService.fetchPatients();
-    setPatients(data);
-    setIsLoading(false);
+    try {
+      const data = await PatientService.fetchPatients();
+      setPatients(data);
+    } catch (error) {
+      toast.error("Failed to fetch patients");
+      console.error("Error fetching patients:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchPatients();
   }, []);
+
+  const handleAddPatientSuccess = () => {
+    fetchPatients();
+    toast.success("Patient added successfully");
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -37,7 +49,7 @@ const Patients = () => {
       <AddPatientForm 
         open={addPatientOpen} 
         onOpenChange={setAddPatientOpen} 
-        onSuccess={fetchPatients}
+        onSuccess={handleAddPatientSuccess}
       />
     </div>
   );

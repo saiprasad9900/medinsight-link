@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogClose,
@@ -26,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { PatientService } from "@/services/PatientService";
 
 const patientFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -63,25 +62,20 @@ export function AddPatientForm({ open, onOpenChange, onSuccess }: AddPatientForm
     try {
       setIsSubmitting(true);
       
-      const { error } = await supabase
-        .from("patients")
-        .insert({
-          name: data.name,
-          age: data.age,
-          gender: data.gender,
-          condition: data.condition,
-          doctor: data.doctor || null,
-          status: data.status,
-        });
+      const success = await PatientService.addPatient({
+        name: data.name,
+        age: data.age,
+        gender: data.gender,
+        condition: data.condition,
+        doctor: data.doctor,
+        status: data.status,
+      });
 
-      if (error) {
-        throw error;
+      if (success) {
+        form.reset();
+        onOpenChange(false);
+        if (onSuccess) onSuccess();
       }
-
-      toast.success("Patient added successfully");
-      form.reset();
-      onOpenChange(false);
-      if (onSuccess) onSuccess();
     } catch (error: any) {
       toast.error(`Error adding patient: ${error.message}`);
       console.error("Error adding patient:", error);
