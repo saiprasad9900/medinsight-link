@@ -124,20 +124,19 @@ export const AppointmentCalendar = ({
                 day: "relative"
               }}
               components={{
-                // Use the correct type for the props here
-                Day: (props) => {
-                  // For non-day components or undefined props
-                  if (!props.date) {
+                Day: ({ date: dayDate, ...props }: React.HTMLAttributes<HTMLDivElement> & { date?: Date }) => {
+                  // For non-day components or undefined date
+                  if (!dayDate) {
                     return <div {...props} />;
                   }
                   
                   // Add a small indicator dot for days with appointments
                   const hasAppointments = busyDays.some(
-                    busyDay => busyDay.toDateString() === props.date.toDateString()
+                    busyDay => busyDay.toDateString() === dayDate.toDateString()
                   );
                   
-                  // Combine classNames properly
-                  const className = `${props.className || ""} ${hasAppointments ? "bg-primary/20 font-bold" : ""}`;
+                  // Combine classNames properly - using type assertion since we know props structure
+                  const className = `${(props as any).className || ""} ${hasAppointments ? "bg-primary/20 font-bold" : ""}`;
                   
                   return (
                     <div className="relative">
