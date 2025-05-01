@@ -1,4 +1,4 @@
-
+import React, { useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,20 +46,34 @@ interface AppointmentFormProps {
   isOpen: boolean;
   onClose: () => void;
   onAppointmentCreated: () => void;
+  initialDate?: Date; // Added initialDate prop
 }
 
-export const AppointmentForm = ({ isOpen, onClose, onAppointmentCreated }: AppointmentFormProps) => {
+export const AppointmentForm = ({ isOpen, onClose, onAppointmentCreated, initialDate }: AppointmentFormProps) => {
   // Form for new appointment
   const appointmentForm = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
     defaultValues: {
       patientName: "",
-      date: new Date(),
+      date: initialDate || new Date(), // Use initialDate if provided
       time: "",
       type: "",
       doctor: "",
     },
   });
+
+  // Reset form with initialDate when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      appointmentForm.reset({
+        patientName: "",
+        date: initialDate || new Date(),
+        time: "",
+        type: "",
+        doctor: "",
+      });
+    }
+  }, [isOpen, initialDate, appointmentForm]);
 
   const onSubmitAppointment = async (data: AppointmentFormValues) => {
     // Format date for database

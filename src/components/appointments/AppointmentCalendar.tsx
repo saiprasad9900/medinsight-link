@@ -81,15 +81,6 @@ export const AppointmentCalendar = ({
     }
   };
 
-  // Custom day rendering to highlight days with appointments
-  const dayClassNames = (date: Date) => {
-    const hasAppointments = busyDays.some(
-      busyDay => busyDay.toDateString() === date.toDateString()
-    );
-    
-    return hasAppointments ? 'bg-primary/20 font-bold relative' : '';
-  };
-
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 pb-2">
@@ -130,7 +121,7 @@ export const AppointmentCalendar = ({
               className="rounded-md p-3"
               classNames={{
                 day_today: "bg-secondary/30 text-foreground",
-                day: (date) => dayClassNames(date)
+                day: "relative" // Fixed: Changed from function to string
               }}
               components={{
                 Day: ({ date, ...props }) => {
@@ -141,7 +132,10 @@ export const AppointmentCalendar = ({
                   
                   return (
                     <div className="relative">
-                      <div {...props} />
+                      <div 
+                        {...props} 
+                        className={`${props.className} ${hasAppointments ? "bg-primary/20 font-bold" : ""}`}
+                      />
                       {hasAppointments && (
                         <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></span>
                       )}
