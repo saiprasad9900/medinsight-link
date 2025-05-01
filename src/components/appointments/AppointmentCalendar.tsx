@@ -124,16 +124,21 @@ export const AppointmentCalendar = ({
                 day: "relative" // Fixed: Changed from function to string
               }}
               components={{
-                Day: ({ date, ...props }) => {
+                Day: ({ day, displayMonth, ...props }) => {
+                  // Make sure we only process day component props
+                  if (!day) {
+                    return <div {...props} />; // Handle non-day components (like month headers)
+                  }
+                  
                   // Add a small indicator dot for days with appointments
                   const hasAppointments = busyDays.some(
-                    busyDay => busyDay.toDateString() === date.toDateString()
+                    busyDay => busyDay.toDateString() === day.toDateString()
                   );
                   
                   return (
                     <div className="relative">
                       <div 
-                        {...props} 
+                        {...props}
                         className={`${props.className || ""} ${hasAppointments ? "bg-primary/20 font-bold" : ""}`}
                       />
                       {hasAppointments && (
