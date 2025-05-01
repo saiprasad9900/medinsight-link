@@ -134,7 +134,7 @@ export const AppointmentCalendar = ({
                     <div className="relative">
                       <div 
                         {...props} 
-                        className={`${props.className} ${hasAppointments ? "bg-primary/20 font-bold" : ""}`}
+                        className={`${props.className || ""} ${hasAppointments ? "bg-primary/20 font-bold" : ""}`}
                       />
                       {hasAppointments && (
                         <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></span>
