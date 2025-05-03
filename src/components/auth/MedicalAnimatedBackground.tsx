@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from 'react';
-import { Heart, Stethoscope, Pill, Thermometer, Activity, Clipboard, FirstAid } from 'lucide-react';
+import { Heart, Stethoscope, Pill, Thermometer, Activity, Clipboard, BandageIcon } from 'lucide-react';
 
 // Define the types of medical icons available
 const medicalIcons = [
@@ -10,7 +10,7 @@ const medicalIcons = [
   { component: Thermometer, color: 'rgba(245, 158, 11, 0.7)' }, // Amber thermometer
   { component: Activity, color: 'rgba(99, 102, 241, 0.7)' }, // Indigo activity
   { component: Clipboard, color: 'rgba(59, 130, 246, 0.7)' }, // Blue clipboard
-  { component: FirstAid, color: 'rgba(239, 68, 68, 0.7)' }, // Red first aid
+  { component: BandageIcon, color: 'rgba(239, 68, 68, 0.7)' }, // Red bandage (replacing FirstAid)
 ];
 
 interface FloatingIcon {

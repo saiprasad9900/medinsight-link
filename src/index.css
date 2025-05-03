@@ -1,3 +1,6 @@
+
+@import url('https://rsms.me/inter/inter.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -157,9 +160,6 @@
   background-size: 200% 100%;
   animation: shimmer 2s infinite linear;
 }
-
-/* Add Inter font */
-@import url('https://rsms.me/inter/inter.css');
 
 html {
   font-family: 'Inter', sans-serif;
