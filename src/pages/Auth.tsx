@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -100,7 +99,7 @@ const Auth = () => {
                   <User className="h-8 w-8 text-primary" />
                 )}
                 <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-pulse-slow">
-                  Medi Predict
+                  MEDI PREDICT
                 </CardTitle>
                 <div className="absolute -bottom-1 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer"></div>
               </div>
@@ -188,7 +187,7 @@ const Auth = () => {
                 <CardFooter>
                   <Button
                     type="submit"
-                    className={`w-full bg-gradient-to-r ${asDoctor ? 'from-blue-600 to-primary' : 'from-medinsight-600 to-primary'} hover:opacity-90 transition-all`}
+                    className={`w-full bg-gradient-to-r ${asDoctor ? 'from-blue-600 to-primary' : 'from-primary-600 to-primary'} hover:opacity-90 transition-all`}
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Signing in..." : "Sign In"}
@@ -268,7 +267,7 @@ const Auth = () => {
                 <CardFooter>
                   <Button
                     type="submit"
-                    className={`w-full bg-gradient-to-r ${asDoctor ? 'from-blue-600 to-primary' : 'from-medinsight-600 to-primary'} hover:opacity-90 transition-all`}
+                    className={`w-full bg-gradient-to-r ${asDoctor ? 'from-blue-600 to-primary' : 'from-primary-600 to-primary'} hover:opacity-90 transition-all`}
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Creating Account..." : "Create Account"}
@@ -279,7 +278,7 @@ const Auth = () => {
           </Tabs>
           
           <div className="mt-8 p-4 lg:hidden">
-            <h3 className="font-bold text-center mb-4">Why Choose MediPredict?</h3>
+            <h3 className="font-bold text-center mb-4">Why Choose MEDI PREDICT?</h3>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { icon: <Stethoscope className="h-5 w-5" />, title: "AI Doctor" },

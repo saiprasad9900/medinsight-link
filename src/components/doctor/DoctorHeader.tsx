@@ -18,7 +18,7 @@ const DoctorHeader = () => {
           AI Health Assistant
         </h1>
         <p className="text-muted-foreground mt-1">
-          Get helpful health guidance and information from Dr. MediPredict
+          Get helpful health guidance and information from Dr. MEDI PREDICT
         </p>
       </div>
       

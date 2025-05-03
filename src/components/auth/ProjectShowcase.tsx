@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Stethoscope, BarChart3, FileText, MessageSquare, ShieldCheck } from "lucide-react";
 import placeholder from "/placeholder.svg";
@@ -121,7 +120,7 @@ const ProjectShowcase = () => {
   return (
     <div className="space-y-8">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">Welcome to MediPredict</h2>
+        <h2 className="text-2xl font-bold mb-2">Welcome to MEDI PREDICT</h2>
         <p className="text-muted-foreground">
           The future of healthcare analytics powered by artificial intelligence
         </p>

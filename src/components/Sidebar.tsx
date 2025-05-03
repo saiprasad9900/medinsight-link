@@ -155,6 +155,7 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
           </span>
         </Link>
       </div>
+      
       <ScrollArea className="flex-1">
         <nav className="grid items-start px-2 text-sm font-medium gap-2">
           {sections.map((section) => (

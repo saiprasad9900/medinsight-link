@@ -20,7 +20,7 @@ const ChatHeader = ({
     <CardHeader className="bg-primary/5 border-b">
       <CardTitle className="flex items-center gap-2">
         <Bot className="h-5 w-5 text-primary" />
-        Dr. MediPredict
+        Dr. MEDI PREDICT
         {apiKeyMissing && (
           <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 ml-2">
             <Info className="h-3 w-3 mr-1" /> Limited Mode
