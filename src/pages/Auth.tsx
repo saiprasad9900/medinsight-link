@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +14,7 @@ import { Stethoscope, User, ShieldAlert, FileText, BarChart3 } from "lucide-reac
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ProjectShowcase from "@/components/auth/ProjectShowcase";
 import HelpSection from "@/components/auth/HelpSection";
+import MedicalAnimatedBackground from "@/components/auth/MedicalAnimatedBackground";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -80,14 +82,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background overflow-auto">
-      <div className="hidden lg:block lg:w-1/2 xl:w-3/5 p-8 overflow-y-auto">
+    <div className="flex min-h-screen bg-background overflow-auto relative">
+      {/* Add the animated medical background */}
+      <MedicalAnimatedBackground />
+      
+      <div className="hidden lg:block lg:w-1/2 xl:w-3/5 p-8 overflow-y-auto relative z-10">
         <ProjectShowcase />
       </div>
       
-      <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          {/* Add HelpSection component */}
+      <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-4 relative z-10">
+        <Card className="w-full max-w-md backdrop-blur-sm bg-background/80 shadow-lg border-opacity-40">
+          {/* HelpSection component */}
           <HelpSection />
           
           <CardHeader className="text-center">
