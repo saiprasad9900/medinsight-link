@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Upload } from "lucide-react";
 import FileUpload from "./FileUpload";
@@ -104,8 +105,11 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
 
     if (recordsNeedingAnalysis.length > 0) {
       const analyzeNewRecords = async () => {
+        // Make a copy of the records array to avoid mutation issues
+        const updatedRecords = [...userRecords];
+        
         // Mark records as being analyzed
-        setUserRecords(userRecords.map(record => 
+        setUserRecords(updatedRecords.map(record => 
           recordsNeedingAnalysis.some(r => r.id === record.id)
             ? { ...record, analyzing: true }
             : record
@@ -132,8 +136,11 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
             // Save analysis results (in a real app, this would persist to database)
             await saveAnalysisResults(record.id, analysis, prediction);
             
+            // Create a new array for the state update to ensure proper rendering
+            const newRecords = [...userRecords];
+            
             // Update records list
-            setUserRecords(userRecords.map(r => 
+            setUserRecords(newRecords.map(r => 
               r.id === record.id ? updatedRecord : r
             ));
 
@@ -147,8 +154,12 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
             });
           } catch (error: any) {
             console.error("Analysis error for record:", record.id, error);
+            
+            // Create a new array for the state update
+            const newRecords = [...userRecords];
+            
             // Update record to show analysis failed
-            setUserRecords(userRecords.map(r => 
+            setUserRecords(newRecords.map(r => 
               r.id === record.id 
                 ? { ...r, analyzing: false } 
                 : r
@@ -163,7 +174,9 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
   }, [userRecords, selectedRecord, setUserRecords, setSelectedRecord]);
 
   const handleFileUpload = async (files: File[], filePaths: string[]) => {
-    // This function is now handled in the RecordsPage component
+    if (onFileUploadComplete) {
+      onFileUploadComplete(files, filePaths);
+    }
     setActiveTab("browse");
   };
 
@@ -271,7 +284,7 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
       <TabsContent value="upload" className="mt-6 max-w-3xl mx-auto">
         <div className="space-y-6">
           <RecordTypeSelector />
-          <FileUpload onUploadComplete={onFileUploadComplete} />
+          <FileUpload onUploadComplete={handleFileUpload} />
         </div>
       </TabsContent>
     </Tabs>

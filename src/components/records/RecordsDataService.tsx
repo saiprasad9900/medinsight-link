@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -126,8 +125,11 @@ const RecordsDataService = () => {
       };
     });
 
+    // Create a new array for state update to ensure proper rendering
+    const updatedRecords = [...newRecords, ...userRecords];
+    
     // Add the new records to state
-    setUserRecords([...newRecords, ...userRecords]);
+    setUserRecords(updatedRecords);
     
     // Select the first new record if available
     if (newRecords.length > 0) {
