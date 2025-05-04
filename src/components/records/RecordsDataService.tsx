@@ -117,6 +117,7 @@ const RecordsDataService = () => {
           : user?.email?.split('@')[0] || 'Patient',
         status: "Pending" as const,
         filePath: filePaths[index],
+        analyzing: false
       };
       
       return {
@@ -126,7 +127,7 @@ const RecordsDataService = () => {
     });
 
     // Add the new records to state
-    setUserRecords(prev => [...newRecords, ...prev]);
+    setUserRecords([...newRecords, ...userRecords]);
     
     // Select the first new record if available
     if (newRecords.length > 0) {

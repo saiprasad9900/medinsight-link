@@ -15,7 +15,7 @@ const RecordsPage = () => {
 };
 
 const RecordsContainer = () => {
-  const { setActiveTab, setUserRecords, userRecords, setSelectedRecord } = useRecordContext();
+  const { setActiveTab, setUserRecords } = useRecordContext();
   const { handleFileUpload } = RecordsDataService();
 
   // Handle file upload from FileUpload component
@@ -29,9 +29,6 @@ const RecordsContainer = () => {
       description: "This may take a moment to process",
       duration: 3000
     });
-
-    // For each of the newly uploaded files, immediately start analysis
-    // (The useEffect in RecordsContent will detect these new records and analyze them)
   };
 
   return (

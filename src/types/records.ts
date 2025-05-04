@@ -50,4 +50,5 @@ export interface Record {
   analysis?: Analysis;
   prediction?: Prediction;
   category?: string;
+  analyzing?: boolean; // Added this property to fix the TypeScript error
 }

@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Upload } from "lucide-react";
 import FileUpload from "./FileUpload";
@@ -75,7 +74,11 @@ const recordsData = [
   },
 ];
 
-const RecordsContent = () => {
+interface RecordsContentProps {
+  onFileUploadComplete?: (files: File[], filePaths: string[]) => void;
+}
+
+const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
   const { 
     activeTab, 
     setActiveTab, 
@@ -96,13 +99,13 @@ const RecordsContent = () => {
   useEffect(() => {
     // Find any records that need analysis
     const recordsNeedingAnalysis = userRecords.filter(record => 
-      !record.analysis && !record.analyzing && record.status === "Pending"
+      !record.analysis && record.analyzing !== true && record.status === "Pending"
     );
 
     if (recordsNeedingAnalysis.length > 0) {
       const analyzeNewRecords = async () => {
         // Mark records as being analyzed
-        setUserRecords(prev => prev.map(record => 
+        setUserRecords(userRecords.map(record => 
           recordsNeedingAnalysis.some(r => r.id === record.id)
             ? { ...record, analyzing: true }
             : record
@@ -130,7 +133,7 @@ const RecordsContent = () => {
             await saveAnalysisResults(record.id, analysis, prediction);
             
             // Update records list
-            setUserRecords(prev => prev.map(r => 
+            setUserRecords(userRecords.map(r => 
               r.id === record.id ? updatedRecord : r
             ));
 
@@ -145,7 +148,7 @@ const RecordsContent = () => {
           } catch (error: any) {
             console.error("Analysis error for record:", record.id, error);
             // Update record to show analysis failed
-            setUserRecords(prev => prev.map(r => 
+            setUserRecords(userRecords.map(r => 
               r.id === record.id 
                 ? { ...r, analyzing: false } 
                 : r
@@ -198,7 +201,7 @@ const RecordsContent = () => {
         setSelectedRecord(updatedRecord);
         
         // Also update the record in the records list
-        setUserRecords(prev => prev.map(r => 
+        setUserRecords(userRecords.map(r => 
           r.id === record.id ? updatedRecord : r
         ));
         
@@ -268,7 +271,7 @@ const RecordsContent = () => {
       <TabsContent value="upload" className="mt-6 max-w-3xl mx-auto">
         <div className="space-y-6">
           <RecordTypeSelector />
-          <FileUpload onUploadComplete={handleFileUpload} />
+          <FileUpload onUploadComplete={onFileUploadComplete} />
         </div>
       </TabsContent>
     </Tabs>
