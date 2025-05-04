@@ -116,7 +116,7 @@ const RecordsDataService = () => {
           ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
           : user?.email?.split('@')[0] || 'Patient',
         status: "Pending" as const,
-        filePath: filePaths[index]
+        filePath: filePaths[index],
       };
       
       return {
@@ -125,9 +125,16 @@ const RecordsDataService = () => {
       };
     });
 
-    // Fix the type error by using the current records array and adding to it
-    setUserRecords([...newRecords, ...userRecords]);
-    setSelectedRecord(null);
+    // Add the new records to state
+    setUserRecords(prev => [...newRecords, ...prev]);
+    
+    // Select the first new record if available
+    if (newRecords.length > 0) {
+      setSelectedRecord(newRecords[0]);
+    }
+    
+    // Return the new records for further processing if needed
+    return newRecords;
   };
 
   // Expose the fileUpload function to the parent component

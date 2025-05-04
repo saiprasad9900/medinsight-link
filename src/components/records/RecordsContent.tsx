@@ -6,11 +6,12 @@ import RecordsList from "./RecordsList";
 import RecordDetails from "./RecordDetails";
 import RecordTypeSelector from "./RecordTypeSelector";
 import { useRecordContext } from "./RecordContextProvider";
-import { analyzeRecord, predictOutcomes } from "@/services/analysisService";
+import { analyzeRecord, predictOutcomes, saveAnalysisResults } from "@/services/analysisService";
 import { Record } from "@/types/records";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import RecordAnalysis from "./RecordAnalysis";
+import { useEffect } from "react";
 
 // Sample data for doctors
 const recordsData = [
@@ -81,6 +82,7 @@ const RecordsContent = () => {
     selectedRecord, 
     setSelectedRecord,
     userRecords,
+    setUserRecords,
     categoryFilter,
     loading,
     analyzing,
@@ -89,6 +91,73 @@ const RecordsContent = () => {
   
   const { userRole } = useAuth();
   const isDoctor = userRole === "doctor";
+
+  // Automatically analyze newly uploaded records
+  useEffect(() => {
+    // Find any records that need analysis
+    const recordsNeedingAnalysis = userRecords.filter(record => 
+      !record.analysis && !record.analyzing && record.status === "Pending"
+    );
+
+    if (recordsNeedingAnalysis.length > 0) {
+      const analyzeNewRecords = async () => {
+        // Mark records as being analyzed
+        setUserRecords(prev => prev.map(record => 
+          recordsNeedingAnalysis.some(r => r.id === record.id)
+            ? { ...record, analyzing: true }
+            : record
+        ));
+
+        // Process each record that needs analysis
+        for (const record of recordsNeedingAnalysis) {
+          try {
+            // Run NLP analysis and predictive modeling in parallel
+            const [analysis, prediction] = await Promise.all([
+              analyzeRecord(record),
+              predictOutcomes(record)
+            ]);
+            
+            // Update the record with analysis and prediction results
+            const updatedRecord = { 
+              ...record, 
+              analysis, 
+              prediction, 
+              status: "Analyzed" as const,
+              analyzing: false 
+            };
+            
+            // Save analysis results (in a real app, this would persist to database)
+            await saveAnalysisResults(record.id, analysis, prediction);
+            
+            // Update records list
+            setUserRecords(prev => prev.map(r => 
+              r.id === record.id ? updatedRecord : r
+            ));
+
+            // If this is the currently selected record, update it
+            if (selectedRecord?.id === record.id) {
+              setSelectedRecord(updatedRecord);
+            }
+            
+            toast.success(`Analysis complete for "${record.title}"`, {
+              description: "View the record to see detailed analysis and insights"
+            });
+          } catch (error: any) {
+            console.error("Analysis error for record:", record.id, error);
+            // Update record to show analysis failed
+            setUserRecords(prev => prev.map(r => 
+              r.id === record.id 
+                ? { ...r, analyzing: false } 
+                : r
+            ));
+            toast.error(`Error analyzing record: ${error.message}`);
+          }
+        }
+      };
+
+      analyzeNewRecords();
+    }
+  }, [userRecords, selectedRecord, setUserRecords, setSelectedRecord]);
 
   const handleFileUpload = async (files: File[], filePaths: string[]) => {
     // This function is now handled in the RecordsPage component
@@ -104,7 +173,7 @@ const RecordsContent = () => {
     setSelectedRecord(record);
     
     // If record doesn't have analysis or prediction yet, generate them
-    if (!record.analysis || !record.prediction) {
+    if (!record.analysis && !record.prediction && record.status !== "Analyzed") {
       setAnalyzing(true);
       
       try {
@@ -115,10 +184,23 @@ const RecordsContent = () => {
         ]);
         
         // Update the record with analysis and prediction results
-        const updatedRecord = { ...record, analysis, prediction };
+        const updatedRecord = { 
+          ...record, 
+          analysis, 
+          prediction,
+          status: "Analyzed" as const 
+        };
+        
+        // Save analysis results
+        await saveAnalysisResults(record.id, analysis, prediction);
         
         // Update selected record
         setSelectedRecord(updatedRecord);
+        
+        // Also update the record in the records list
+        setUserRecords(prev => prev.map(r => 
+          r.id === record.id ? updatedRecord : r
+        ));
         
       } catch (error: any) {
         console.error("Analysis error:", error);
