@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -115,8 +116,7 @@ const RecordsDataService = () => {
           ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
           : user?.email?.split('@')[0] || 'Patient',
         status: "Pending" as const,
-        filePath: filePaths[index],
-        analyzing: false
+        filePath: filePaths[index]
       };
       
       return {
@@ -125,7 +125,7 @@ const RecordsDataService = () => {
       };
     });
 
-    // Create a new array for state update to ensure proper rendering
+    // Create a new array for state update
     const updatedRecords = [...newRecords, ...userRecords];
     
     // Add the new records to state

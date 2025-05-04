@@ -1,17 +1,11 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Upload } from "lucide-react";
 import FileUpload from "./FileUpload";
 import RecordsList from "./RecordsList";
-import RecordDetails from "./RecordDetails";
 import RecordTypeSelector from "./RecordTypeSelector";
 import { useRecordContext } from "./RecordContextProvider";
-import { analyzeRecord, predictOutcomes, saveAnalysisResults } from "@/services/analysisService";
-import { Record } from "@/types/records";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
 import RecordAnalysis from "./RecordAnalysis";
-import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Sample data for doctors
 const recordsData = [
@@ -86,92 +80,13 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
     selectedRecord, 
     setSelectedRecord,
     userRecords,
-    setUserRecords,
     categoryFilter,
     loading,
     analyzing,
-    setAnalyzing
   } = useRecordContext();
   
   const { userRole } = useAuth();
   const isDoctor = userRole === "doctor";
-
-  // Automatically analyze newly uploaded records
-  useEffect(() => {
-    // Find any records that need analysis
-    const recordsNeedingAnalysis = userRecords.filter(record => 
-      !record.analysis && record.analyzing !== true && record.status === "Pending"
-    );
-
-    if (recordsNeedingAnalysis.length > 0) {
-      const analyzeNewRecords = async () => {
-        // Make a copy of the records array to avoid mutation issues
-        const updatedRecords = [...userRecords];
-        
-        // Mark records as being analyzed
-        setUserRecords(updatedRecords.map(record => 
-          recordsNeedingAnalysis.some(r => r.id === record.id)
-            ? { ...record, analyzing: true }
-            : record
-        ));
-
-        // Process each record that needs analysis
-        for (const record of recordsNeedingAnalysis) {
-          try {
-            // Run NLP analysis and predictive modeling in parallel
-            const [analysis, prediction] = await Promise.all([
-              analyzeRecord(record),
-              predictOutcomes(record)
-            ]);
-            
-            // Update the record with analysis and prediction results
-            const updatedRecord = { 
-              ...record, 
-              analysis, 
-              prediction, 
-              status: "Analyzed" as const,
-              analyzing: false 
-            };
-            
-            // Save analysis results (in a real app, this would persist to database)
-            await saveAnalysisResults(record.id, analysis, prediction);
-            
-            // Create a new array for the state update to ensure proper rendering
-            const newRecords = [...userRecords];
-            
-            // Update records list
-            setUserRecords(newRecords.map(r => 
-              r.id === record.id ? updatedRecord : r
-            ));
-
-            // If this is the currently selected record, update it
-            if (selectedRecord?.id === record.id) {
-              setSelectedRecord(updatedRecord);
-            }
-            
-            toast.success(`Analysis complete for "${record.title}"`, {
-              description: "View the record to see detailed analysis and insights"
-            });
-          } catch (error: any) {
-            console.error("Analysis error for record:", record.id, error);
-            
-            // Create a new array for the state update
-            const newRecords = [...userRecords];
-            
-            // Update record to show analysis failed
-            setUserRecords(newRecords.map(r => 
-              r.id === record.id 
-                ? { ...r, analyzing: false } 
-                : r
-            ));
-            toast.error(`Error analyzing record: ${error.message}`);
-          }
-        }
-      };
-
-      analyzeNewRecords();
-    }
-  }, [userRecords, selectedRecord, setUserRecords, setSelectedRecord]);
 
   const handleFileUpload = async (files: File[], filePaths: string[]) => {
     if (onFileUploadComplete) {
@@ -180,51 +95,13 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
     setActiveTab("browse");
   };
 
-  const handleRecordClick = async (record: Record) => {
+  const handleRecordClick = (record: Record) => {
     if (selectedRecord?.id === record.id) {
       setSelectedRecord(null);
       return;
     }
     
     setSelectedRecord(record);
-    
-    // If record doesn't have analysis or prediction yet, generate them
-    if (!record.analysis && !record.prediction && record.status !== "Analyzed") {
-      setAnalyzing(true);
-      
-      try {
-        // Run NLP analysis and predictive modeling in parallel
-        const [analysis, prediction] = await Promise.all([
-          analyzeRecord(record),
-          predictOutcomes(record)
-        ]);
-        
-        // Update the record with analysis and prediction results
-        const updatedRecord = { 
-          ...record, 
-          analysis, 
-          prediction,
-          status: "Analyzed" as const 
-        };
-        
-        // Save analysis results
-        await saveAnalysisResults(record.id, analysis, prediction);
-        
-        // Update selected record
-        setSelectedRecord(updatedRecord);
-        
-        // Also update the record in the records list
-        setUserRecords(userRecords.map(r => 
-          r.id === record.id ? updatedRecord : r
-        ));
-        
-      } catch (error: any) {
-        console.error("Analysis error:", error);
-        toast.error(`Error analyzing record: ${error.message}`);
-      } finally {
-        setAnalyzing(false);
-      }
-    }
   };
 
   // Get records based on user role

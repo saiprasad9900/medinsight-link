@@ -1,10 +1,9 @@
 
-import { RecordContextProvider, useRecordContext } from "@/components/records/RecordContextProvider";
+import { RecordContextProvider } from "@/components/records/RecordContextProvider";
 import RecordsHeader from "@/components/records/RecordsHeader";
 import RecordsContent from "@/components/records/RecordsContent";
 import RecordsDataService from "@/components/records/RecordsDataService";
 import { toast } from "sonner";
-import { analyzeRecord, predictOutcomes } from "@/services/analysisService";
 
 const RecordsPage = () => {
   return (
@@ -15,18 +14,18 @@ const RecordsPage = () => {
 };
 
 const RecordsContainer = () => {
-  const { setActiveTab, setUserRecords } = useRecordContext();
+  const { setActiveTab } = useRecordContext();
   const { handleFileUpload } = RecordsDataService();
 
   // Handle file upload from FileUpload component
-  const onFileUploadComplete = async (files: File[], filePaths: string[]) => {
+  const onFileUploadComplete = (files: File[], filePaths: string[]) => {
     // First handle the file upload like before
-    const newRecords = handleFileUpload(files, filePaths);
+    handleFileUpload(files, filePaths);
     setActiveTab("browse");
     
-    // Display a toast notification that analysis has started
-    toast.info(`Analyzing ${files.length} new medical record${files.length > 1 ? 's' : ''}...`, {
-      description: "This may take a moment to process",
+    // Display a toast notification that files were uploaded
+    toast.success(`${files.length} medical record${files.length > 1 ? 's' : ''} uploaded successfully`, {
+      description: "You can view the uploaded records in the Browse tab",
       duration: 3000
     });
   };
