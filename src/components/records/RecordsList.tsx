@@ -1,15 +1,15 @@
 
 import { useState } from "react";
 import RecordCard from "./RecordCard";
-import { Record } from "@/types/records";
+import { MedicalRecord } from "@/types/records";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface RecordsListProps {
-  records: Record[];
+  records: MedicalRecord[];
   loading: boolean;
-  onRecordClick: (record: Record) => void;
+  onRecordClick: (record: MedicalRecord) => void;
   selectedRecordId: string | null;
   onUploadClick: () => void;
 }

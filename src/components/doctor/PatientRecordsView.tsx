@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Record } from "@/types/records";
+import { MedicalRecord } from "@/types/records";
 import { analyzeRecord, categorizeRecord } from "@/services/analysisService";
 import EnhancedRecordInsight from "@/components/records/EnhancedRecordInsight";
 import PatientHeader from "./records/PatientHeader";
@@ -37,9 +36,9 @@ interface Patient {
 
 const PatientRecordsView = ({ patientId, onMessagePatient }: PatientRecordsViewProps) => {
   const [patient, setPatient] = useState<Patient | null>(null);
-  const [records, setRecords] = useState<Record[]>([]);
+  const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [activeTab, setActiveTab] = useState("records");
   
@@ -69,7 +68,7 @@ const PatientRecordsView = ({ patientId, onMessagePatient }: PatientRecordsViewP
         if (recordsError) throw recordsError;
         
         if (recordsData) {
-          const formattedRecords: Record[] = recordsData.map((file) => {
+          const formattedRecords: MedicalRecord[] = recordsData.map((file) => {
             const type = getFileType(file.file_type);
             return {
               id: file.id,
@@ -107,13 +106,13 @@ const PatientRecordsView = ({ patientId, onMessagePatient }: PatientRecordsViewP
     fetchPatientData();
   }, [patientId]);
   
-  const getFileType = (fileType: string): Record["type"] => {
+  const getFileType = (fileType: string): MedicalRecord["type"] => {
     if (fileType.includes('image')) return 'Medical Image';
     if (fileType.includes('pdf')) return 'Clinical Note';
     return 'Lab Result';
   };
   
-  const handleRecordClick = async (record: Record) => {
+  const handleRecordClick = async (record: MedicalRecord) => {
     if (selectedRecord?.id === record.id) {
       setSelectedRecord(null);
       return;

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Record } from "@/types/records";
+import { MedicalRecord } from "@/types/records";
 import { categorizeRecord } from "@/services/analysisService";
 import { useRecordContext } from './RecordContextProvider';
 
@@ -27,7 +27,7 @@ const RecordsDataService = () => {
   const isDoctor = userRole === "doctor";
 
   // Function to get file type category
-  const getFileType = (fileType: string): Record["type"] => {
+  const getFileType = (fileType: string): MedicalRecord["type"] => {
     if (fileType.includes('image')) return 'Medical Image';
     if (fileType.includes('pdf')) return 'Clinical Note';
     return 'Lab Result';
@@ -57,8 +57,8 @@ const RecordsDataService = () => {
         }
 
         if (data) {
-          // Convert the records_files data to our Record interface format
-          const records: Record[] = data.map((file: RecordFile) => {
+          // Convert the records_files data to our MedicalRecord interface format
+          const records: MedicalRecord[] = data.map((file: RecordFile) => {
             const type = getFileType(file.file_type);
             return {
               id: file.id,
@@ -101,7 +101,7 @@ const RecordsDataService = () => {
   // Handle file upload completion
   const handleFileUpload = (files: File[], filePaths: string[]) => {
     // Add newly uploaded files to the records list
-    const newRecords: Record[] = files.map((file, index) => {
+    const newRecords: MedicalRecord[] = files.map((file, index) => {
       const type = getFileType(file.type);
       const record = {
         id: crypto.randomUUID(),

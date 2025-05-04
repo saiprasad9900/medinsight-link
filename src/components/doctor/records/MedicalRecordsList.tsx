@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Record } from "@/types/records";
+import { MedicalRecord } from "@/types/records";
 
 interface MedicalRecordsListProps {
-  records: Record[];
-  onRecordClick: (record: Record) => void;
+  records: MedicalRecord[];
+  onRecordClick: (record: MedicalRecord) => void;
   selectedRecordId: string | null;
 }
 

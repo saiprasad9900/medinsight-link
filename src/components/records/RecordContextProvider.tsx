@@ -1,14 +1,14 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import { Record } from "@/types/records";
+import { MedicalRecord } from "@/types/records";
 
 interface RecordContextType {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  selectedRecord: Record | null;
-  setSelectedRecord: (record: Record | null) => void;
-  userRecords: Record[];
-  setUserRecords: (records: Record[]) => void;
+  selectedRecord: MedicalRecord | null;
+  setSelectedRecord: (record: MedicalRecord | null) => void;
+  userRecords: MedicalRecord[];
+  setUserRecords: (records: MedicalRecord[]) => void;
   loading: boolean;
   setLoading: (loading: boolean) => void;
   analyzing: boolean;
@@ -33,8 +33,8 @@ interface RecordContextProviderProps {
 
 export const RecordContextProvider = ({ children }: RecordContextProviderProps) => {
   const [activeTab, setActiveTab] = useState("browse");
-  const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
-  const [userRecords, setUserRecords] = useState<Record[]>([]);
+  const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
+  const [userRecords, setUserRecords] = useState<MedicalRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);

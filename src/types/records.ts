@@ -38,7 +38,7 @@ export interface Prediction {
   recommendations: string[];
 }
 
-export interface Record {
+export interface MedicalRecord {
   id: string;
   title: string;
   type: "Lab Result" | "Clinical Note" | "Medical Image" | "Prescription";

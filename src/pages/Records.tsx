@@ -4,6 +4,7 @@ import RecordsHeader from "@/components/records/RecordsHeader";
 import RecordsContent from "@/components/records/RecordsContent";
 import RecordsDataService from "@/components/records/RecordsDataService";
 import { toast } from "sonner";
+import { useRecordContext } from "@/components/records/RecordContextProvider";
 
 const RecordsPage = () => {
   return (

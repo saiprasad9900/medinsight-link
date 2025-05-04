@@ -2,11 +2,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
-import { Record } from "@/types/records";
+import { MedicalRecord } from "@/types/records";
 
 interface RecordNotAnalyzedProps {
-  selectedRecord: Record;
-  onAnalyzeClick: (record: Record) => void;
+  selectedRecord: MedicalRecord;
+  onAnalyzeClick: (record: MedicalRecord) => void;
 }
 
 const RecordNotAnalyzed = ({ selectedRecord, onAnalyzeClick }: RecordNotAnalyzedProps) => {

@@ -1,41 +1,11 @@
-
-import { useState } from "react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  BarChart3, 
-  FileText, 
-  Eye, 
-  Download, 
-  MoreHorizontal, 
-  Image as ImageIcon,
-  Calendar,
-  Clock,
-  AlertCircle
-} from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { MedicalRecord } from "@/types/records";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle, CheckCircle2, Clock, FileText } from "lucide-react";
 
 interface RecordCardProps {
-  record: {
-    id: string;
-    title: string;
-    type: "Lab Result" | "Clinical Note" | "Medical Image" | "Prescription";
-    date: string;
-    patientName: string;
-    insights?: number;
-    status: "Analyzed" | "Pending" | "Processing";
-    filePath?: string;
-    category?: string;
-  };
+  record: MedicalRecord;
   isSelected?: boolean;
 }
 

@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Upload } from "lucide-react";
 import FileUpload from "./FileUpload";
@@ -6,6 +7,7 @@ import RecordTypeSelector from "./RecordTypeSelector";
 import { useRecordContext } from "./RecordContextProvider";
 import RecordAnalysis from "./RecordAnalysis";
 import { useAuth } from "@/contexts/AuthContext";
+import { MedicalRecord } from "@/types/records";
 
 // Sample data for doctors
 const recordsData = [
@@ -95,7 +97,7 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
     setActiveTab("browse");
   };
 
-  const handleRecordClick = (record: Record) => {
+  const handleRecordClick = (record: MedicalRecord) => {
     if (selectedRecord?.id === record.id) {
       setSelectedRecord(null);
       return;
