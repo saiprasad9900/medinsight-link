@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Record } from "@/types/records";
+import { MedicalRecord } from "@/types/records";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Brain, Layers } from "lucide-react";
@@ -8,7 +8,7 @@ import EnhancedRecordInsight from "./EnhancedRecordInsight";
 import PredictiveInsights from "./PredictiveInsights";
 
 interface RecordDetailsProps {
-  record: Record | null;
+  record: MedicalRecord | null;
   analyzing: boolean;
   onAnalyzeClick: () => void;
 }

@@ -1,8 +1,30 @@
+
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { MedicalRecord } from "@/types/records";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, CheckCircle2, Clock, FileText } from "lucide-react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { 
+  AlertCircle, 
+  CheckCircle2, 
+  Clock, 
+  FileText,
+  BarChart3,
+  ImageIcon,
+  Calendar,
+  Eye,
+  Download,
+  MoreHorizontal 
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RecordCardProps {
   record: MedicalRecord;

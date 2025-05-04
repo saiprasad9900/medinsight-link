@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,13 +15,13 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Users, FileText, MessagesSquare, Calendar } from "lucide-react";
 import RecordCard from "@/components/records/RecordCard";
-import { Record } from "@/types/records";
+import { MedicalRecord } from "@/types/records";
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [patients, setPatients] = useState<any[]>([]);
-  const [records, setRecords] = useState<Record[]>([]);
+  const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -71,7 +70,7 @@ const DoctorDashboard = () => {
         
         if (recordsData) {
           // Convert to Record type
-          const formattedRecords: Record[] = recordsData.map((file: any) => ({
+          const formattedRecords: MedicalRecord[] = recordsData.map((file: any) => ({
             id: file.id,
             title: file.filename,
             type: file.file_type.includes('image') ? 'Medical Image' : 'Clinical Note',

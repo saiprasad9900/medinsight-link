@@ -1,5 +1,5 @@
 
-import { Analysis, Prediction, Record as MedicalRecord } from "@/types/records";
+import { Analysis, Prediction, MedicalRecord } from "@/types/records";
 import { supabase } from "@/integrations/supabase/client";
 
 // Enhanced sample data for more comprehensive analysis

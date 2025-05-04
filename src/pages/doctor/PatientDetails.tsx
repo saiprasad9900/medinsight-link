@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Phone, Mail, Calendar, FileText, Activity, MessageSquare, User } from "lucide-react";
 import { toast } from "sonner";
 import RecordCard from "@/components/records/RecordCard";
-import { Record } from "@/types/records";
+import { MedicalRecord } from "@/types/records";
 import EnhancedRecordInsight from "@/components/records/EnhancedRecordInsight";
 
 // Mock patient data
@@ -101,7 +100,7 @@ const mockPatients = [
 ];
 
 // Mock records
-const mockRecords: Record[] = [
+const mockRecords: MedicalRecord[] = [
   {
     id: "1",
     title: "Complete Blood Count Results",
@@ -162,8 +161,8 @@ const PatientDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [patientRecords, setPatientRecords] = useState<Record[]>([]);
-  const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
+  const [patientRecords, setPatientRecords] = useState<MedicalRecord[]>([]);
+  const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
 
   useEffect(() => {
     // In a real app, fetch patient details from database
@@ -266,7 +265,7 @@ const PatientDetails = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-4">
-                <Avatar className="h-20 w-20 border-2 border-primary/20">
+                <Avatar className="h-20 w-20 border-2 border-primary border-t-transparent">
                   <AvatarFallback className="text-2xl bg-primary/10">
                     {patient.name.split(' ').map((n: string) => n[0]).join('')}
                   </AvatarFallback>
