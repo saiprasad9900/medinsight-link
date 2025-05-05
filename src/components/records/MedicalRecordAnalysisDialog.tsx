@@ -32,7 +32,7 @@ const MedicalRecordAnalysisDialog = ({ isOpen, onClose, record }: MedicalRecordA
     
     try {
       setAnalyzing(true);
-      toast.info("Analyzing medical record...");
+      toast.info(`Analyzing ${record.type.toLowerCase()} for ${record.patientName}...`);
       
       // Analyze the record and get predictions
       const analysis = await analyzeRecord(record);
@@ -42,7 +42,7 @@ const MedicalRecordAnalysisDialog = ({ isOpen, onClose, record }: MedicalRecordA
       record.analysis = analysis;
       record.prediction = prediction;
       
-      toast.success("Analysis completed successfully");
+      toast.success(`${record.type} analysis completed successfully`);
     } catch (error) {
       console.error("Error analyzing record:", error);
       toast.error("Failed to analyze record");
@@ -76,7 +76,7 @@ const MedicalRecordAnalysisDialog = ({ isOpen, onClose, record }: MedicalRecordA
             {analyzing ? (
               <>
                 <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-                <p className="text-muted-foreground">Analyzing medical record...</p>
+                <p className="text-muted-foreground">Analyzing {record.type.toLowerCase()}...</p>
               </>
             ) : (
               <>

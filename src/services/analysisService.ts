@@ -1,4 +1,3 @@
-
 import { Analysis, Prediction, MedicalRecord } from "@/types/records";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -232,7 +231,7 @@ const mockedPredictions: Record<string, Prediction> = {
   }
 };
 
-// This function simulates NLP analysis of medical documents
+// This function simulates NLP analysis of medical documents with improved type detection
 export const analyzeRecord = async (record: MedicalRecord): Promise<Analysis> => {
   // In a real implementation, this would call an actual NLP service or API
   console.log(`Analyzing record: ${record.title}`);
@@ -240,19 +239,79 @@ export const analyzeRecord = async (record: MedicalRecord): Promise<Analysis> =>
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1500));
   
-  // Get appropriate mock result based on record type and content
-  if (record.type === "Lab Result") {
+  // Enhanced logic to determine the record type based on title and content
+  const title = record.title.toLowerCase();
+  
+  // Check for lab result indicators
+  if (
+    record.type === "Lab Result" || 
+    title.includes("lab") || 
+    title.includes("blood") || 
+    title.includes("test") ||
+    title.includes("panel") ||
+    title.includes("sample") ||
+    title.includes("culture")
+  ) {
+    console.log("Analyzing as lab result");
     return mockedAnalysisResults.labResult;
-  } else if (record.type === "Clinical Note") {
+  } 
+  // Check for clinical note indicators
+  else if (
+    record.type === "Clinical Note" || 
+    title.includes("note") || 
+    title.includes("report") ||
+    title.includes("exam") ||
+    title.includes("assessment") ||
+    title.includes("visit") ||
+    title.includes("consultation")
+  ) {
+    console.log("Analyzing as clinical note");
     return mockedAnalysisResults.clinicalNote;
-  } else if (record.type === "Prescription") {
+  } 
+  // Check for prescription indicators
+  else if (
+    record.type === "Prescription" || 
+    title.includes("prescription") || 
+    title.includes("medication") ||
+    title.includes("drug") ||
+    title.includes("pharmacy") ||
+    title.includes("dosage") ||
+    title.includes("rx")
+  ) {
+    console.log("Analyzing as prescription");
     return mockedAnalysisResults.prescription;
-  } else if (record.type === "Medical Image") {
+  } 
+  // Check for medical image indicators
+  else if (
+    record.type === "Medical Image" || 
+    title.includes("x-ray") || 
+    title.includes("xray") ||
+    title.includes("scan") ||
+    title.includes("mri") || 
+    title.includes("ct") || 
+    title.includes("ultrasound") ||
+    title.includes("image") ||
+    title.includes("radiograph")
+  ) {
+    console.log("Analyzing as medical image");
     return mockedAnalysisResults.medicalImage;
   }
   
-  // Default fallback
-  return mockedAnalysisResults.clinicalNote;
+  // Default fallback based on the record type
+  console.log(`No specific pattern matched, defaulting based on type: ${record.type}`);
+  switch (record.type) {
+    case "Lab Result":
+      return mockedAnalysisResults.labResult;
+    case "Clinical Note":
+      return mockedAnalysisResults.clinicalNote;
+    case "Prescription":
+      return mockedAnalysisResults.prescription;
+    case "Medical Image":
+      return mockedAnalysisResults.medicalImage;
+    default:
+      // Ultimate fallback to clinical note if nothing else matches
+      return mockedAnalysisResults.clinicalNote;
+  }
 };
 
 // This function simulates predictive modeling with enhanced logic
@@ -285,36 +344,124 @@ export const predictOutcomes = async (record: MedicalRecord, patientHistory?: Me
 
 // Function to categorize medical records based on content
 export const categorizeRecord = (record: MedicalRecord): string => {
-  // Enhanced categorization logic
+  // Enhanced categorization logic with more precise detection
   const title = record.title.toLowerCase();
   
-  if (title.includes("blood") || title.includes("lab") || title.includes("test") || 
-      title.includes("panel") || title.includes("count") || title.includes("level")) {
+  // Lab tests and bloodwork
+  if (
+    title.includes("blood") || 
+    title.includes("lab") || 
+    title.includes("test") || 
+    title.includes("panel") || 
+    title.includes("count") || 
+    title.includes("level") ||
+    title.includes("cbc") ||
+    title.includes("metabolic") ||
+    title.includes("culture")
+  ) {
     return "Laboratory";
   } 
-  else if (title.includes("x-ray") || title.includes("mri") || title.includes("ct") || 
-           title.includes("scan") || title.includes("imaging") || title.includes("ultrasound")) {
+  // Imaging and radiology
+  else if (
+    title.includes("x-ray") || 
+    title.includes("xray") ||
+    title.includes("mri") || 
+    title.includes("ct") || 
+    title.includes("scan") || 
+    title.includes("imaging") || 
+    title.includes("ultrasound") ||
+    title.includes("radiograph") ||
+    title.includes("mammogram") ||
+    title.includes("pet")
+  ) {
     return "Radiology";
   } 
-  else if (title.includes("prescription") || title.includes("medication") || 
-           title.includes("drug") || title.includes("dose")) {
+  // Medications and prescriptions
+  else if (
+    title.includes("prescription") || 
+    title.includes("medication") || 
+    title.includes("drug") || 
+    title.includes("dose") ||
+    title.includes("rx") ||
+    title.includes("pharmacy")
+  ) {
     return "Pharmacy";
   } 
-  else if (title.includes("assessment") || title.includes("evaluation") || 
-           title.includes("exam") || title.includes("consultation")) {
+  // Assessment and evaluations
+  else if (
+    title.includes("assessment") || 
+    title.includes("evaluation") || 
+    title.includes("exam") || 
+    title.includes("consultation") ||
+    title.includes("visit") ||
+    title.includes("checkup") ||
+    title.includes("screening")
+  ) {
     return "Assessment";
   } 
-  else if (title.includes("surgery") || title.includes("operation") || 
-           title.includes("procedure") || title.includes("post-op")) {
+  // Surgical procedures
+  else if (
+    title.includes("surgery") || 
+    title.includes("operation") || 
+    title.includes("procedure") || 
+    title.includes("post-op") ||
+    title.includes("surgical") ||
+    title.includes("biopsy")
+  ) {
     return "Surgical";
   }
-  else if (title.includes("heart") || title.includes("cardiac") || 
-           title.includes("ecg") || title.includes("ekg")) {
+  // Cardiac related
+  else if (
+    title.includes("heart") || 
+    title.includes("cardiac") || 
+    title.includes("ecg") || 
+    title.includes("ekg") ||
+    title.includes("cardio") ||
+    title.includes("cardiovascular")
+  ) {
     return "Cardiology";
   }
-  else if (title.includes("respiratory") || title.includes("lung") || 
-           title.includes("breathing") || title.includes("pulmonary")) {
+  // Respiratory related
+  else if (
+    title.includes("respiratory") || 
+    title.includes("lung") || 
+    title.includes("breathing") || 
+    title.includes("pulmonary") ||
+    title.includes("chest") ||
+    title.includes("bronchial")
+  ) {
     return "Pulmonology";
+  }
+  // Neurological
+  else if (
+    title.includes("neuro") ||
+    title.includes("brain") ||
+    title.includes("nerve") ||
+    title.includes("cognitive") ||
+    title.includes("eeg")
+  ) {
+    return "Neurology";
+  }
+  // Gastrointestinal
+  else if (
+    title.includes("gastro") ||
+    title.includes("digestive") ||
+    title.includes("intestine") ||
+    title.includes("stomach") ||
+    title.includes("colon") ||
+    title.includes("endoscopy")
+  ) {
+    return "Gastroenterology";
+  }
+  // Orthopedic
+  else if (
+    title.includes("ortho") ||
+    title.includes("bone") ||
+    title.includes("joint") ||
+    title.includes("fracture") ||
+    title.includes("skeletal")
+  ) {
+    return "Orthopedics";
   }
   
   return "General";
