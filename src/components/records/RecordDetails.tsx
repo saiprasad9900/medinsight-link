@@ -3,9 +3,10 @@ import { useState } from "react";
 import { MedicalRecord } from "@/types/records";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Brain, Layers } from "lucide-react";
+import { Brain, Layers, FileSearch } from "lucide-react";
 import EnhancedRecordInsight from "./EnhancedRecordInsight";
 import PredictiveInsights from "./PredictiveInsights";
+import MedicalRecordAnalysisDialog from "./MedicalRecordAnalysisDialog";
 
 interface RecordDetailsProps {
   record: MedicalRecord | null;
@@ -19,13 +20,14 @@ const RecordDetails = ({
   onAnalyzeClick 
 }: RecordDetailsProps) => {
   const [activeView, setActiveView] = useState<"analysis" | "prediction">("analysis");
+  const [showAnalysisDialog, setShowAnalysisDialog] = useState(false);
 
   if (!record) return null;
 
   return (
     <div>
-      <div className="mb-4">
-        <TabsList className="w-full grid grid-cols-2">
+      <div className="mb-4 flex items-center justify-between">
+        <TabsList className="grid grid-cols-2">
           <TabsTrigger 
             value="analysis" 
             className="flex gap-1 items-center"
@@ -45,6 +47,16 @@ const RecordDetails = ({
             Predictions
           </TabsTrigger>
         </TabsList>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowAnalysisDialog(true)}
+          className="gap-1"
+        >
+          <FileSearch className="h-4 w-4" />
+          Full Analysis
+        </Button>
       </div>
       
       {analyzing ? (
@@ -95,6 +107,12 @@ const RecordDetails = ({
           )}
         </>
       )}
+
+      <MedicalRecordAnalysisDialog
+        isOpen={showAnalysisDialog}
+        onClose={() => setShowAnalysisDialog(false)}
+        record={record}
+      />
     </div>
   );
 };
