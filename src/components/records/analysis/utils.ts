@@ -1,0 +1,12 @@
+
+// Utility functions for medical record analysis
+
+export const getSeverityColor = (type: string) => {
+  switch (type) {
+    case "info": return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+    case "warning": return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+    case "success": return "bg-green-500/10 text-green-500 border-green-500/20";
+    case "error": return "bg-red-500/10 text-red-500 border-red-500/20";
+    default: return "";
+  }
+};
