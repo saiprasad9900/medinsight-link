@@ -1,6 +1,7 @@
 
 import { MedicalRecord } from "@/types/records";
 import { cn } from "@/lib/utils";
+import { getInsightSeverity } from "../utils";
 
 interface InsightsTabProps {
   record: MedicalRecord;

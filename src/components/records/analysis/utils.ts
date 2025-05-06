@@ -10,3 +10,37 @@ export const getSeverityColor = (type: string) => {
     default: return "";
   }
 };
+
+// Helper function to determine insight severity based on content keywords
+export const getInsightSeverity = (content: string) => {
+  const lowercaseContent = content.toLowerCase();
+  
+  // Critical keywords
+  if (lowercaseContent.includes("critical") || 
+      lowercaseContent.includes("severe") || 
+      lowercaseContent.includes("emergency") ||
+      lowercaseContent.includes("immediate attention")) {
+    return "error";
+  }
+  
+  // Warning keywords
+  if (lowercaseContent.includes("abnormal") || 
+      lowercaseContent.includes("elevated") || 
+      lowercaseContent.includes("reduced") ||
+      lowercaseContent.includes("concerning") ||
+      lowercaseContent.includes("monitor")) {
+    return "warning";
+  }
+  
+  // Success keywords
+  if (lowercaseContent.includes("normal") || 
+      lowercaseContent.includes("healthy") || 
+      lowercaseContent.includes("optimal") ||
+      lowercaseContent.includes("improved")) {
+    return "success";
+  }
+  
+  // Default to info
+  return "info";
+};
+
