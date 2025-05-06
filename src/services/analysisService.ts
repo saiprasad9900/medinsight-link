@@ -1,501 +1,715 @@
-import { Analysis, Prediction, MedicalRecord } from "@/types/records";
-import { supabase } from "@/integrations/supabase/client";
 
-// Enhanced sample data for more comprehensive analysis
-const mockedAnalysisResults: Record<string, Analysis> = {
-  labResult: {
-    summary: "The blood test results show elevated white blood cell count (12,500 cells/mcL) and C-reactive protein levels (15 mg/L), indicating an active inflammatory process. Kidney and liver function markers are within normal ranges. Further investigation recommended to identify the source of inflammation. The pattern suggests a possible bacterial infection.",
-    insights: [
-      {
-        type: "warning",
-        title: "Elevated WBC Count",
-        description: "White blood cell count of 12,500 cells/mcL is above the normal range (4,500-11,000 cells/mcL), suggesting an inflammatory response or possible infection. Neutrophil percentage is particularly elevated at 78%.",
-      },
-      {
-        type: "warning",
-        title: "Increased CRP Levels",
-        description: "C-reactive protein at 15 mg/L indicates significant inflammation and correlates with the elevated WBC count. This is often seen in bacterial infections and inflammatory conditions.",
-      },
+import { MedicalRecord, Analysis, Prediction, Insight } from "@/types/records";
+
+// Helper function to generate a random number within a range
+const getRandomInt = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+// Categorize medical records based on their type and title
+export const categorizeRecord = (record: MedicalRecord): string => {
+  const title = record.title.toLowerCase();
+  const type = record.type.toLowerCase();
+  
+  if (type === "lab result" || title.includes("lab") || title.includes("blood") || title.includes("test")) {
+    return "Laboratory";
+  } else if (type === "medical image" || title.includes("x-ray") || title.includes("scan") || title.includes("mri") || title.includes("ct")) {
+    return "Radiology";
+  } else if (title.includes("heart") || title.includes("cardiac") || title.includes("ecg") || title.includes("ekg") || title.includes("cardio")) {
+    return "Cardiology";
+  } else if (title.includes("prescription") || title.includes("medication") || title.includes("drug")) {
+    return "Pharmacy";
+  } else if (title.includes("surgery") || title.includes("operation") || title.includes("post-op") || title.includes("pre-op")) {
+    return "Surgical";
+  } else if (title.includes("neuro") || title.includes("brain") || title.includes("spinal") || title.includes("nerve")) {
+    return "Neurology";
+  } else if (title.includes("ortho") || title.includes("bone") || title.includes("joint") || title.includes("fracture")) {
+    return "Orthopedics";
+  } else if (title.includes("derma") || title.includes("skin")) {
+    return "Dermatology";
+  } else {
+    return "General";
+  }
+};
+
+// Advanced analysis function - detects record type and content to provide appropriate insights
+export const analyzeRecord = async (record: MedicalRecord): Promise<Analysis> => {
+  // In a real implementation, this would call an actual AI service or API
+  console.log(`Analyzing record: ${record.title} (${record.type})`);
+  
+  // Simulate processing delay
+  await new Promise(res => setTimeout(res, 1500));
+  
+  const category = record.category || categorizeRecord(record);
+  const title = record.title.toLowerCase();
+  
+  // Generate different analyses based on the record type and content
+  switch (category) {
+    case "Laboratory":
+      return generateLabAnalysis(record, title);
+    case "Radiology":
+      return generateRadiologyAnalysis(record, title);
+    case "Cardiology":
+      return generateCardiologyAnalysis(record, title);
+    case "Neurology":
+      return generateNeurologyAnalysis(record, title);
+    case "Orthopedics":
+      return generateOrthopedicsAnalysis(record, title);
+    case "Dermatology":
+      return generateDermatologyAnalysis(record, title);
+    case "Pharmacy":
+      return generatePharmacyAnalysis(record, title);
+    case "Surgical":
+      return generateSurgicalAnalysis(record, title);
+    default:
+      return generateGeneralAnalysis(record, title);
+  }
+};
+
+// Generate outcome predictions based on the record and its analysis
+export const predictOutcomes = async (record: MedicalRecord): Promise<Prediction> => {
+  // In a real implementation, this would use machine learning or another predictive model
+  console.log(`Predicting outcomes for: ${record.title}`);
+  
+  // Simulate processing delay
+  await new Promise(res => setTimeout(res, 800));
+  
+  const category = record.category || categorizeRecord(record);
+  
+  // Risk levels based on the record category
+  let riskScore = 0;
+  let recommendations: string[] = [];
+  
+  if (category === "Cardiology") {
+    riskScore = getRandomInt(50, 85);
+    recommendations = [
+      "Schedule a follow-up appointment within 2 weeks",
+      "Monitor blood pressure daily and record readings",
+      "Maintain a low-sodium diet as advised by your nutritionist",
+      "Take prescribed medications at regular intervals",
+      "Consider cardiac rehabilitation program"
+    ];
+  } else if (category === "Laboratory") {
+    riskScore = getRandomInt(30, 70);
+    recommendations = [
+      "Follow up with your primary care physician to discuss these results",
+      "Consider dietary changes based on cholesterol/glucose levels",
+      "Schedule repeat testing in 3 months to monitor changes",
+      "Ensure proper hydration before future blood tests"
+    ];
+  } else if (category === "Radiology") {
+    riskScore = getRandomInt(40, 75);
+    recommendations = [
+      "Consult with a specialist regarding the findings",
+      "Complete the recommended follow-up imaging in 6 months",
+      "Avoid activities that could exacerbate the observed condition",
+      "Consider physical therapy for related symptoms"
+    ];
+  } else {
+    riskScore = getRandomInt(20, 60);
+    recommendations = [
+      "Schedule a follow-up appointment to discuss these findings",
+      "Maintain your current medication regimen unless advised otherwise",
+      "Report any new or worsening symptoms to your healthcare provider",
+      "Continue with recommended lifestyle modifications"
+    ];
+  }
+  
+  // Determine risk level based on score
+  let riskLevel: "Low" | "Medium" | "High";
+  if (riskScore < 40) riskLevel = "Low";
+  else if (riskScore < 70) riskLevel = "Medium";
+  else riskLevel = "High";
+  
+  // Generate predictive outcomes
+  const predictedOutcomes = [
+    {
+      outcome: "Symptom improvement",
+      probability: (100 - riskScore) / 100,
+      timeframe: "1-2 months"
+    },
+    {
+      outcome: "Need for additional treatment",
+      probability: riskScore / 150 + 0.1,
+      timeframe: "3-6 months"
+    },
+    {
+      outcome: "Complete resolution",
+      probability: (90 - riskScore) / 100,
+      timeframe: "6-12 months"
+    }
+  ];
+  
+  return {
+    riskScore,
+    riskLevel,
+    predictedOutcomes,
+    recommendations
+  };
+};
+
+// Specialized analysis generators for different medical specialties
+function generateLabAnalysis(record: MedicalRecord, title: string): Analysis {
+  const isBloodTest = title.includes("blood") || title.includes("cbc") || title.includes("panel");
+  const isLiverTest = title.includes("liver") || title.includes("alt") || title.includes("ast");
+  const isKidneyTest = title.includes("kidney") || title.includes("creatinine") || title.includes("gfr");
+  const isLipidTest = title.includes("lipid") || title.includes("cholesterol") || title.includes("triglyceride");
+  const isGlucoseTest = title.includes("glucose") || title.includes("a1c") || title.includes("diabetes");
+  
+  let summary = "This laboratory report shows the results of blood tests with some values outside the normal range.";
+  let insights: Insight[] = [];
+  let extractedData: any = {
+    conditions: ["Regular monitoring recommended"],
+    medications: [],
+    testResults: []
+  };
+  
+  if (isBloodTest) {
+    summary = "Complete blood count showing red and white blood cell counts, hemoglobin levels, and platelets. Results indicate some minor abnormalities that require follow-up.";
+    insights = [
       {
         type: "info",
-        title: "Normal Kidney Function",
-        description: "Creatinine and BUN levels are within normal ranges, indicating proper kidney function. Electrolyte balance appears stable.",
-      },
-      {
-        type: "info",
-        title: "Normal Liver Enzymes",
-        description: "ALT, AST, and Bilirubin are within reference ranges, suggesting normal liver function. No evidence of hepatocellular damage.",
+        title: "White Blood Cell Count",
+        description: "White blood cell count is slightly elevated, which may indicate an ongoing infection or inflammatory response."
       },
       {
         type: "success",
-        title: "Improved Hemoglobin",
-        description: "Hemoglobin has increased from 11.2 g/dL to 12.4 g/dL since last measurement, showing good response to iron supplementation. Continues to approach normal range.",
+        title: "Hemoglobin Levels",
+        description: "Hemoglobin levels are within normal limits, suggesting adequate oxygen-carrying capacity."
+      }
+    ];
+    extractedData.testResults = [
+      { name: "WBC", value: "11.2", unit: "K/uL", referenceRange: "4.5-11.0" },
+      { name: "RBC", value: "4.8", unit: "M/uL", referenceRange: "4.5-5.5" },
+      { name: "Hemoglobin", value: "14.2", unit: "g/dL", referenceRange: "13.5-17.5" },
+      { name: "Platelets", value: "265", unit: "K/uL", referenceRange: "150-450" }
+    ];
+  } else if (isLiverTest) {
+    summary = "Liver function test results indicating enzyme levels and other markers of liver health. Some values suggest potential liver stress that should be monitored.";
+    insights = [
+      {
+        type: "warning",
+        title: "Elevated Liver Enzymes",
+        description: "ALT and AST levels are moderately elevated, which may indicate some level of liver inflammation or damage."
       },
-    ],
-    extractedData: {
-      conditions: ["Bacterial Inflammation", "Possible Infection", "Anemia (Improving)"],
-      testResults: [
-        { name: "White Blood Cell Count", value: "12,500", unit: "cells/mcL", referenceRange: "4,500-11,000" },
-        { name: "Neutrophils", value: "78", unit: "%", referenceRange: "40-60" },
-        { name: "C-Reactive Protein", value: "15", unit: "mg/L", referenceRange: "<5" },
-        { name: "Hemoglobin", value: "12.4", unit: "g/dL", referenceRange: "12.0-15.5" },
-        { name: "Creatinine", value: "0.9", unit: "mg/dL", referenceRange: "0.7-1.3" },
-        { name: "ALT", value: "28", unit: "U/L", referenceRange: "7-55" },
-        { name: "Ferritin", value: "85", unit: "ng/mL", referenceRange: "12-300" },
-      ],
-      diagnosticCodes: ["R70.0", "D64.9", "R50.9"]
-    }
-  },
-  clinicalNote: {
-    summary: "Patient presents with recurring chest pain, shortness of breath, and fatigue for the past 3 weeks. Physical examination reveals elevated blood pressure (145/92 mmHg) and mild tachycardia (105 BPM). ECG shows T-wave inversions in leads V3-V6, suggesting possible myocardial ischemia. Cardiac enzyme panel shows slight elevation in troponin levels. Recommended cardiac enzyme panel and stress test to rule out coronary artery disease.",
-    insights: [
+      {
+        type: "info",
+        title: "Bilirubin Level",
+        description: "Total bilirubin is at the upper end of normal range, but not clinically significant at this time."
+      }
+    ];
+    extractedData.testResults = [
+      { name: "ALT", value: "65", unit: "U/L", referenceRange: "7-55" },
+      { name: "AST", value: "48", unit: "U/L", referenceRange: "8-48" },
+      { name: "ALP", value: "115", unit: "U/L", referenceRange: "40-129" },
+      { name: "Bilirubin (Total)", value: "1.1", unit: "mg/dL", referenceRange: "0.1-1.2" }
+    ];
+  } else if (isLipidTest) {
+    summary = "Lipid panel showing cholesterol levels and related markers. Results suggest moderate cardiovascular risk factors that should be addressed.";
+    insights = [
+      {
+        type: "warning",
+        title: "Elevated LDL Cholesterol",
+        description: "LDL cholesterol is above recommended levels, increasing cardiovascular risk."
+      },
+      {
+        type: "success",
+        title: "HDL Cholesterol",
+        description: "HDL cholesterol is in the optimal range, which helps protect against heart disease."
+      }
+    ];
+    extractedData.testResults = [
+      { name: "Total Cholesterol", value: "228", unit: "mg/dL", referenceRange: "<200" },
+      { name: "LDL", value: "148", unit: "mg/dL", referenceRange: "<100" },
+      { name: "HDL", value: "52", unit: "mg/dL", referenceRange: ">40" },
+      { name: "Triglycerides", value: "140", unit: "mg/dL", referenceRange: "<150" }
+    ];
+  } else if (isGlucoseTest) {
+    summary = "Glucose and diabetes-related tests indicate elevated blood sugar levels that require attention and possible intervention.";
+    insights = [
       {
         type: "error",
-        title: "Potential Cardiac Issue",
-        description: "ECG abnormalities combined with chest pain, shortness of breath, and elevated troponin are concerning for possible myocardial ischemia or coronary artery disease. This requires immediate attention.",
-      },
-      {
-        type: "warning",
-        title: "Hypertension",
-        description: "Blood pressure reading of 145/92 mmHg indicates Stage 1 hypertension, requiring monitoring and possible treatment. Patient reports inconsistent medication adherence.",
-      },
-      {
-        type: "warning",
-        title: "Tachycardia",
-        description: "Resting heart rate of 105 BPM indicates mild tachycardia, which may be related to cardiac issues, anxiety, or other underlying conditions. Correlates with patient's reported palpitations.",
-      },
-      {
-        type: "info",
-        title: "Further Testing Needed",
-        description: "Cardiac enzyme panel and stress test are appropriate next steps to evaluate for coronary artery disease. Consider echocardiogram to assess cardiac function and structure.",
-      },
-      {
-        type: "warning",
-        title: "Medication Adherence Issues",
-        description: "Patient reports taking medications inconsistently. This may be contributing to uncontrolled hypertension and symptom progression. Medication reconciliation recommended.",
-      },
-    ],
-    extractedData: {
-      conditions: ["Chest Pain", "Dyspnea", "Fatigue", "Hypertension", "Tachycardia", "Possible Myocardial Ischemia", "Elevated Troponin"],
-      medications: ["Aspirin 81mg daily", "Atorvastatin 20mg daily", "Lisinopril 10mg daily"],
-      diagnosticCodes: ["R07.9", "I10", "R00.0", "I25.9", "R06.0"],
-      vitalSigns: [
-        { name: "Blood Pressure", value: "145/92", unit: "mmHg" },
-        { name: "Heart Rate", value: "105", unit: "BPM" },
-        { name: "Respiratory Rate", value: "18", unit: "breaths/min" },
-        { name: "Temperature", value: "98.6", unit: "°F" },
-        { name: "Oxygen Saturation", value: "97", unit: "%" },
-      ]
-    }
-  },
-  prescription: {
-    summary: "Prescription for diabetes management includes Metformin 1000mg twice daily, Glipizide 5mg before breakfast, and instructions for blood glucose monitoring. Recent HbA1c of 8.2% indicates suboptimal glycemic control. Patient also prescribed Lisinopril 10mg daily for hypertension management and Atorvastatin 20mg daily for dyslipidemia.",
-    insights: [
-      {
-        type: "warning",
         title: "Elevated HbA1c",
-        description: "HbA1c of 8.2% is above the target range of <7.0%, indicating suboptimal diabetes control over the past 3 months. This puts the patient at increased risk for microvascular complications.",
-      },
-      {
-        type: "info",
-        title: "Dual Oral Therapy",
-        description: "Combination of Metformin (biguanide) and Glipizide (sulfonylurea) is appropriate for patients with persistent hyperglycemia despite monotherapy. Monitor for hypoglycemia risk.",
-      },
-      {
-        type: "info",
-        title: "Monitoring Recommendation",
-        description: "Blood glucose monitoring 2-3 times daily is recommended to track glycemic patterns and adjust treatment accordingly. Special attention to post-prandial glucose levels.",
+        description: "HbA1c is in the prediabetic range, indicating sustained elevated blood glucose over the past 3 months."
       },
       {
         type: "warning",
-        title: "Cardiovascular Risk Management",
-        description: "Patient is receiving appropriate medications (Lisinopril, Atorvastatin) for cardiovascular risk reduction, which is essential in diabetic patients. Continue to monitor blood pressure and lipid levels.",
+        title: "Fasting Glucose",
+        description: "Fasting glucose is elevated above the normal range, consistent with impaired glucose metabolism."
+      }
+    ];
+    extractedData.testResults = [
+      { name: "Fasting Glucose", value: "118", unit: "mg/dL", referenceRange: "70-99" },
+      { name: "HbA1c", value: "6.3", unit: "%", referenceRange: "<5.7" },
+      { name: "Insulin", value: "14.2", unit: "uIU/mL", referenceRange: "2.6-24.9" }
+    ];
+  } else if (isKidneyTest) {
+    summary = "Kidney function tests showing markers of renal filtration and waste elimination. Results show mild impairment requiring monitoring.";
+    insights = [
+      {
+        type: "warning",
+        title: "Elevated Creatinine",
+        description: "Creatinine level is slightly elevated, which may indicate reduced kidney function."
       },
       {
         type: "info",
-        title: "Lifestyle Modifications",
-        description: "Prescription includes recommendations for dietary changes, regular physical activity, and weight management, which are critical components of diabetes management.",
+        title: "eGFR Calculation",
+        description: "eGFR calculation shows Stage 2 Chronic Kidney Disease, which requires regular monitoring."
+      }
+    ];
+    extractedData.testResults = [
+      { name: "Creatinine", value: "1.3", unit: "mg/dL", referenceRange: "0.7-1.2" },
+      { name: "eGFR", value: "68", unit: "mL/min/1.73m²", referenceRange: ">90" },
+      { name: "BUN", value: "22", unit: "mg/dL", referenceRange: "7-20" },
+      { name: "BUN/Creatinine Ratio", value: "16.9", unit: "", referenceRange: "10-20" }
+    ];
+  } else {
+    summary = "Laboratory test results showing multiple parameters. Some values are outside the reference range and warrant clinical correlation.";
+    insights = [
+      {
+        type: "info",
+        title: "Test Results Overview",
+        description: "Several test results are outside normal ranges, suggesting the need for clinical correlation and possibly additional testing."
       },
-    ],
-    extractedData: {
-      conditions: ["Type 2 Diabetes Mellitus", "Hyperglycemia", "Hypertension", "Dyslipidemia"],
-      medications: [
-        "Metformin 1000mg twice daily", 
-        "Glipizide 5mg before breakfast", 
-        "Lisinopril 10mg daily", 
-        "Atorvastatin 20mg daily"
-      ],
-      testResults: [
-        { name: "HbA1c", value: "8.2", unit: "%", referenceRange: "<7.0%" },
-        { name: "Fasting Blood Glucose", value: "165", unit: "mg/dL", referenceRange: "70-100" },
-        { name: "Total Cholesterol", value: "195", unit: "mg/dL", referenceRange: "<200" },
-        { name: "LDL", value: "115", unit: "mg/dL", referenceRange: "<100" },
-      ],
-      diagnosticCodes: ["E11.9", "I10", "E78.5"],
+      {
+        type: "warning",
+        title: "Abnormal Values",
+        description: "Specific abnormalities detected may be related to the patient's presenting symptoms and require follow-up."
+      }
+    ];
+  }
+  
+  return {
+    summary,
+    insights,
+    extractedData
+  };
+}
+
+function generateRadiologyAnalysis(record: MedicalRecord, title: string): Analysis {
+  const isChestXRay = title.includes("chest") || title.includes("lung") || title.includes("thorax");
+  const isBrainScan = title.includes("brain") || title.includes("head") || title.includes("cranial");
+  const isAbdominalScan = title.includes("abdomen") || title.includes("abdominal") || title.includes("liver") || title.includes("kidney");
+  const isMusculoskeletal = title.includes("bone") || title.includes("joint") || title.includes("spine") || title.includes("fracture");
+  
+  let summary = "Radiological examination reveals anatomical structures with some notable findings requiring clinical correlation.";
+  let insights: Insight[] = [];
+  let extractedData: any = {
+    findings: []
+  };
+  
+  if (isChestXRay) {
+    summary = "Chest X-ray shows lung fields, heart silhouette, and bony structures. There are minor abnormalities that should be clinically correlated with the patient's symptoms.";
+    insights = [
+      {
+        type: "info",
+        title: "Cardiac Silhouette",
+        description: "Heart size appears within normal limits. No evidence of cardiomegaly."
+      },
+      {
+        type: isChestXRay && title.includes("opacity") ? "warning" : "success",
+        title: "Lung Fields",
+        description: isChestXRay && title.includes("opacity") ? 
+          "Small opacity noted in the right lower lobe, which may represent early pneumonia or atelectasis." : 
+          "Lung fields appear clear without evidence of consolidation, effusion, or pneumothorax."
+      }
+    ];
+    extractedData.findings = [
+      "No evidence of active pulmonary disease",
+      "Heart size within normal limits",
+      "No pleural effusion",
+      "Bony structures intact"
+    ];
+    
+    if (isChestXRay && title.includes("opacity")) {
+      extractedData.findings = [
+        "Small opacity in right lower lobe",
+        "Possible early pneumonia or atelectasis",
+        "Heart size within normal limits",
+        "No pleural effusion"
+      ];
     }
-  },
-  medicalImage: {
-    summary: "Chest X-ray shows patchy opacities in the right lower lobe consistent with pneumonia. No pleural effusion or pneumothorax is observed. Heart size appears normal. Incidental finding of mild degenerative changes in the thoracic spine. The distribution pattern suggests community-acquired pneumonia, most likely bacterial in origin.",
-    insights: [
+  } else if (isBrainScan) {
+    summary = "Brain imaging study showing cerebral structures and surrounding tissues. Findings suggest normal anatomy with no acute abnormalities.";
+    insights = [
+      {
+        type: "success",
+        title: "Brain Parenchyma",
+        description: "No evidence of acute infarction, hemorrhage, or space-occupying lesion."
+      },
+      {
+        type: "info",
+        title: "Ventricular System",
+        description: "Ventricles are normal in size and configuration. No midline shift observed."
+      }
+    ];
+    extractedData.findings = [
+      "No evidence of acute intracranial hemorrhage",
+      "No mass effect or midline shift",
+      "Ventricles normal in size and configuration",
+      "No territorial infarction"
+    ];
+  } else if (isAbdominalScan) {
+    summary = "Abdominal imaging study showing the liver, spleen, kidneys, and other abdominal structures. Some findings require clinical correlation.";
+    insights = [
+      {
+        type: "info",
+        title: "Liver Appearance",
+        description: "Liver shows normal size and contour with homogeneous parenchymal attenuation. No focal lesions identified."
+      },
       {
         type: "warning",
-        title: "Right Lower Lobe Pneumonia",
-        description: "Patchy opacities in the right lower lobe are consistent with bacterial pneumonia, requiring antibiotic treatment. The consolidation pattern suggests moderate severity.",
+        title: "Renal Findings",
+        description: "Small non-obstructing calculus noted in the right kidney, measuring approximately 4mm."
+      }
+    ];
+    extractedData.findings = [
+      "Liver, spleen, and pancreas appear normal",
+      "4mm non-obstructing calculus in right kidney",
+      "No free fluid or pneumoperitoneum",
+      "No lymphadenopathy"
+    ];
+  } else if (isMusculoskeletal) {
+    summary = "Musculoskeletal imaging study showing bone and joint structures. Findings include degenerative changes consistent with the patient's age.";
+    insights = [
+      {
+        type: title.includes("fracture") ? "error" : "warning",
+        title: "Bone Structure",
+        description: title.includes("fracture") ? 
+          "Non-displaced fracture identified in the distal radius with minimal angulation." : 
+          "Mild degenerative changes noted with small osteophyte formation."
+      },
+      {
+        type: "info",
+        title: "Joint Space",
+        description: "Mild joint space narrowing consistent with early degenerative changes."
+      }
+    ];
+    extractedData.findings = title.includes("fracture") ? [
+      "Non-displaced fracture of distal radius",
+      "No significant angulation or displacement",
+      "Surrounding soft tissues unremarkable",
+      "No additional fractures identified"
+    ] : [
+      "Mild degenerative changes",
+      "Small osteophyte formation",
+      "Joint space narrowing",
+      "No acute fracture or dislocation"
+    ];
+  } else {
+    summary = "Radiological examination shows multiple anatomical structures. No acute abnormalities identified, though there are some incidental findings.";
+    insights = [
+      {
+        type: "info",
+        title: "General Findings",
+        description: "Study demonstrates normal anatomical structures without significant abnormality."
       },
       {
         type: "success",
-        title: "Normal Heart Size",
-        description: "Cardiac silhouette is within normal limits, suggesting no cardiac enlargement. No evidence of congestive heart failure or pericardial effusion.",
+        title: "No Acute Process",
+        description: "No evidence of acute pathological process within the examined area."
+      }
+    ];
+    extractedData.findings = [
+      "No acute abnormality",
+      "Normal anatomical structures",
+      "Age-appropriate findings",
+      "No significant pathology"
+    ];
+  }
+  
+  return {
+    summary,
+    insights,
+    extractedData
+  };
+}
+
+function generateCardiologyAnalysis(record: MedicalRecord, title: string): Analysis {
+  const isEKG = title.includes("ekg") || title.includes("ecg") || title.includes("electrocardiogram");
+  const isEcho = title.includes("echo") || title.includes("echocardiogram") || title.includes("cardiac ultrasound");
+  const isStressTest = title.includes("stress") || title.includes("exercise") || title.includes("treadmill");
+  
+  let summary = "Cardiac assessment showing heart function and related parameters. Some findings suggest the need for monitoring and potential intervention.";
+  let insights: Insight[] = [];
+  let extractedData: any = {
+    conditions: [],
+    findings: []
+  };
+  
+  if (isEKG) {
+    summary = "Electrocardiogram showing cardiac electrical activity. Results show some rhythm abnormalities requiring further evaluation.";
+    insights = [
+      {
+        type: "warning",
+        title: "Rhythm Analysis",
+        description: "Sinus rhythm with occasional premature ventricular complexes (PVCs)."
       },
       {
         type: "info",
-        title: "Spinal Degeneration",
-        description: "Incidental finding of mild degenerative changes in the thoracic spine, which are likely age-related and clinically insignificant. No acute fractures or dislocations noted.",
+        title: "Rate and Intervals",
+        description: "Heart rate of 78 bpm with normal PR, QRS, and QT intervals."
+      }
+    ];
+    extractedData.findings = [
+      "Sinus rhythm at 78 bpm",
+      "Occasional PVCs",
+      "Normal axis",
+      "No acute ischemic changes"
+    ];
+    extractedData.conditions = ["Premature Ventricular Complexes"];
+  } else if (isEcho) {
+    summary = "Echocardiogram assessing cardiac structure and function. Results show mild left ventricular hypertrophy with preserved ejection fraction.";
+    insights = [
+      {
+        type: "warning",
+        title: "Left Ventricular Function",
+        description: "Mild left ventricular hypertrophy with preserved ejection fraction of 55%."
       },
       {
         type: "info",
-        title: "Clear Upper Lobes",
-        description: "Upper lobes are clear without evidence of infiltrates, masses, or nodules. No signs of tuberculosis or other chronic infections.",
+        title: "Valvular Function",
+        description: "Trace mitral regurgitation, not hemodynamically significant."
+      }
+    ];
+    extractedData.findings = [
+      "Left ventricular ejection fraction 55%",
+      "Mild left ventricular hypertrophy",
+      "Trace mitral regurgitation",
+      "No pericardial effusion"
+    ];
+    extractedData.conditions = ["Left Ventricular Hypertrophy", "Mitral Regurgitation (Trace)"];
+  } else if (isStressTest) {
+    summary = "Exercise stress test evaluating cardiac function during physical exertion. Results show adequate exercise capacity with some ST-segment changes.";
+    insights = [
+      {
+        type: "warning",
+        title: "ST Segment Changes",
+        description: "Minimal ST depression in lateral leads during peak exercise, normalizing in recovery."
       },
       {
+        type: "success",
+        title: "Exercise Capacity",
+        description: "Patient achieved 9 minutes on Bruce protocol with appropriate heart rate response."
+      }
+    ];
+    extractedData.findings = [
+      "Bruce protocol: 9 minutes",
+      "Peak heart rate: 145 bpm (85% of predicted max)",
+      "Minimal ST depression in lateral leads",
+      "No chest pain during testing"
+    ];
+    extractedData.conditions = ["Exercise-Induced ST Changes"];
+  } else {
+    summary = "Cardiac evaluation showing heart structure and function. Results indicate generally normal cardiac function with some minor abnormalities.";
+    insights = [
+      {
         type: "info",
-        title: "No Pleural Abnormalities",
-        description: "No evidence of pleural effusion, pneumothorax, or pleural thickening. Costophrenic angles are sharp bilaterally.",
+        title: "Cardiac Function",
+        description: "Overall cardiac function appears adequate with minor abnormalities noted."
       },
-    ],
-    extractedData: {
-      conditions: ["Pneumonia (Right Lower Lobe)", "Degenerative Disc Disease"],
-      diagnosticCodes: ["J18.9", "M51.9"],
-      findings: [
-        "Patchy opacities in right lower lobe",
-        "Normal cardiac silhouette",
-        "No pleural effusion",
-        "No pneumothorax",
-        "Mild degenerative changes in thoracic spine"
-      ]
+      {
+        type: "warning",
+        title: "Cardiovascular Risk",
+        description: "Findings suggest moderate cardiovascular risk that should be managed with appropriate interventions."
+      }
+    ];
+    extractedData.findings = [
+      "Generally normal cardiac function",
+      "Minor abnormalities noted",
+      "Moderate cardiovascular risk",
+      "Follow-up recommended"
+    ];
+  }
+  
+  return {
+    summary,
+    insights,
+    extractedData
+  };
+}
+
+function generateNeurologyAnalysis(record: MedicalRecord, title: string): Analysis {
+  let summary = "Neurological assessment showing brain and nervous system function. Results indicate some abnormalities requiring follow-up.";
+  let insights: Insight[] = [
+    {
+      type: "warning",
+      title: "Neurological Findings",
+      description: "Assessment shows some abnormalities in neurological function that warrant further investigation."
+    },
+    {
+      type: "info",
+      title: "Cognitive Status",
+      description: "Cognitive assessment reveals mild impairment in short-term memory but preserved long-term memory and executive function."
     }
-  }
-};
-
-// Enhanced predictive models
-const mockedPredictions: Record<string, Prediction> = {
-  default: {
-    riskScore: 45,
-    riskLevel: "Medium",
-    predictedOutcomes: [
-      { outcome: "Hospitalization", probability: 0.35, timeframe: "3 months" },
-      { outcome: "Disease Progression", probability: 0.28, timeframe: "6 months" },
-      { outcome: "Complication", probability: 0.15, timeframe: "12 months" },
-    ],
-    recommendations: [
-      "Schedule follow-up appointment within 2 weeks",
-      "Increase medication adherence monitoring",
-      "Consider lifestyle modifications including diet and exercise",
-      "Monitor blood pressure weekly",
-      "Undergo comprehensive metabolic panel in 1 month"
+  ];
+  let extractedData: any = {
+    conditions: ["Mild Cognitive Impairment"],
+    findings: [
+      "Mild short-term memory impairment",
+      "Preserved long-term memory",
+      "Normal motor function",
+      "Intact sensory function"
     ]
-  },
-  high: {
-    riskScore: 78,
-    riskLevel: "High",
-    predictedOutcomes: [
-      { outcome: "Hospitalization", probability: 0.72, timeframe: "1 month" },
-      { outcome: "Major Cardiac Event", probability: 0.65, timeframe: "3 months" },
-      { outcome: "Mortality Risk", probability: 0.38, timeframe: "6 months" },
-    ],
-    recommendations: [
-      "Immediate referral to cardiology specialist",
-      "Consider adjustment of current medication regimen",
-      "Daily monitoring of vital signs",
-      "Stress test within 1 week",
-      "Evaluate for hospital admission if symptoms worsen",
-      "Implement home health monitoring program",
-      "Schedule follow-up within 48-72 hours"
+  };
+  
+  return {
+    summary,
+    insights,
+    extractedData
+  };
+}
+
+function generateOrthopedicsAnalysis(record: MedicalRecord, title: string): Analysis {
+  let summary = "Orthopedic assessment showing bone and joint structure and function. Results indicate some abnormalities requiring treatment.";
+  let insights: Insight[] = [
+    {
+      type: "warning",
+      title: "Joint Assessment",
+      description: "Moderate osteoarthritic changes in the knee joint with reduced cartilage space."
+    },
+    {
+      type: "info",
+      title: "Functional Status",
+      description: "Mild limitation in range of motion but adequate functional capacity for activities of daily living."
+    }
+  ];
+  let extractedData: any = {
+    conditions: ["Knee Osteoarthritis"],
+    findings: [
+      "Reduced joint space in medial compartment",
+      "Osteophyte formation",
+      "Mild effusion",
+      "No acute fracture or dislocation"
     ]
-  },
-  low: {
-    riskScore: 22,
-    riskLevel: "Low",
-    predictedOutcomes: [
-      { outcome: "Complete Recovery", probability: 0.85, timeframe: "1 month" },
-      { outcome: "Minor Complication", probability: 0.12, timeframe: "3 months" },
-      { outcome: "Recurrence", probability: 0.08, timeframe: "12 months" },
-    ],
-    recommendations: [
-      "Routine follow-up in 3 months",
-      "Continue current treatment plan",
-      "Self-monitor for any new or worsening symptoms",
-      "Maintain healthy lifestyle habits",
-      "Consider preventive health screenings appropriate for age and gender"
+  };
+  
+  return {
+    summary,
+    insights,
+    extractedData
+  };
+}
+
+function generateDermatologyAnalysis(record: MedicalRecord, title: string): Analysis {
+  let summary = "Dermatological assessment showing skin findings. Results indicate some abnormalities requiring treatment.";
+  let insights: Insight[] = [
+    {
+      type: "warning",
+      title: "Skin Lesion",
+      description: "Irregular pigmented lesion with asymmetric borders measuring 6mm in diameter."
+    },
+    {
+      type: "info",
+      title: "Surrounding Skin",
+      description: "Surrounding skin shows normal characteristics without additional concerning lesions."
+    }
+  ];
+  let extractedData: any = {
+    conditions: ["Atypical Nevus"],
+    findings: [
+      "Irregular pigmented lesion",
+      "Asymmetric borders",
+      "6mm diameter",
+      "No ulceration"
     ]
-  }
-};
+  };
+  
+  return {
+    summary,
+    insights,
+    extractedData
+  };
+}
 
-// This function simulates NLP analysis of medical documents with improved type detection
-export const analyzeRecord = async (record: MedicalRecord): Promise<Analysis> => {
-  // In a real implementation, this would call an actual NLP service or API
-  console.log(`Analyzing record: ${record.title}`);
+function generatePharmacyAnalysis(record: MedicalRecord, title: string): Analysis {
+  let summary = "Medication prescription and analysis. Several medications prescribed with potential interactions noted.";
+  let insights: Insight[] = [
+    {
+      type: "warning",
+      title: "Medication Interactions",
+      description: "Potential mild interaction between prescribed medications that should be monitored."
+    },
+    {
+      type: "info",
+      title: "Dosing Schedule",
+      description: "Complex medication schedule that may benefit from simplification to improve adherence."
+    }
+  ];
+  let extractedData: any = {
+    medications: ["Lisinopril 10mg", "Atorvastatin 20mg", "Aspirin 81mg", "Metformin 500mg"],
+    findings: [
+      "Multiple medications for chronic conditions",
+      "Complex dosing schedule",
+      "Potential mild drug interactions",
+      "Generally appropriate prescribing"
+    ]
+  };
   
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Enhanced logic to determine the record type based on title and content
-  const title = record.title.toLowerCase();
-  
-  // Check for lab result indicators
-  if (
-    record.type === "Lab Result" || 
-    title.includes("lab") || 
-    title.includes("blood") || 
-    title.includes("test") ||
-    title.includes("panel") ||
-    title.includes("sample") ||
-    title.includes("culture")
-  ) {
-    console.log("Analyzing as lab result");
-    return mockedAnalysisResults.labResult;
-  } 
-  // Check for clinical note indicators
-  else if (
-    record.type === "Clinical Note" || 
-    title.includes("note") || 
-    title.includes("report") ||
-    title.includes("exam") ||
-    title.includes("assessment") ||
-    title.includes("visit") ||
-    title.includes("consultation")
-  ) {
-    console.log("Analyzing as clinical note");
-    return mockedAnalysisResults.clinicalNote;
-  } 
-  // Check for prescription indicators
-  else if (
-    record.type === "Prescription" || 
-    title.includes("prescription") || 
-    title.includes("medication") ||
-    title.includes("drug") ||
-    title.includes("pharmacy") ||
-    title.includes("dosage") ||
-    title.includes("rx")
-  ) {
-    console.log("Analyzing as prescription");
-    return mockedAnalysisResults.prescription;
-  } 
-  // Check for medical image indicators
-  else if (
-    record.type === "Medical Image" || 
-    title.includes("x-ray") || 
-    title.includes("xray") ||
-    title.includes("scan") ||
-    title.includes("mri") || 
-    title.includes("ct") || 
-    title.includes("ultrasound") ||
-    title.includes("image") ||
-    title.includes("radiograph")
-  ) {
-    console.log("Analyzing as medical image");
-    return mockedAnalysisResults.medicalImage;
-  }
-  
-  // Default fallback based on the record type
-  console.log(`No specific pattern matched, defaulting based on type: ${record.type}`);
-  switch (record.type) {
-    case "Lab Result":
-      return mockedAnalysisResults.labResult;
-    case "Clinical Note":
-      return mockedAnalysisResults.clinicalNote;
-    case "Prescription":
-      return mockedAnalysisResults.prescription;
-    case "Medical Image":
-      return mockedAnalysisResults.medicalImage;
-    default:
-      // Ultimate fallback to clinical note if nothing else matches
-      return mockedAnalysisResults.clinicalNote;
-  }
-};
+  return {
+    summary,
+    insights,
+    extractedData
+  };
+}
 
-// This function simulates predictive modeling with enhanced logic
-export const predictOutcomes = async (record: MedicalRecord, patientHistory?: MedicalRecord[]): Promise<Prediction> => {
-  // In a real implementation, this would use ML models to generate predictions
-  console.log(`Generating predictions for: ${record.title}`);
+function generateSurgicalAnalysis(record: MedicalRecord, title: string): Analysis {
+  let summary = "Surgical report detailing procedure, findings, and outcomes. Results indicate successful intervention with expected post-operative course.";
+  let insights: Insight[] = [
+    {
+      type: "success",
+      title: "Surgical Outcome",
+      description: "Procedure completed successfully with expected outcomes achieved."
+    },
+    {
+      type: "info",
+      title: "Recovery Expectations",
+      description: "Expected recovery timeline of 4-6 weeks with gradual return to normal activities."
+    }
+  ];
+  let extractedData: any = {
+    findings: [
+      "Procedure completed successfully",
+      "No intraoperative complications",
+      "Estimated blood loss: minimal",
+      "Expected recovery: 4-6 weeks"
+    ]
+  };
   
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  // More sophisticated logic for determining risk level based on record content
-  const title = record.title.toLowerCase();
-  
-  if (record.type === "Clinical Note" && 
-      (title.includes("cardiac") || title.includes("chest pain") || title.includes("heart"))) {
-    return mockedPredictions.high;
-  } 
-  else if (record.type === "Lab Result" && 
-           (title.includes("abnormal") || title.includes("elevated"))) {
-    return mockedPredictions.high;
-  }
-  else if ((record.type === "Medical Image" && title.includes("x-ray")) || 
-           (record.type === "Lab Result" && title.includes("normal"))) {
-    return mockedPredictions.low;
-  }
-  
-  // Default medium risk prediction
-  return mockedPredictions.default;
-};
+  return {
+    summary,
+    insights,
+    extractedData
+  };
+}
 
-// Function to categorize medical records based on content
-export const categorizeRecord = (record: MedicalRecord): string => {
-  // Enhanced categorization logic with more precise detection
-  const title = record.title.toLowerCase();
+function generateGeneralAnalysis(record: MedicalRecord, title: string): Analysis {
+  let summary = "Medical record showing patient health status and clinical findings. Results indicate generally stable condition with some areas requiring monitoring.";
+  let insights: Insight[] = [
+    {
+      type: "info",
+      title: "General Assessment",
+      description: "Patient in stable condition with chronic health issues being appropriately managed."
+    },
+    {
+      type: "warning",
+      title: "Areas of Concern",
+      description: "Some parameters require ongoing monitoring and potential adjustment of treatment plan."
+    }
+  ];
+  let extractedData: any = {
+    conditions: ["Hypertension", "Hyperlipidemia"],
+    findings: [
+      "Stable vital signs",
+      "Chronic conditions under management",
+      "Follow-up recommended in 3 months",
+      "Lifestyle modifications encouraged"
+    ]
+  };
   
-  // Lab tests and bloodwork
-  if (
-    title.includes("blood") || 
-    title.includes("lab") || 
-    title.includes("test") || 
-    title.includes("panel") || 
-    title.includes("count") || 
-    title.includes("level") ||
-    title.includes("cbc") ||
-    title.includes("metabolic") ||
-    title.includes("culture")
-  ) {
-    return "Laboratory";
-  } 
-  // Imaging and radiology
-  else if (
-    title.includes("x-ray") || 
-    title.includes("xray") ||
-    title.includes("mri") || 
-    title.includes("ct") || 
-    title.includes("scan") || 
-    title.includes("imaging") || 
-    title.includes("ultrasound") ||
-    title.includes("radiograph") ||
-    title.includes("mammogram") ||
-    title.includes("pet")
-  ) {
-    return "Radiology";
-  } 
-  // Medications and prescriptions
-  else if (
-    title.includes("prescription") || 
-    title.includes("medication") || 
-    title.includes("drug") || 
-    title.includes("dose") ||
-    title.includes("rx") ||
-    title.includes("pharmacy")
-  ) {
-    return "Pharmacy";
-  } 
-  // Assessment and evaluations
-  else if (
-    title.includes("assessment") || 
-    title.includes("evaluation") || 
-    title.includes("exam") || 
-    title.includes("consultation") ||
-    title.includes("visit") ||
-    title.includes("checkup") ||
-    title.includes("screening")
-  ) {
-    return "Assessment";
-  } 
-  // Surgical procedures
-  else if (
-    title.includes("surgery") || 
-    title.includes("operation") || 
-    title.includes("procedure") || 
-    title.includes("post-op") ||
-    title.includes("surgical") ||
-    title.includes("biopsy")
-  ) {
-    return "Surgical";
-  }
-  // Cardiac related
-  else if (
-    title.includes("heart") || 
-    title.includes("cardiac") || 
-    title.includes("ecg") || 
-    title.includes("ekg") ||
-    title.includes("cardio") ||
-    title.includes("cardiovascular")
-  ) {
-    return "Cardiology";
-  }
-  // Respiratory related
-  else if (
-    title.includes("respiratory") || 
-    title.includes("lung") || 
-    title.includes("breathing") || 
-    title.includes("pulmonary") ||
-    title.includes("chest") ||
-    title.includes("bronchial")
-  ) {
-    return "Pulmonology";
-  }
-  // Neurological
-  else if (
-    title.includes("neuro") ||
-    title.includes("brain") ||
-    title.includes("nerve") ||
-    title.includes("cognitive") ||
-    title.includes("eeg")
-  ) {
-    return "Neurology";
-  }
-  // Gastrointestinal
-  else if (
-    title.includes("gastro") ||
-    title.includes("digestive") ||
-    title.includes("intestine") ||
-    title.includes("stomach") ||
-    title.includes("colon") ||
-    title.includes("endoscopy")
-  ) {
-    return "Gastroenterology";
-  }
-  // Orthopedic
-  else if (
-    title.includes("ortho") ||
-    title.includes("bone") ||
-    title.includes("joint") ||
-    title.includes("fracture") ||
-    title.includes("skeletal")
-  ) {
-    return "Orthopedics";
-  }
-  
-  return "General";
-};
-
-// Function to save analysis results to the database
-export const saveAnalysisResults = async (recordId: string, analysis: Analysis, prediction: Prediction) => {
-  try {
-    // In a real implementation, this would save to your database
-    // For now, we'll just log the action
-    console.log(`Saving analysis results for record ${recordId}`);
-    
-    // This would be your actual database call
-    // const { data, error } = await supabase
-    //   .from('record_analyses')
-    //   .upsert({
-    //     record_id: recordId,
-    //     analysis_data: analysis,
-    //     prediction_data: prediction,
-    //     analyzed_at: new Date()
-    //   });
-    
-    // if (error) throw error;
-    // return data;
-    
-    return { success: true };
-  } catch (error) {
-    console.error("Error saving analysis results:", error);
-    throw error;
-  }
-};
-
-// In a real implementation, you would have additional functions for:
-// - Training and updating ML models
-// - Processing different types of medical data
-// - Integration with other healthcare systems
-// - Verification and validation of predictions
+  return {
+    summary,
+    insights,
+    extractedData
+  };
+}
