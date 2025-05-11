@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -16,7 +17,8 @@ import {
   Shield,
   Calendar,
   Clipboard,
-  CalendarClock
+  CalendarClock,
+  Apple
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -57,6 +59,23 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
     }
   ];
   
+  const healthRoutes = [
+    {
+      label: "AI Doctor",
+      icon: <Bot className="h-5 w-5" />,
+      href: "/ai-doctor",
+      active: pathname === "/ai-doctor",
+      section: "health"
+    },
+    {
+      label: "Diet Planner",
+      icon: <Apple className="h-5 w-5" />,
+      href: "/diet-planner",
+      active: pathname === "/diet-planner",
+      section: "health"
+    }
+  ];
+  
   const communicationRoutes = [
     {
       label: "Messages",
@@ -80,13 +99,6 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
       icon: <LineChart className="h-5 w-5" />,
       href: "/analytics",
       active: pathname === "/analytics",
-      section: "analytics"
-    },
-    {
-      label: "AI Doctor",
-      icon: <Bot className="h-5 w-5" />,
-      href: "/ai-doctor",
-      active: pathname === "/ai-doctor",
       section: "analytics"
     }
   ];
@@ -127,13 +139,18 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
       routes: patientRoutes
     },
     {
+      id: "health",
+      label: "Health & Wellness",
+      routes: healthRoutes
+    },
+    {
       id: "communications",
       label: "Communications",
       routes: communicationRoutes
     },
     {
       id: "analytics",
-      label: "Analytics & AI",
+      label: "Analytics",
       routes: analyticsRoutes
     },
     ...(isDoctor ? [{

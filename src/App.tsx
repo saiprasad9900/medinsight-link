@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import AiDoctor from "./pages/AiDoctor";
 import Appointments from "./pages/Appointments";
+import DietPlanner from "./pages/DietPlanner";
 
 // Doctor Pages
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
@@ -49,6 +50,7 @@ function App() {
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/patients" element={<Patients />} />
                   <Route path="/ai-doctor" element={<AiDoctor />} />
+                  <Route path="/diet-planner" element={<DietPlanner />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/appointments" element={<Appointments />} />
                 </Route>
