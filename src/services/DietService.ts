@@ -178,6 +178,28 @@ const dietPlans: DietPlan[] = [
       // Additional days would be here
     ],
     notes: "This plan is calorie-controlled to support gradual weight loss while maintaining energy for daily activities and workouts. It emphasizes protein to preserve muscle mass and includes plenty of fiber-rich foods for satiety.",
+    exerciseRecommendations: [
+      {
+        name: "HIIT Cardio",
+        description: "High intensity interval training to maximize calorie burn and improve cardiovascular health.",
+        category: "Cardio",
+        duration: "20-30 minutes",
+        intensity: "High",
+        caloriesBurned: 300,
+        schedule: ["Monday", "Wednesday", "Friday"],
+        tips: "Focus on giving 100% during work intervals and completely recovering during rest periods."
+      },
+      {
+        name: "Strength Circuit",
+        description: "Full body resistance training using weights or bodyweight to maintain muscle while losing fat.",
+        category: "Strength",
+        duration: "40-45 minutes",
+        intensity: "Moderate",
+        caloriesBurned: 250,
+        schedule: ["Tuesday", "Thursday", "Saturday"],
+        tips: "Use compound movements like squats, push-ups and rows to engage multiple muscle groups."
+      }
+    ]
   },
   
   // Maintenance plan (male)
@@ -357,6 +379,28 @@ const dietPlans: DietPlan[] = [
       // Additional days would be here
     ],
     notes: "This maintenance plan is designed to support an active lifestyle while maintaining current weight. It provides adequate calories from balanced macronutrients to fuel daily activities and workouts while supporting recovery and overall health.",
+    exerciseRecommendations: [
+      {
+        name: "Mixed Cardio",
+        description: "Combination of moderate intensity steady state and interval training for overall fitness.",
+        category: "Cardio",
+        duration: "30 minutes",
+        intensity: "Moderate",
+        caloriesBurned: 250,
+        schedule: ["Monday", "Thursday"],
+        tips: "Vary your cardio activities to keep things interesting and challenge different muscle groups."
+      },
+      {
+        name: "Full Body Resistance",
+        description: "Full body strength training to maintain muscle mass and overall body composition.",
+        category: "Strength",
+        duration: "45 minutes",
+        intensity: "Moderate",
+        caloriesBurned: 200,
+        schedule: ["Tuesday", "Friday"],
+        tips: "Focus on form and controlled movements rather than lifting heavy weights."
+      }
+    ]
   },
   
   // Muscle gain plan (male)
@@ -564,6 +608,28 @@ const dietPlans: DietPlan[] = [
       // Additional days would be here
     ],
     notes: "This muscle-building plan provides a moderate calorie surplus to support lean muscle growth while minimizing fat gain. It prioritizes protein and nutrient timing around workouts to optimize recovery and adaptation.",
+    exerciseRecommendations: [
+      {
+        name: "Heavy Compound Lifting",
+        description: "Focus on major compound lifts like squats, deadlifts and bench press to stimulate maximum muscle growth.",
+        category: "Strength",
+        duration: "60 minutes",
+        intensity: "High",
+        caloriesBurned: 300,
+        schedule: ["Monday", "Thursday"],
+        tips: "Work in the 6-10 rep range with heavy weights and proper form."
+      },
+      {
+        name: "Hypertrophy Training",
+        description: "Moderate weight, higher rep training focused on specific muscle groups for growth.",
+        category: "Hypertrophy",
+        duration: "50-60 minutes",
+        intensity: "Moderate-High",
+        caloriesBurned: 250,
+        schedule: ["Tuesday", "Friday"],
+        tips: "Focus on mind-muscle connection and proper time under tension for each set."
+      }
+    ]
   },
 ];
 
