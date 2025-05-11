@@ -1,6 +1,7 @@
 
 import { DietFormData, DietPlan } from "@/types/diet";
 import { toast } from "sonner";
+import { generateExercises } from "./ExerciseService";
 
 // Sample plans for different profiles
 const dietPlans: DietPlan[] = [
@@ -643,6 +644,9 @@ export const generateDietPlan = async (formData: DietFormData): Promise<DietPlan
     
     // Generate personalized notes
     basePlan.notes = generatePersonalizedNotes(formData);
+    
+    // Generate exercise recommendations
+    basePlan.exerciseRecommendations = await generateExercises(formData);
     
     return basePlan;
     

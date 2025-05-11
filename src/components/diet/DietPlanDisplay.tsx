@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DietPlan, MealPlan } from "@/types/diet";
-import { Download, Printer, Share2 } from "lucide-react";
+import { Download, Printer, Share2, Dumbbell, Salad, ShoppingCart, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
+import ExercisePlanDisplay from "./ExercisePlanDisplay";
+import AiAnalysisAnimation from "./AiAnalysisAnimation";
 
 interface DietPlanDisplayProps {
   plan: DietPlan | null;
@@ -72,14 +74,20 @@ const MealCard = ({ meal }: { meal: MealPlan }) => {
 const DietPlanDisplay = ({ plan }: DietPlanDisplayProps) => {
   const [currentDay, setCurrentDay] = useState(1);
   const [activeView, setActiveView] = useState("meals");
+  const [loading, setLoading] = useState(false);
 
   if (!plan) {
     return null;
   }
 
   const handleDownload = () => {
-    // Implementation would go here
-    toast.success("Diet plan downloaded");
+    setLoading(true);
+    
+    // Simulate download with animation
+    setTimeout(() => {
+      setLoading(false);
+      toast.success("Diet plan downloaded");
+    }, 2000);
   };
 
   const handlePrint = () => {
@@ -88,11 +96,21 @@ const DietPlanDisplay = ({ plan }: DietPlanDisplayProps) => {
   };
 
   const handleShare = () => {
-    // Implementation would go here
-    toast.success("Diet plan shared");
+    setLoading(true);
+    
+    // Simulate sharing with animation
+    setTimeout(() => {
+      setLoading(false);
+      toast.success("Diet plan shared");
+    }, 2000);
   };
 
   const dayPlan = plan.days.find(day => day.day === currentDay) || plan.days[0];
+  
+  // If we're showing the loading animation
+  if (loading) {
+    return <AiAnalysisAnimation analyzing={true} onComplete={() => {}} type="diet" />;
+  }
   
   return (
     <div className="space-y-6">
@@ -147,28 +165,51 @@ const DietPlanDisplay = ({ plan }: DietPlanDisplayProps) => {
         </CardFooter>
       </Card>
 
-      <div>
-        <h3 className="text-lg font-medium mb-3">7-Day Meal Plan</h3>
-        <DaySelector 
-          currentDay={currentDay} 
-          totalDays={plan.days.length} 
-          onDayChange={setCurrentDay} 
-        />
-      </div>
-
-      <Tabs value={activeView} onValueChange={setActiveView}>
-        <TabsList>
-          <TabsTrigger value="meals">Meals</TabsTrigger>
-          <TabsTrigger value="shopping">Shopping List</TabsTrigger>
-          <TabsTrigger value="tips">Day Tips</TabsTrigger>
+      <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
+        <TabsList className="w-full">
+          <TabsTrigger value="meals" className="flex items-center gap-2 flex-1">
+            <Salad className="h-4 w-4" />
+            <span className="hidden sm:inline">Meal Plan</span>
+            <span className="sm:hidden">Meals</span>
+          </TabsTrigger>
+          <TabsTrigger value="exercises" className="flex items-center gap-2 flex-1">
+            <Dumbbell className="h-4 w-4" />
+            <span className="hidden sm:inline">Exercise Plan</span>
+            <span className="sm:hidden">Exercises</span>
+          </TabsTrigger>
+          <TabsTrigger value="shopping" className="flex items-center gap-2 flex-1">
+            <ShoppingCart className="h-4 w-4" />
+            <span className="hidden sm:inline">Shopping List</span>
+            <span className="sm:hidden">Shopping</span>
+          </TabsTrigger>
+          <TabsTrigger value="tips" className="flex items-center gap-2 flex-1">
+            <Lightbulb className="h-4 w-4" />
+            <span className="hidden sm:inline">Health Tips</span>
+            <span className="sm:hidden">Tips</span>
+          </TabsTrigger>
         </TabsList>
+        
         <TabsContent value="meals" className="space-y-4">
+          <div>
+            <h3 className="text-lg font-medium mb-3">7-Day Meal Plan</h3>
+            <DaySelector 
+              currentDay={currentDay} 
+              totalDays={plan.days.length} 
+              onDayChange={setCurrentDay} 
+            />
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {dayPlan.meals.map((meal, i) => (
               <MealCard key={i} meal={meal} />
             ))}
           </div>
         </TabsContent>
+        
+        <TabsContent value="exercises" className="space-y-4">
+          <ExercisePlanDisplay exercises={plan.exerciseRecommendations || []} />
+        </TabsContent>
+        
         <TabsContent value="shopping">
           <Card>
             <CardHeader>
@@ -224,6 +265,7 @@ const DietPlanDisplay = ({ plan }: DietPlanDisplayProps) => {
             </CardContent>
           </Card>
         </TabsContent>
+        
         <TabsContent value="tips">
           <Card>
             <CardHeader>

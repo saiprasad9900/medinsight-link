@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -24,6 +23,7 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { generateDietPlan } from "@/services/DietService";
 import { DietPlan, DietFormData } from "@/types/diet";
+import AiAnalysisAnimation from "./AiAnalysisAnimation";
 
 const formSchema = z.object({
   gender: z.enum(["male", "female", "other"]),
@@ -46,6 +46,7 @@ interface DietFormProps {
 
 const DietForm = ({ onSubmit }: DietFormProps) => {
   const [loading, setLoading] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -75,16 +76,34 @@ const DietForm = ({ onSubmit }: DietFormProps) => {
 
   const handleFormSubmit = async (values: FormValues) => {
     setLoading(true);
+    setShowAnalysis(true);
+    
     try {
       // The values from the form are now guaranteed to match the DietFormData interface
       const plan = await generateDietPlan(values as DietFormData);
-      onSubmit(plan);
+      
+      // Keep the analysis animation visible for at least 3 seconds for better UX
+      setTimeout(() => {
+        setShowAnalysis(false);
+        setLoading(false);
+        onSubmit(plan);
+      }, 3000);
     } catch (error) {
       console.error("Failed to generate diet plan:", error);
-    } finally {
+      setShowAnalysis(false);
       setLoading(false);
     }
   };
+
+  const handleAnalysisComplete = () => {
+    // This will be called when the animation completes
+    // We're keeping the loading state true until we get the plan
+  };
+
+  // If showing analysis animation, render it instead of the form
+  if (showAnalysis) {
+    return <AiAnalysisAnimation analyzing={true} onComplete={handleAnalysisComplete} type="both" />;
+  }
 
   return (
     <Form {...form}>
@@ -334,7 +353,7 @@ const DietForm = ({ onSubmit }: DietFormProps) => {
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Generating Plan..." : "Generate Diet Plan"}
+          {loading ? "Generating Plan..." : "Generate Diet & Exercise Plan"}
         </Button>
       </form>
     </Form>

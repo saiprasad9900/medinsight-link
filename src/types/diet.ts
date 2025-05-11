@@ -15,6 +15,7 @@ export interface DietPlan {
   };
   days: DayPlan[];
   notes: string;
+  exerciseRecommendations: ExerciseRecommendation[];
 }
 
 export interface DayPlan {
@@ -71,4 +72,17 @@ export interface DietFormData {
   dietaryRestrictions: string[];
   mealPreference: string;
   intensityLevel: number;
+}
+
+export interface ExerciseRecommendation {
+  name: string;
+  description: string;
+  category: string;
+  duration: string;
+  intensity: string;
+  caloriesBurned: number;
+  schedule: string[];
+  tips: string;
+  videoUrl?: string;
+  imageUrl?: string;
 }
