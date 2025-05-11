@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { generateDietPlan } from "@/services/DietService";
-import { DietPlan } from "@/types/diet";
+import { DietPlan, DietFormData } from "@/types/diet";
 
 const formSchema = z.object({
   gender: z.enum(["male", "female", "other"]),
@@ -37,6 +37,9 @@ const formSchema = z.object({
   intensityLevel: z.coerce.number().min(1).max(5),
 });
 
+// Make sure the form schema matches our DietFormData type
+type FormValues = z.infer<typeof formSchema>;
+
 interface DietFormProps {
   onSubmit: (plan: DietPlan) => void;
 }
@@ -44,7 +47,7 @@ interface DietFormProps {
 const DietForm = ({ onSubmit }: DietFormProps) => {
   const [loading, setLoading] = useState(false);
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       gender: "male",
@@ -70,10 +73,11 @@ const DietForm = ({ onSubmit }: DietFormProps) => {
     { id: "low_carb", label: "Low Carb" },
   ];
 
-  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleFormSubmit = async (values: FormValues) => {
     setLoading(true);
     try {
-      const plan = await generateDietPlan(values);
+      // The values from the form are now guaranteed to match the DietFormData interface
+      const plan = await generateDietPlan(values as DietFormData);
       onSubmit(plan);
     } catch (error) {
       console.error("Failed to generate diet plan:", error);
