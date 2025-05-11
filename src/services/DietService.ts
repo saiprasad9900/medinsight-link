@@ -1,3 +1,4 @@
+
 import { DietFormData, DietPlan } from "@/types/diet";
 import { toast } from "sonner";
 
@@ -864,4 +865,8 @@ const generatePersonalizedNotes = (formData: DietFormData): string => {
   
   let activityNote = "";
   if (formData.activityLevel === "very_active" || formData.activityLevel === "active") {
-    activityNote = "It includes strategic meal timing around workouts to support performance and
+    activityNote = "It includes strategic meal timing around workouts to support performance and recovery. ";
+  }
+  
+  return baseNotes + goalNote + dietaryNote + activityNote;
+};
