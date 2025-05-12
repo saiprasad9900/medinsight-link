@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ChatBot from "@/components/chat/ChatBot";
@@ -103,7 +102,7 @@ const AiDoctor = () => {
       <MedicalDisclaimer />
       
       {hasAPIError && (
-        <Alert variant="warning" className="mb-4">
+        <Alert variant="destructive" className="mb-4">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             AI service connection issue detected. Using reliable fallback responses.
@@ -156,7 +155,70 @@ const AiDoctor = () => {
         </TabsContent>
         
         <TabsContent value="settings" className="scale-in">
-          {/* ... keep existing code (health profile UI) */}
+          <div className="container py-8">
+            <h2 className="text-2xl font-semibold mb-4">Your Health Profile</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Age and Gender */}
+              <div>
+                <h3 className="text-lg font-medium mb-2">Basic Information</h3>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Age:</label>
+                    <input 
+                      type="number" 
+                      value={userHealthContext.age}
+                      onChange={(e) => setUserHealthContext(prev => ({ ...prev, age: parseInt(e.target.value) }))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Gender:</label>
+                    <select
+                      value={userHealthContext.gender}
+                      onChange={(e) => setUserHealthContext(prev => ({ ...prev, gender: e.target.value }))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    >
+                      <option>Male</option>
+                      <option>Female</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Medical Conditions */}
+              <div>
+                <h3 className="text-lg font-medium mb-2">Medical History</h3>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Conditions:</label>
+                    <input 
+                      type="text" 
+                      value={userHealthContext.conditions.join(", ")}
+                      onChange={(e) => setUserHealthContext(prev => ({ ...prev, conditions: e.target.value.split(", ") }))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">Separate conditions with commas.</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Medications:</label>
+                    <input 
+                      type="text" 
+                      value={userHealthContext.medications.join(", ")}
+                      onChange={(e) => setUserHealthContext(prev => ({ ...prev, medications: e.target.value.split(", ") }))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">Separate medications with commas.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <Button onClick={() => toast.success("Health profile updated!")} className="mt-6">
+              Update Profile
+            </Button>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
