@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MedicalRecord } from "@/types/records";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import PatientDisclaimer from "./PatientDisclaimer";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface RecordsListProps {
   records: MedicalRecord[];
@@ -37,6 +37,8 @@ const RecordsList = ({
   onViewRecord
 }: RecordsListProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { userRole } = useAuth();
+  const isDoctor = userRole === "doctor";
 
   const handleRecordClick = (record: MedicalRecord) => {
     onRecordClick(record);
@@ -136,7 +138,7 @@ const RecordsList = ({
             </p>
           </div>
         </CardContent>
-        <PatientDisclaimer />
+        <PatientDisclaimer isDoctor={isDoctor} />
       </Card>
     );
   }

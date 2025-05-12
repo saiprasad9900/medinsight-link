@@ -22,6 +22,7 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
     loading, 
     activeTab, 
     setActiveTab,
+    setCategoryFilter
   } = useRecordContext();
   
   const [analyzing, setAnalyzing] = useState(false);
@@ -77,7 +78,11 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
         <TabsContent value="browse" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-1 space-y-6">
-              <RecordFilters />
+              <RecordFilters 
+                onFilterChange={setCategoryFilter}
+                onUploadClick={() => setActiveTab("upload")}
+                activeTab={activeTab}
+              />
               
               <RecordsList 
                 records={userRecords}
