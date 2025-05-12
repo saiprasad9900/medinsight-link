@@ -3,7 +3,7 @@ import { useState } from "react";
 import { MedicalRecord } from "@/types/records";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Brain, Layers, FileSearch } from "lucide-react";
+import { Brain, Layers, FileSearch, Eye } from "lucide-react";
 import EnhancedRecordInsight from "./EnhancedRecordInsight";
 import PredictiveInsights from "./PredictiveInsights";
 import MedicalRecordAnalysisDialog from "./MedicalRecordAnalysisDialog";
@@ -12,12 +12,14 @@ interface RecordDetailsProps {
   record: MedicalRecord | null;
   analyzing: boolean;
   onAnalyzeClick: () => void;
+  onViewRecord: () => void;
 }
 
 const RecordDetails = ({ 
   record, 
   analyzing, 
-  onAnalyzeClick 
+  onAnalyzeClick,
+  onViewRecord
 }: RecordDetailsProps) => {
   const [activeView, setActiveView] = useState<"analysis" | "prediction">("analysis");
   const [showAnalysisDialog, setShowAnalysisDialog] = useState(false);
@@ -48,15 +50,26 @@ const RecordDetails = ({
           </TabsTrigger>
         </TabsList>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowAnalysisDialog(true)}
-          className="gap-1"
-        >
-          <FileSearch className="h-4 w-4" />
-          Full Analysis
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onViewRecord}
+            className="gap-1"
+          >
+            <Eye className="h-4 w-4" />
+            View Record
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAnalysisDialog(true)}
+            className="gap-1"
+          >
+            <FileSearch className="h-4 w-4" />
+            Full Analysis
+          </Button>
+        </div>
       </div>
       
       {analyzing ? (

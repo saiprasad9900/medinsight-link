@@ -5,8 +5,15 @@ import RecordsContent from "@/components/records/RecordsContent";
 import RecordsDataService from "@/components/records/RecordsDataService";
 import { toast } from "sonner";
 import { useRecordContext } from "@/components/records/RecordContextProvider";
+import { useEffect } from "react";
+import { ensureStorageBucket } from "@/services/storageService";
 
 const RecordsPage = () => {
+  // Initialize storage bucket when the page loads
+  useEffect(() => {
+    ensureStorageBucket().catch(console.error);
+  }, []);
+
   return (
     <RecordContextProvider>
       <RecordsContainer />
