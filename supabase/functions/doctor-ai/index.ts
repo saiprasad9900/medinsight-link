@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -6,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Medical-specific fallback responses for when API key is missing or rate limited
+// Enhanced medical fallback responses for when API key is missing or rate limited
 const generateMedicalFallbackResponse = (message: string) => {
   console.log("Generating medical fallback response for:", message);
   
@@ -61,6 +62,30 @@ const generateMedicalFallbackResponse = (message: string) => {
         "Preventive healthcare involves regular check-ups, a balanced diet, regular physical activity, adequate sleep, and stress management. These foundations can help reduce risk for many common health conditions.",
         "For disease prevention, consider factors like balanced nutrition, regular physical activity, adequate sleep, stress management, and avoiding tobacco and excessive alcohol. Regular health screenings are also important."
       ]
+    },
+    {
+      category: "sleep",
+      keywords: ["sleep", "insomnia", "tired", "fatigue", "rest", "exhaustion"],
+      responses: [
+        "Sleep problems can significantly impact health. Aim for 7-9 hours of quality sleep by maintaining a consistent schedule, creating a comfortable sleep environment, and limiting screen time before bed.",
+        "Insomnia and sleep disturbances may be caused by stress, medical conditions, or lifestyle factors. Consider relaxation techniques, limiting caffeine, and consulting a healthcare provider if sleep issues persist."
+      ]
+    },
+    {
+      category: "mental health",
+      keywords: ["anxiety", "depression", "stress", "mental", "mood", "therapy", "counseling", "psychiatric"],
+      responses: [
+        "Mental health is an essential component of overall wellbeing. If you're experiencing persistent feelings of anxiety, depression, or other mental health concerns, consider reaching out to a mental health professional.",
+        "Stress management techniques include regular exercise, mindfulness practices, adequate sleep, social connection, and possibly counseling or therapy. Many people benefit from professional support for mental health concerns."
+      ]
+    },
+    {
+      category: "nutrition",
+      keywords: ["nutrition", "diet", "food", "eating", "weight", "calories", "carbs", "protein", "fat"],
+      responses: [
+        "A balanced diet typically includes plenty of fruits and vegetables, whole grains, lean proteins, and healthy fats. Nutritional needs vary by individual, so consulting with a dietitian can provide personalized guidance.",
+        "Healthy eating involves moderation, variety, and balance. Focus on whole foods, appropriate portion sizes, and mindful eating habits. Specific dietary recommendations may depend on your individual health needs."
+      ]
     }
   ];
   
@@ -75,11 +100,11 @@ const generateMedicalFallbackResponse = (message: string) => {
   
   // General fallback responses if no specific health category matches
   const generalResponses = [
-    "I'm currently experiencing some technical limitations, but I'd be happy to assist you once I'm back online. For any urgent medical concerns, please contact a healthcare professional.",
-    "Due to technical constraints, I'm unable to provide a detailed response at this time. For health questions, reliable sources include the CDC, WHO, or consulting with your doctor.",
-    "I apologize, but I'm unable to provide specific health information right now. Remember that maintaining a balanced diet, regular exercise, and adequate sleep are foundational to good health.",
-    "I'm sorry for the inconvenience. My systems are currently limited. For health emergencies, please call your local emergency services immediately.",
-    "Thanks for your question. Unfortunately, I can't access my full capabilities right now. Please try again later, or consult with a healthcare provider for immediate concerns."
+    "I'm here to provide general health information. While I aim to be helpful, remember that personalized medical advice should come from healthcare professionals who know your specific situation.",
+    "Thank you for your health question. I can offer general information, but for specific medical concerns, it's best to consult with your healthcare provider for personalized advice.",
+    "Health topics require individualized attention. While I can share general health information, your healthcare provider can offer guidance tailored to your specific needs and medical history.",
+    "I'm happy to discuss general health topics, but remember that this information isn't a substitute for professional medical advice. Regular check-ups with healthcare providers are essential for optimal health.",
+    "For general health maintenance, consider regular physical activity, a balanced diet, adequate sleep, stress management, and routine preventive care with your healthcare provider."
   ];
   
   // Choose a general response based on the length of the message for some variety
@@ -130,7 +155,7 @@ const generateEmergencyWarning = (): string => {
     "- Loss of consciousness";
 };
 
-// Function to generate health education messages when OpenAI is unavailable
+// Enhanced function to generate health education messages
 const generateHealthEducationMessage = (topic: string): string => {
   const healthTopics = {
     "general": [
@@ -217,6 +242,23 @@ const generateHealthEducationMessage = (topic: string): string => {
       "- Helps maintain healthy weight\n" +
       "- Reduces risk of chronic conditions like heart disease and diabetes\n" +
       "- Supports overall health and longevity"
+    ],
+    "mental": [
+      "**Mental Health Basics**:\n\n" +
+      "- Practice self-care regularly\n" +
+      "- Maintain social connections\n" +
+      "- Set healthy boundaries\n" +
+      "- Recognize when to seek professional help\n" +
+      "- Understand that mental health is as important as physical health\n" +
+      "- Practice mindfulness and being present",
+      
+      "**Mental Wellness Strategies**:\n\n" +
+      "- Develop healthy coping mechanisms for stress\n" +
+      "- Get regular physical activity\n" +
+      "- Prioritize adequate sleep\n" +
+      "- Limit alcohol and avoid recreational drugs\n" +
+      "- Express feelings in healthy ways\n" +
+      "- Seek professional help when needed"
     ]
   };
   
@@ -232,6 +274,8 @@ const generateHealthEducationMessage = (topic: string): string => {
     selectedTopic = "stress";
   } else if (topicLower.includes("sleep") || topicLower.includes("insomnia") || topicLower.includes("rest")) {
     selectedTopic = "sleep";
+  } else if (topicLower.includes("mental") || topicLower.includes("depression") || topicLower.includes("mood")) {
+    selectedTopic = "mental";
   }
   
   // Choose a random education message from the selected topic
@@ -277,8 +321,7 @@ serve(async (req) => {
       
       return new Response(JSON.stringify({ 
         reply: educationResponse,
-        source: "health-education",
-        error: "OpenAI API key is missing or invalid. Please configure the key in Supabase secrets."
+        source: "health-education" 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });

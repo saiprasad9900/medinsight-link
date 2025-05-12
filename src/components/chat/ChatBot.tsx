@@ -47,6 +47,8 @@ const ChatBot = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const [detectedIntent, setDetectedIntent] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   // Track if this is the first message to send health context
   const firstMessageSentRef = useRef(false);
@@ -64,7 +66,7 @@ const ChatBot = ({
       "symptoms": ["symptom", "feeling", "pain", "ache", "sore", "hurt"],
       "diagnosis": ["diagnose", "what is", "do I have", "could it be"],
       "treatment": ["treatment", "medicine", "remedy", "cure", "how to treat"],
-      "prevention": ["prevent", "avoid", "stop", "risk", "chances"]
+      "prevention": ["prevent", "avoid", "risk", "chances"]
     };
     
     // Very basic intent detection for UI purposes
@@ -126,20 +128,36 @@ const ChatBot = ({
       // Check if we got a fallback response due to missing API key
       if (data.source === "fallback" && !apiKeyMissing) {
         setApiKeyMissing(true);
-        console.warn("Using fallback responses due to missing OpenAI API key");
-        toast.warning("AI running in limited mode due to configuration issues", {
-          description: "Please contact site administrator to set up OpenAI API key for full functionality."
+        console.warn("Using fallback responses due to missing or rate-limited OpenAI API key");
+        toast.warning("AI running in limited mode", {
+          description: "Using reliable fallback responses as OpenAI API is currently unavailable."
         });
       }
 
       if (data.error) {
         console.error("Error in AI response:", data.error);
+        // If we have a specific error, try again with a slightly different system prompt
+        if (retryCount < maxRetries) {
+          setRetryCount(prev => prev + 1);
+          // Try again with the fallback system
+          console.log(`Retrying request (attempt ${retryCount + 1}/${maxRetries})`);
+          
+          // Add a small delay before retrying
+          await new Promise(resolve => setTimeout(resolve, 800));
+          
+          // Try again with the same request but don't increment retry count again
+          await handleRetryRequest(userMessage, chatHistory);
+          return;
+        }
         throw new Error(data.error);
       }
 
       if (!data.reply) {
         throw new Error("AI response is empty");
       }
+
+      // Reset retry count on success
+      setRetryCount(0);
 
       // Add AI response to chat
       setMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
@@ -168,6 +186,30 @@ const ChatBot = ({
       setIsLoading(false);
     }
   };
+  
+  // Helper function to retry requests
+  const handleRetryRequest = async (userMessage: string, chatHistory: ApiMessage[]) => {
+    try {
+      const { data } = await supabase.functions.invoke('doctor-ai', {
+        body: {
+          message: userMessage,
+          chatHistory,
+          retry: true
+        }
+      });
+      
+      if (data && data.reply) {
+        setMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
+      } else {
+        throw new Error("Still no valid AI response after retry");
+      }
+    } catch (retryError) {
+      console.error("Retry failed:", retryError);
+      // Don't add another error message to the chat, the original error handler will do that
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Card className="w-full h-[calc(100vh-12rem)] flex flex-col shadow-lg">
@@ -175,7 +217,7 @@ const ChatBot = ({
         apiKeyMissing={apiKeyMissing} 
         isWarmingUp={isWarmingUp} 
         includeHealthContext={includeHealthContext}
-        modelName={modelName} 
+        modelName={apiKeyMissing ? "Fallback Mode" : modelName} 
       />
       <CardContent className="p-0 flex-1 overflow-hidden">
         <ChatMessages 

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ChatBot from "@/components/chat/ChatBot";
@@ -11,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, ActivitySquare, BookOpen, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MedicalSymptom } from "@/types/patients";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 type HealthInfo = {
   age: number;
@@ -24,6 +27,8 @@ const AiDoctor = () => {
   const [activeTab, setActiveTab] = useState("chat");
   const [modelName, setModelName] = useState("GPT-4o");
   const [showHealthInfoEditor, setShowHealthInfoEditor] = useState(false);
+  const [hasAPIError, setHasAPIError] = useState(false);
+  const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(null);
 
   const [userHealthContext, setUserHealthContext] = useState<HealthInfo>({
     age: 35,
@@ -43,20 +48,28 @@ const AiDoctor = () => {
         
         if (error) {
           console.error("Error warming up function:", error);
-          toast.error("AI service is currently experiencing issues. Some features may be limited.");
+          setHasAPIError(true);
+          setApiErrorMessage(error.message);
+          toast.error("AI service is currently experiencing issues. Using fallback mode.", {
+            description: "Responses will still be helpful but more general."
+          });
         } else {
           console.log("Warmed up doctor-ai function successfully", data);
           
           if (data.source === "fallback") {
-            setModelName("Limited Mode");
-            toast.warning("Running in limited mode", {
-              description: "OpenAI API key quota exceeded. Full AI features unavailable."
+            setModelName("Fallback Mode");
+            toast.warning("Using fallback mode", {
+              description: "API key issue detected. Using reliable fallback responses."
             });
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Exception warming up function:", error);
-        toast.error("Failed to connect to AI service. Please try again later.");
+        setHasAPIError(true);
+        setApiErrorMessage(error.message);
+        toast.error("AI service connection issue", {
+          description: "Using reliable fallback responses instead."
+        });
       } finally {
         setIsWarmingUp(false);
       }
@@ -88,6 +101,17 @@ const AiDoctor = () => {
     <div className="space-y-6 animate-fade-in">
       <DoctorHeader />
       <MedicalDisclaimer />
+      
+      {hasAPIError && (
+        <Alert variant="warning" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            AI service connection issue detected. Using reliable fallback responses.
+            {apiErrorMessage && <div className="text-sm mt-1 text-muted-foreground">Error: {apiErrorMessage}</div>}
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <HealthInfoGrid />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
