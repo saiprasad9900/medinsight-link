@@ -30,6 +30,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AppointmentService } from "@/services/AppointmentService";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 // Form schema for appointment validation
 const appointmentFormSchema = z.object({
@@ -46,16 +48,18 @@ interface AppointmentFormProps {
   isOpen: boolean;
   onClose: () => void;
   onAppointmentCreated: () => void;
-  initialDate?: Date; // Added initialDate prop
+  initialDate?: Date;
 }
 
 export const AppointmentForm = ({ isOpen, onClose, onAppointmentCreated, initialDate }: AppointmentFormProps) => {
+  const { user } = useAuth();
+  
   // Form for new appointment
   const appointmentForm = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
     defaultValues: {
-      patientName: "",
-      date: initialDate || new Date(), // Use initialDate if provided
+      patientName: user?.user_metadata?.full_name || "",
+      date: initialDate || new Date(),
       time: "",
       type: "",
       doctor: "",
@@ -66,16 +70,19 @@ export const AppointmentForm = ({ isOpen, onClose, onAppointmentCreated, initial
   useEffect(() => {
     if (isOpen) {
       appointmentForm.reset({
-        patientName: "",
+        patientName: user?.user_metadata?.full_name || "",
         date: initialDate || new Date(),
         time: "",
         type: "",
         doctor: "",
       });
     }
-  }, [isOpen, initialDate, appointmentForm]);
+  }, [isOpen, initialDate, appointmentForm, user]);
 
   const onSubmitAppointment = async (data: AppointmentFormValues) => {
+    // Show loading state
+    const loadingToast = toast.loading("Scheduling appointment...");
+    
     // Format date for database
     const formattedDate = data.date.toISOString().split('T')[0];
     
@@ -88,6 +95,9 @@ export const AppointmentForm = ({ isOpen, onClose, onAppointmentCreated, initial
       status: "Pending",
       doctor: data.doctor
     });
+    
+    // Dismiss loading toast
+    toast.dismiss(loadingToast);
     
     if (success) {
       // Refresh appointments list

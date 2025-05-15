@@ -24,6 +24,13 @@ const AppointmentsPage = () => {
       const data = await AppointmentService.fetchAppointments();
       setAppointments(data);
       filterAppointmentsByDate(data, selectedDate);
+      
+      // Show success message when there are appointments
+      if (data.length > 0) {
+        toast.success(`Loaded ${data.length} appointments`, {
+          description: "Your appointments are up to date"
+        });
+      }
     } catch (error) {
       console.error("Error fetching appointments:", error);
       toast.error("Failed to load appointments", {
@@ -69,6 +76,14 @@ const AppointmentsPage = () => {
     }
   };
 
+  // Handle appointment creation success
+  const handleAppointmentCreated = () => {
+    toast.success("Appointment created successfully", {
+      description: "The appointment has been added to your calendar"
+    });
+    fetchAppointments();
+  };
+
   useEffect(() => {
     fetchAppointments();
   }, []);
@@ -112,12 +127,7 @@ const AppointmentsPage = () => {
       <AppointmentForm 
         isOpen={isNewAppointmentOpen}
         onClose={() => setIsNewAppointmentOpen(false)}
-        onAppointmentCreated={() => {
-          fetchAppointments();
-          toast.success("Appointment created successfully", {
-            description: "The appointment has been added to the calendar"
-          });
-        }}
+        onAppointmentCreated={handleAppointmentCreated}
         initialDate={selectedDate}
       />
     </div>
