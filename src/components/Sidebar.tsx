@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -18,7 +17,8 @@ import {
   Calendar,
   Clipboard,
   CalendarClock,
-  Apple
+  Apple,
+  Brain
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -72,6 +72,13 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
       icon: <Apple className="h-5 w-5" />,
       href: "/diet-planner",
       active: pathname === "/diet-planner",
+      section: "health"
+    },
+    {
+      label: "Health Games",
+      icon: <Brain className="h-5 w-5" />,
+      href: "/health-games",
+      active: pathname === "/health-games",
       section: "health"
     }
   ];

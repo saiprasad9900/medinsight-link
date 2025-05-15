@@ -17,6 +17,7 @@ import Auth from "./pages/Auth";
 import AiDoctor from "./pages/AiDoctor";
 import Appointments from "./pages/Appointments";
 import DietPlanner from "./pages/DietPlanner";
+import HealthGames from "./pages/HealthGames"; // New games page
 
 // Doctor Pages
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
@@ -53,6 +54,7 @@ function App() {
                   <Route path="/diet-planner" element={<DietPlanner />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/appointments" element={<Appointments />} />
+                  <Route path="/health-games" element={<HealthGames />} />
                 </Route>
               </Route>
               
