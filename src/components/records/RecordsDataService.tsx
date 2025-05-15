@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { MedicalRecord } from "@/types/records";
 import { categorizeRecord } from "@/services/analysisService";
 import { useRecordContext } from './RecordContextProvider';
@@ -34,67 +34,71 @@ const RecordsDataService = () => {
   };
 
   // Fetch records based on user role
-  useEffect(() => {
-    const fetchUserRecords = async () => {
-      if (!user) return;
+  const fetchUserRecords = async () => {
+    if (!user) return;
 
-      try {
-        setLoading(true);
-        let query = supabase
-          .from('records_files')
-          .select('*')
-          .order('created_at', { ascending: false });
-          
-        // If user is not a doctor, only fetch their own records
-        if (!isDoctor) {
-          query = query.eq('user_id', user.id);
-        }
+    try {
+      setLoading(true);
+      let query = supabase
+        .from('records_files')
+        .select('*')
+        .order('created_at', { ascending: false });
         
-        const { data, error } = await query;
-
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          // Convert the records_files data to our MedicalRecord interface format
-          const records: MedicalRecord[] = data.map((file: RecordFile) => {
-            const type = getFileType(file.file_type);
-            return {
-              id: file.id,
-              title: file.filename,
-              type,
-              date: new Date(file.created_at).toLocaleDateString('en-US', {
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric'
-              }),
-              patientName: user?.user_metadata?.first_name 
-                ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
-                : user.email?.split('@')[0] || 'Patient',
-              status: "Pending" as const,
-              filePath: file.file_path,
-              category: categorizeRecord({ 
-                id: file.id, 
-                title: file.filename, 
-                type, 
-                date: '', 
-                patientName: '', 
-                status: "Pending" 
-              })
-            };
-          });
-
-          setUserRecords(records);
-        }
-      } catch (error: any) {
-        console.error('Error fetching records:', error);
-        toast.error(`Error loading records: ${error.message}`);
-      } finally {
-        setLoading(false);
+      // If user is not a doctor, only fetch their own records
+      if (!isDoctor) {
+        query = query.eq('user_id', user.id);
       }
-    };
+      
+      const { data, error } = await query;
 
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        // Convert the records_files data to our MedicalRecord interface format
+        const records: MedicalRecord[] = data.map((file: RecordFile) => {
+          const type = getFileType(file.file_type);
+          return {
+            id: file.id,
+            title: file.filename,
+            type,
+            date: new Date(file.created_at).toLocaleDateString('en-US', {
+              month: 'short', 
+              day: 'numeric', 
+              year: 'numeric'
+            }),
+            patientName: user?.user_metadata?.first_name 
+              ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+              : user.email?.split('@')[0] || 'Patient',
+            status: "Pending" as const,
+            filePath: file.file_path,
+            category: categorizeRecord({ 
+              id: file.id, 
+              title: file.filename, 
+              type, 
+              date: '', 
+              patientName: '', 
+              status: "Pending" 
+            })
+          };
+        });
+
+        setUserRecords(records);
+      }
+    } catch (error: any) {
+      console.error('Error fetching records:', error);
+      toast({
+        title: "Error loading records",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUserRecords();
   }, [user, isDoctor, setLoading, setUserRecords]);
 
@@ -136,12 +140,15 @@ const RecordsDataService = () => {
       setSelectedRecord(newRecords[0]);
     }
     
+    // Refresh records from database to ensure we have the latest data
+    fetchUserRecords();
+    
     // Return the new records for further processing if needed
     return newRecords;
   };
 
-  // Expose the fileUpload function to the parent component
-  return { handleFileUpload };
+  // Expose the fileUpload function and fetchUserRecords for external use
+  return { handleFileUpload, fetchUserRecords };
 };
 
 export default RecordsDataService;

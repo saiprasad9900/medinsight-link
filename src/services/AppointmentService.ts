@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 
 export interface Appointment {
   id?: string;
@@ -59,7 +59,11 @@ export const AppointmentService = {
 
       return data || [];
     } catch (error: any) {
-      toast.error(`Failed to fetch appointments: ${error.message}`);
+      toast({
+        title: "Failed to fetch appointments",
+        description: error.message,
+        variant: "destructive"
+      });
       console.error("Error fetching appointments:", error);
       return [];
     }
@@ -104,10 +108,17 @@ export const AppointmentService = {
         }
       }
       
-      toast.success("Appointment scheduled successfully");
+      toast({
+        title: "Appointment scheduled successfully",
+        variant: "success"
+      });
       return true;
     } catch (error: any) {
-      toast.error(`Error scheduling appointment: ${error.message}`);
+      toast({
+        title: "Error scheduling appointment",
+        description: error.message,
+        variant: "destructive"
+      });
       console.error("Error adding appointment:", error);
       return false;
     }

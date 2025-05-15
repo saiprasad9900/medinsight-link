@@ -7,8 +7,9 @@ import RecordDetails from "./RecordDetails";
 import { useRecordContext } from "./RecordContextProvider";
 import FileUpload from "./FileUpload";
 import { analyzeRecord, predictOutcomes } from "@/services/analysisService";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import MedicalRecordViewer from "./MedicalRecordViewer";
+import RecordsDataService from "./RecordsDataService";
 
 interface RecordsContentProps {
   onFileUploadComplete?: (files: File[], filePaths: string[]) => void;
@@ -27,12 +28,15 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
   
   const [analyzing, setAnalyzing] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const { fetchUserRecords } = RecordsDataService();
   
   const handleAnalyzeClick = async () => {
     if (!selectedRecord || selectedRecord.analysis || analyzing) return;
     
     setAnalyzing(true);
-    toast.info(`Analyzing ${selectedRecord.type.toLowerCase()}...`);
+    toast({
+      title: `Analyzing ${selectedRecord.type.toLowerCase()}...`,
+    });
     
     try {
       // Analyze the record
@@ -50,10 +54,17 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
       // Update the selected record
       setSelectedRecord(updatedRecord);
       
-      toast.success("Analysis complete");
+      toast({
+        title: "Analysis complete",
+        variant: "success"
+      });
     } catch (error: any) {
       console.error("Analysis error:", error);
-      toast.error(`Analysis failed: ${error.message}`);
+      toast({
+        title: "Analysis failed",
+        description: error.message,
+        variant: "destructive"
+      });
     } finally {
       setAnalyzing(false);
     }
@@ -63,8 +74,28 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
     if (selectedRecord?.filePath) {
       setViewerOpen(true);
     } else {
-      toast.error("No file available to view");
+      toast({
+        title: "No file available to view",
+        variant: "destructive"
+      });
     }
+  };
+
+  // Handle file upload complete and refresh records
+  const handleFileUploadComplete = (files: File[], filePaths: string[]) => {
+    // Call the parent's onFileUploadComplete if provided
+    if (onFileUploadComplete) {
+      onFileUploadComplete(files, filePaths);
+    }
+    
+    // Refresh the records list to show new uploads immediately
+    fetchUserRecords();
+    
+    toast({
+      title: "Records uploaded successfully",
+      description: `${files.length} ${files.length === 1 ? 'record' : 'records'} added to your medical records`,
+      variant: "success"
+    });
   };
   
   return (
@@ -105,7 +136,7 @@ const RecordsContent = ({ onFileUploadComplete }: RecordsContentProps) => {
         </TabsContent>
         
         <TabsContent value="upload" className="mt-6">
-          <FileUpload onUploadComplete={onFileUploadComplete} />
+          <FileUpload onUploadComplete={handleFileUploadComplete} />
         </TabsContent>
       </Tabs>
       

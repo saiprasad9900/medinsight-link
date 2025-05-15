@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Filter } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { AppointmentService, Appointment } from "@/services/AppointmentService";
 
 // Import our components
@@ -27,14 +27,18 @@ const AppointmentsPage = () => {
       
       // Show success message when there are appointments
       if (data.length > 0) {
-        toast.success(`Loaded ${data.length} appointments`, {
-          description: "Your appointments are up to date"
+        toast({
+          title: `Loaded ${data.length} appointments`,
+          description: "Your appointments are up to date",
+          variant: "success"
         });
       }
     } catch (error) {
       console.error("Error fetching appointments:", error);
-      toast.error("Failed to load appointments", {
-        description: "Please try again or contact support if the problem persists."
+      toast({
+        title: "Failed to load appointments",
+        description: "Please try again or contact support if the problem persists.",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -67,10 +71,15 @@ const AppointmentsPage = () => {
       
       const count = appointments.filter(a => a.date === date.toISOString().split('T')[0]).length;
       if (count > 0) {
-        toast.success(`Showing ${count} appointments for ${formattedDate}`);
+        toast({
+          title: `Showing ${count} appointments for ${formattedDate}`,
+          variant: "success"
+        });
       } else {
-        toast.info(`No appointments on ${formattedDate}`, {
-          description: "Click 'New Appointment' to schedule one."
+        toast({
+          title: `No appointments on ${formattedDate}`,
+          description: "Click 'New Appointment' to schedule one.",
+          variant: "info"
         });
       }
     }
@@ -78,9 +87,12 @@ const AppointmentsPage = () => {
 
   // Handle appointment creation success
   const handleAppointmentCreated = () => {
-    toast.success("Appointment created successfully", {
-      description: "The appointment has been added to your calendar"
+    toast({
+      title: "Appointment created successfully",
+      description: "The appointment has been added to your calendar",
+      variant: "success"
     });
+    // Immediately refresh appointments list to show the new appointment
     fetchAppointments();
   };
 
