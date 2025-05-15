@@ -35,10 +35,6 @@ export const ensureStorageBucket = async (): Promise<void> => {
     } else {
       console.log('Medical records storage bucket already exists');
     }
-    
-    // Set up bucket policies if needed
-    // This would typically be done through the Supabase dashboard for production apps
-    
   } catch (error) {
     console.error('Error ensuring storage bucket exists:', error);
   }
@@ -59,5 +55,25 @@ export const getFilePublicUrl = async (filePath: string): Promise<string | null>
   } catch (error) {
     console.error('Error getting public URL:', error);
     return null;
+  }
+};
+
+/**
+ * List all files in the medical records bucket for a user
+ */
+export const listUserMedicalRecords = async (userId: string | undefined) => {
+  if (!userId) return { data: null, error: new Error('User ID is required') };
+  
+  try {
+    // First ensure the bucket exists
+    await ensureStorageBucket();
+    
+    // Then list files for the user
+    return await supabase.storage
+      .from('medical_records')
+      .list(userId);
+  } catch (error) {
+    console.error('Error listing user files:', error);
+    return { data: null, error };
   }
 };

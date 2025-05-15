@@ -1,13 +1,14 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Upload, File, XCircle } from "lucide-react";
+import { Upload, File, XCircle, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { listUserMedicalRecords } from "@/services/storageService";
 
 interface FileUploadProps {
   onUploadComplete?: (files: File[], filePaths: string[]) => void;
@@ -19,6 +20,7 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -62,12 +64,33 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const verifyFileUpload = async (filePath: string): Promise<boolean> => {
+    // Small delay to ensure file is properly processed
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    try {
+      const { data: filesList } = await supabase.storage
+        .from('medical_records')
+        .list(user?.id);
+        
+      const fileName = filePath.split('/').pop();
+      return filesList?.some(file => file.name === fileName) || false;
+    } catch (error) {
+      console.error("Error verifying file upload:", error);
+      return false;
+    }
+  };
+
   const uploadFileToSupabase = async (file: File): Promise<string> => {
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+    
     try {
       // Create a unique file path using a timestamp and random string
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${user?.id}/${fileName}`;
+      const filePath = `${user.id}/${fileName}`;
 
       // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage
@@ -78,11 +101,17 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
         throw uploadError;
       }
 
+      // Verify the file was actually uploaded to the bucket
+      const uploaded = await verifyFileUpload(filePath);
+      if (!uploaded) {
+        throw new Error("Failed to verify file upload in storage bucket");
+      }
+
       // Save metadata to the records_files table
       const { error: dbError } = await supabase
         .from('records_files')
         .insert({
-          user_id: user?.id,
+          user_id: user.id,
           filename: file.name,
           file_path: filePath,
           file_type: file.type,
@@ -113,6 +142,7 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
     
     setUploading(true);
     setProgress(0);
+    setUploadSuccess(false);
     
     try {
       const filePaths: string[] = [];
@@ -131,13 +161,18 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
       }
 
       if (filePaths.length > 0) {
+        setUploadSuccess(true);
+        
         if (onUploadComplete) {
           onUploadComplete(files, filePaths);
         }
         toast.success("Files uploaded successfully", {
-          description: `${filePaths.length} of ${files.length} files have been uploaded and are ready for analysis.`
+          description: `${filePaths.length} of ${files.length} files have been uploaded and are now visible in your medical records.`
         });
         setFiles([]);
+        
+        // Refresh records list after successful upload
+        await listUserMedicalRecords(user.id);
       } else {
         toast.error("All file uploads failed. Please try again.");
       }
@@ -145,7 +180,10 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
       toast.error(`Upload failed: ${error.message}`);
     } finally {
       setUploading(false);
-      setProgress(0);
+      setTimeout(() => {
+        setProgress(0);
+        setUploadSuccess(false);
+      }, 3000);
     }
   };
 
@@ -156,6 +194,8 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
           "border-2 border-dashed transition-colors",
           isDragging 
             ? "border-primary bg-primary/5" 
+            : uploadSuccess
+            ? "border-green-500 bg-green-50"
             : "border-border hover:border-primary/50",
         )}
       >
@@ -166,21 +206,36 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
           onDrop={handleDrop}
         >
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Upload className="h-8 w-8 text-primary" />
+            <div className={cn(
+              "h-16 w-16 rounded-full flex items-center justify-center",
+              uploadSuccess ? "bg-green-100" : "bg-primary/10"
+            )}>
+              {uploadSuccess 
+                ? <CheckCircle className="h-8 w-8 text-green-500" /> 
+                : <Upload className="h-8 w-8 text-primary" />
+              }
             </div>
             <div>
-              <h3 className="text-lg font-medium">Drag & Drop Files</h3>
+              <h3 className="text-lg font-medium">
+                {uploadSuccess 
+                  ? "Files Uploaded Successfully!" 
+                  : "Drag & Drop Files"}
+              </h3>
               <p className="text-sm text-muted-foreground mt-1">
-                or click to browse from your computer
+                {uploadSuccess
+                  ? "Your medical records are now available in your account"
+                  : "or click to browse from your computer"}
               </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Select Files
-            </Button>
+            {!uploadSuccess && (
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                Select Files
+              </Button>
+            )}
             <input
               type="file"
               multiple
@@ -188,6 +243,7 @@ const FileUpload = ({ onUploadComplete }: FileUploadProps) => {
               ref={fileInputRef}
               onChange={handleFileInputChange}
               accept=".pdf,.jpg,.jpeg,.png"
+              disabled={uploading}
             />
             <p className="text-xs text-muted-foreground">
               Supported formats: PDF, JPEG, PNG
