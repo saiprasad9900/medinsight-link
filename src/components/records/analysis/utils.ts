@@ -1,46 +1,28 @@
 
-// Utility functions for medical record analysis
-
-export const getSeverityColor = (type: string) => {
+export const getSeverityColor = (type: string): string => {
   switch (type) {
-    case "info": return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-    case "warning": return "bg-amber-500/10 text-amber-500 border-amber-500/20";
-    case "success": return "bg-green-500/10 text-green-500 border-green-500/20";
-    case "error": return "bg-red-500/10 text-red-500 border-red-500/20";
-    default: return "";
+    case "info":
+      return "border-blue-200 bg-blue-50/50 dark:bg-blue-950/10";
+    case "warning":
+      return "border-amber-200 bg-amber-50/50 dark:bg-amber-950/10";
+    case "success":
+      return "border-green-200 bg-green-50/50 dark:bg-green-950/10";
+    case "error":
+      return "border-red-200 bg-red-50/50 dark:bg-red-950/10";
+    default:
+      return "border-gray-200 bg-gray-50/50 dark:bg-gray-950/10";
   }
 };
 
-// Helper function to determine insight severity based on content keywords
-export const getInsightSeverity = (content: string) => {
-  const lowercaseContent = content.toLowerCase();
-  
-  // Critical keywords
-  if (lowercaseContent.includes("critical") || 
-      lowercaseContent.includes("severe") || 
-      lowercaseContent.includes("emergency") ||
-      lowercaseContent.includes("immediate attention")) {
-    return "error";
+export const getInsightSeverity = (type: string): "Low" | "Medium" | "High" => {
+  switch (type) {
+    case "error":
+      return "High";
+    case "warning":
+      return "Medium";
+    case "info":
+    case "success":
+    default:
+      return "Low";
   }
-  
-  // Warning keywords
-  if (lowercaseContent.includes("abnormal") || 
-      lowercaseContent.includes("elevated") || 
-      lowercaseContent.includes("reduced") ||
-      lowercaseContent.includes("concerning") ||
-      lowercaseContent.includes("monitor")) {
-    return "warning";
-  }
-  
-  // Success keywords
-  if (lowercaseContent.includes("normal") || 
-      lowercaseContent.includes("healthy") || 
-      lowercaseContent.includes("optimal") ||
-      lowercaseContent.includes("improved")) {
-    return "success";
-  }
-  
-  // Default to info
-  return "info";
 };
-

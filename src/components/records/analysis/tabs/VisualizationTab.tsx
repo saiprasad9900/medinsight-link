@@ -1,105 +1,133 @@
 
 import { MedicalRecord } from "@/types/records";
-import { PieChart, Pie, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 interface VisualizationTabProps {
   record: MedicalRecord;
 }
 
-// Chart colors for visualizations
-const COLORS = ['#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c'];
-
 const VisualizationTab = ({ record }: VisualizationTabProps) => {
-  // Generate data for visualization if we have analysis results
-  const generateVisualizationData = () => {
-    if (!record.analysis || !record.analysis.extractedData) return null;
-    
-    // Chart data for conditions
-    const conditionData = record.analysis.extractedData.conditions?.map(condition => ({
-      name: condition,
-      value: Math.floor(Math.random() * 40) + 10 // In a real app, this would be actual relevance data
-    })) || [];
-    
-    // Chart data for trends (simulated)
-    const trendData = [
-      { name: 'Jan', value: 30 },
-      { name: 'Feb', value: 25 },
-      { name: 'Mar', value: 35 },
-      { name: 'Apr', value: 40 },
-      { name: 'May', value: 28 }
-    ];
-    
-    return { conditionData, trendData };
-  };
-  
-  const visualizationData = generateVisualizationData();
-  
-  if (!visualizationData) {
+  if (!record.analysis?.extractedData) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground">No visualization data available</p>
+        <p className="text-muted-foreground">No data available for visualization</p>
       </div>
     );
   }
-  
+
+  const { extractedData } = record.analysis;
+
+  // Generate sample data for visualization based on record type
+  const generateVisualizationData = () => {
+    if (extractedData.testResults && extractedData.testResults.length > 0) {
+      return extractedData.testResults.map(test => ({
+        name: test.name,
+        value: parseFloat(test.value) || 0,
+        unit: test.unit
+      }));
+    }
+
+    if (extractedData.vitalSigns && extractedData.vitalSigns.length > 0) {
+      return extractedData.vitalSigns.map(vital => ({
+        name: vital.name,
+        value: parseFloat(vital.value) || 0,
+        unit: vital.unit
+      }));
+    }
+
+    return [];
+  };
+
+  const chartData = generateVisualizationData();
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
+  const conditionsData = extractedData.conditions 
+    ? extractedData.conditions.map((condition, index) => ({
+        name: condition,
+        value: Math.floor(Math.random() * 100) + 20,
+        color: COLORS[index % COLORS.length]
+      }))
+    : [];
+
   return (
     <div className="space-y-6 pt-4">
-      <div className="p-4 border rounded-lg bg-card">
-        <h3 className="font-medium mb-4">Condition Distribution</h3>
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={visualizationData.conditionData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              >
-                {visualizationData.conditionData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-      
-      <div className="p-4 border rounded-lg bg-card">
-        <h3 className="font-medium mb-4">Historical Trend Analysis</h3>
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={visualizationData.trendData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: 'var(--background)',
-                  borderColor: 'var(--border)',
-                  borderRadius: 'var(--radius)'
-                }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="value" 
-                stroke="var(--primary)" 
-                strokeWidth={2}
-                dot={{ r: 4 }} 
-                activeDot={{ r: 6 }} 
-                name="Value"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      {chartData.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Test Results Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip formatter={(value, name) => [value, name]} />
+                <Bar dataKey="value" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      {conditionsData.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Conditions Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={conditionsData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {conditionsData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      {extractedData.findings && extractedData.findings.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Key Findings Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {extractedData.findings.map((finding, index) => (
+                <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                  <div className="h-2 w-2 bg-primary rounded-full"></div>
+                  <span className="text-sm">{finding}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {chartData.length === 0 && conditionsData.length === 0 && (
+        <Card>
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">No numerical data available for visualization</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Upload lab results or records with test values to see charts
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
