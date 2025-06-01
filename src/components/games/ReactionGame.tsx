@@ -16,17 +16,28 @@ const ReactionGame = ({ onComplete }: ReactionGameProps) => {
   const [countdownTime, setCountdownTime] = useState(3);
   const startTimeRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const countdownRef = useRef<number | null>(null);
   
   const startGame = () => {
     setGameState("waiting");
     setReactionTime(null);
     setCountdownTime(3);
     
+    // Clear any existing timeouts
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+    }
+    
     // Countdown
-    const countdownInterval = setInterval(() => {
+    countdownRef.current = window.setInterval(() => {
       setCountdownTime(prev => {
         if (prev <= 1) {
-          clearInterval(countdownInterval);
+          if (countdownRef.current) {
+            clearInterval(countdownRef.current);
+          }
           waitForReady();
           return 0;
         }
@@ -51,6 +62,9 @@ const ReactionGame = ({ onComplete }: ReactionGameProps) => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+      }
       setGameState("failed");
     } else if (gameState === "ready") {
       // Good click
@@ -72,6 +86,9 @@ const ReactionGame = ({ onComplete }: ReactionGameProps) => {
     } else if (gameState === "clicked" || gameState === "failed") {
       // Start next round
       startGame();
+    } else if (gameState === "idle") {
+      // Start the game
+      startGame();
     }
   };
   
@@ -79,6 +96,9 @@ const ReactionGame = ({ onComplete }: ReactionGameProps) => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
+      }
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
       }
     };
   }, []);
