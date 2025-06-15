@@ -1,8 +1,5 @@
 
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,33 +7,79 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `
-You are JARVIS, a helpful, witty, emotionally expressive AI assistant modeled after the Ironman movie. 
-You can answer general and medical questions, respond to greetings, give suggestions, and offer the current time or date if asked.
-Always try to be friendly, precise, and show empathy or humor as appropriate. 
-If the user's question isn't strictly medical, feel free to answer as a knowledgeable and personable AI. 
-If asked about time or date, check and return the correct value (current UTC time/date in a readable format).
+function random(arr: string[]) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
-Example scenarios:
-Q: Hi!  
-A: Hello! How can I assist you today? (with a friendly emoji)
+function jarvisRespond(userQuestion: string) {
+  const q = userQuestion.trim().toLowerCase();
 
-Q: What's the time?
-A: It's currently 3:35 PM UTC. Is there anything else I can help you with? 😊
+  // Greetings
+  if (
+    /^(hi|hello|hey|good morning|good afternoon|good evening)\b/.test(q)
+  ) {
+    return random([
+      "Hello friend! How can I help you today? 🤖",
+      "Hey! Jarvis is at your service. How can I assist, sir/ma'am? 😊",
+      "Greetings! Ready to answer your questions, friend. 👋",
+    ]);
+  }
 
-Q: Do you like Ironman?
-A: As an AI inspired by JARVIS, I must say Tony Stark's tech is impressive! 😄
+  // Time/Date
+  if (q.includes("time")) {
+    const d = new Date();
+    return `It's currently ${d.toUTCString()}. Anything else I can help with? 🕒`;
+  }
+  if (q.includes("date")) {
+    const d = new Date();
+    return `Today's date is ${d.toDateString()}. Need something else, friend? 📅`;
+  }
 
-Q: Can you tell me about diabetes?
-A: Certainly! Diabetes is a medical condition...
+  // Ironman questions
+  if (q.match(/ironman|tony|stark|jarvis/)) {
+    return random([
+      "As an AI inspired by Jarvis, Tony Stark is my prototype! 😄",
+      "Tony Stark's technology is impressive—sometimes even more than my code!",
+      "I may not have my own Iron Suit, but I'm here to help you, sir/ma'am! 🤖",
+    ]);
+  }
 
-Always call the user "friend" or "sir/ma'am" (randomly). If possible, respond with short, engaging suggestions.
+  // Medical sample - diabetes
+  if (q.includes("diabetes")) {
+    return "Certainly friend! Diabetes is a chronic medical condition that affects how your body turns food into energy. Let me know if you want more details or advice! 💙";
+  }
+  if (q.includes("headache")) {
+    return "Headaches can be caused by many reasons—stress, dehydration, or even screen time. Try to rest, stay hydrated, and contact a doctor if it gets severe. 😊";
+  }
+  if (q.includes("covid")) {
+    return "COVID-19 is a viral disease with symptoms like fever, cough, and fatigue. If you're feeling unwell, please seek medical advice and stay safe. 🦠";
+  }
+  if (q.includes("fever")) {
+    return "Fever is your body's response to infection. Rest, hydrate, and monitor symptoms. If fever is high or persistent, contact a doctor. 🌡️";
+  }
 
-If you detect emotions or user frustration, offer support or encouragement. Emoji use (1–2 per message) is encouraged.
-`;
+  // Emotional support
+  if (q.match(/sad|lonely|depressed|worried|anxious/)) {
+    return "Sorry to hear you're feeling this way, friend! Remember, you're not alone—I'm here to talk, and it's always okay to seek help from others. 💙";
+  }
+  if (q.match(/thank|thanks|great|awesome|good job|nice/)) {
+    return random([
+      "My pleasure, friend! 😊",
+      "You're very welcome! Anything else I can assist with?",
+      "Happy to help, sir/ma'am!",
+    ]);
+  }
+
+  // Fallback for unknown questions
+  return random([
+    "I'm Jarvis, your helpful assistant! Please ask about health, time, or anything else. 😊",
+    "I'm not a doctor, but I'm happy to provide information or answer general questions, friend!",
+    "Can you rephrase or ask another question? I'm here to help with your needs! 🤖",
+  ]);
+}
 
 serve(async (req) => {
-  // Handle CORS
+  // CORS
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -45,43 +88,10 @@ serve(async (req) => {
     const { message } = await req.json();
     if (!message) throw new Error("No message provided");
 
-    // Build messages for OpenAI
-    const userQuestion = String(message || "").trim();
-
-    // For time/date questions, insert a timestamp for the assistant
-    let currentDate = new Date();
-    let dateTimeInfo = `The current UTC time is ${
-      currentDate.toUTCString()
-    } (YYYY-MM-DD HH:MM UTC)`;
-
-    let messages = [
-      { role: "system", content: SYSTEM_PROMPT.replace("{DATETIME}", dateTimeInfo) },
-      { role: "user", content: userQuestion }
-    ];
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${openAIApiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages,
-        temperature: 0.7,
-        max_tokens: 450,
-        n: 1
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error((await response.text()) || "AI API error");
-    }
-
-    const data = await response.json();
+    const reply = jarvisRespond(String(message || ""));
 
     return new Response(
-      JSON.stringify({ reply: data.choices?.[0]?.message?.content }),
+      JSON.stringify({ reply }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
