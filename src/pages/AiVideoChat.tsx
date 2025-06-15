@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import RobotAvatar from "@/components/videochat/RobotAvatar";
 import { useSpeechRecognition } from "@/components/videochat/useSpeechRecognition";
@@ -6,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Mic, Loader2, Video, AlertTriangle } from "lucide-react";
+import { Mic, Loader2, Video, AlertTriangle, VideoOff } from "lucide-react";
 import MedicalDisclaimer from "@/components/doctor/MedicalDisclaimer";
 
 const AiVideoChat: React.FC = () => {
@@ -51,10 +52,22 @@ const AiVideoChat: React.FC = () => {
     setQuestion(text);
     handleAskAI(text);
   };
-  const { listening, startListening } = useSpeechRecognition({ onResult: onSpeechResult });
+  const onSpeechError = (errorMsg: string) => {
+    setError(errorMsg);
+  };
+  const { listening, startListening } = useSpeechRecognition({
+    onResult: onSpeechResult,
+    onError: onSpeechError,
+  });
 
   // --- UPDATED: Use 'jarvis-ai' for all questions, expects JARVIS-like, emotional/human responses ---
   const handleAskAI = async (userQuestion: string) => {
+    if (!userQuestion?.trim()) {
+      setError("I didn't hear anything clearly. Could you please speak again?");
+      setIsThinking(false);
+      setQuestion("");
+      return;
+    }
     setError(null);
     setIsThinking(true);
     setAnswer(null);
@@ -109,7 +122,7 @@ const AiVideoChat: React.FC = () => {
                 <video ref={videoRef} autoPlay muted playsInline width={180} height={140} className="rounded-sm" />
               ) : (
                 <div className="flex flex-col items-center justify-center text-gray-400">
-                  <Mic className="h-6 w-6 mb-2" />
+                  <VideoOff className="h-6 w-6 mb-2" />
                   <span className="text-xs">No camera detected</span>
                 </div>
               )}
