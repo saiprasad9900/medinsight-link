@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import RobotAvatar from "@/components/videochat/RobotAvatar";
 import { useSpeechRecognition } from "@/components/videochat/useSpeechRecognition";
@@ -60,13 +59,13 @@ const AiVideoChat: React.FC = () => {
     setAnswer(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('doctor-ai', {
-        body: { message: userQuestion, chatHistory: [] }
+      const { data, error } = await supabase.functions.invoke('jarvis-ai', {
+        body: { message: userQuestion }
       });
 
       if (error || !data?.reply) {
         setError("Sorry, I couldn't get a reply. Try again.");
-        toast.error("AI Doctor unavailable, please retry.");
+        toast.error("AI unavailable, please retry.");
         setIsThinking(false);
         return;
       }
@@ -85,7 +84,7 @@ const AiVideoChat: React.FC = () => {
         AI Doctor Video Chat
       </h1>
       <p className="text-muted-foreground mb-4 text-center max-w-lg">
-        Talk to Dr. MediPredict! Ask your health or medical questions and get spoken answers.
+        Talk to Dr. MediPredict (JARVIS)! Ask your health, general, or random questions—get spoken, friendly answers.
       </p>
       <div className="w-full flex flex-col md:flex-row items-center justify-center gap-8 pt-6 pb-2">
         {/* User Video */}
@@ -106,7 +105,7 @@ const AiVideoChat: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* Robot Doctor Video / Avatar */}
+        {/* Robot Doctor/JARVIS Avatar */}
         <div>
           <div className="flex flex-col items-center justify-center p-3">
             <span className="text-base mb-2 font-semibold flex items-center gap-1 text-primary">
@@ -151,12 +150,12 @@ const AiVideoChat: React.FC = () => {
         {/* Show answer */}
         {answer && (
           <div className="bg-muted p-4 rounded-md mt-2 shadow text-center w-full max-w-md animate-fade-in">
-            <span className="font-semibold">Dr. MediPredict:</span>
+            <span className="font-semibold">JARVIS:</span>
             <div className="mt-2">{answer}</div>
           </div>
         )}
       </div>
-      <div className="mt-auto mb-6 opacity-60 text-xs">Powered by browser AI – medical information only; not a substitute for professional advice.</div>
+      <div className="mt-auto mb-6 opacity-60 text-xs">Powered by OpenAI via JARVIS-like assistant – info & empathy, not a substitute for professional advice.</div>
     </div>
   );
 };
