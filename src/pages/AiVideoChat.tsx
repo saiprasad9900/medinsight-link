@@ -53,6 +53,7 @@ const AiVideoChat: React.FC = () => {
   };
   const { listening, startListening } = useSpeechRecognition({ onResult: onSpeechResult });
 
+  // --- UPDATED: Use 'jarvis-ai' for all questions, expects JARVIS-like, emotional/human responses ---
   const handleAskAI = async (userQuestion: string) => {
     setError(null);
     setIsThinking(true);
