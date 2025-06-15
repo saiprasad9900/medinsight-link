@@ -60,20 +60,30 @@ const AiVideoChat: React.FC = () => {
     setAnswer(null);
 
     try {
+      console.log("[JARVIS] Invoking jarvis-ai function with:", userQuestion);
       const { data, error } = await supabase.functions.invoke('jarvis-ai', {
         body: { message: userQuestion }
       });
 
-      if (error || !data?.reply) {
-        setError("Sorry, I couldn't get a reply. Try again.");
+      console.log("[JARVIS] Edge Function Response:", { data, error });
+
+      if (error) {
+        setError("Sorry, I couldn't get a reply. Try again. (Edge error)");
         toast.error("AI unavailable, please retry.");
+        setIsThinking(false);
+        return;
+      }
+      if (!data || !data.reply) {
+        setError("No response received from JARVIS. Please try again, or check the configuration.");
+        toast.error("JARVIS did not respond.", { description: JSON.stringify(data) });
         setIsThinking(false);
         return;
       }
       setAnswer(data.reply);
       speak(data.reply);
-    } catch (err) {
+    } catch (err: any) {
       setError("Service unavailable.");
+      console.error("[JARVIS] Exception:", err);
     } finally {
       setIsThinking(false);
     }
