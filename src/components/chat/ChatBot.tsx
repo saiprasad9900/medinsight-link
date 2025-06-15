@@ -40,7 +40,7 @@ const ChatBot = ({
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "Hello! I'm Dr. MediPredict, your AI health assistant. How can I help you today? Remember, I'm here to provide general health information, but I'm not a replacement for professional medical advice."
+      content: "Greetings. I am Jarvis, your personal AI assistant. How may I help you today? Remember, for medical concerns, I provide information, not official advice."
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);

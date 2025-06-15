@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import RobotAvatar from "@/components/videochat/RobotAvatar";
 import { useSpeechRecognition } from "@/components/videochat/useSpeechRecognition";
@@ -86,8 +87,8 @@ const AiVideoChat: React.FC = () => {
         return;
       }
       if (!data || !data.reply) {
-        setError("No response received from Dr. MediPredict. Please try again, or check the configuration.");
-        toast.error("Dr. MediPredict did not respond.", { description: JSON.stringify(data) });
+        setError("No response received from Jarvis. Please try again, or check the configuration.");
+        toast.error("Jarvis did not respond.", { description: JSON.stringify(data) });
         setIsThinking(false);
         return;
       }
@@ -104,10 +105,10 @@ const AiVideoChat: React.FC = () => {
   return (
     <div className="w-full min-h-screen flex flex-col items-center bg-background animate-fade-in pt-4 px-2">
       <h1 className="text-3xl font-bold mb-1 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-        AI Doctor Video Chat
+        Jarvis: AI Video Chat
       </h1>
       <p className="text-muted-foreground mb-4 text-center max-w-lg">
-        Talk to Dr. MediPredict! Ask your health, general, or random questions—get spoken, friendly answers.
+        Talk to Jarvis! Your personal AI assistant for any question.
       </p>
       <div className="w-full flex flex-col md:flex-row items-center justify-center gap-8 pt-6 pb-2">
         {/* User Video */}
@@ -173,12 +174,12 @@ const AiVideoChat: React.FC = () => {
         {/* Show answer */}
         {answer && (
           <div className="bg-muted p-4 rounded-md mt-2 shadow text-center w-full max-w-md animate-fade-in">
-            <span className="font-semibold">Dr. MediPredict:</span>
+            <span className="font-semibold">Jarvis:</span>
             <div className="mt-2">{answer}</div>
           </div>
         )}
       </div>
-      <div className="mt-auto mb-6 opacity-60 text-xs">Powered by OpenAI via Dr. MediPredict – info & empathy, not a substitute for professional advice.</div>
+      <div className="mt-auto mb-6 opacity-60 text-xs">Powered by OpenAI. Jarvis is an AI assistant and not a medical professional.</div>
     </div>
   );
 };

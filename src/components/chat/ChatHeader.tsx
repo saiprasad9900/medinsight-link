@@ -25,8 +25,8 @@ const ChatHeader = ({
             <Shield className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-medium">Dr. MediPredict</h3>
-            <p className="text-xs text-muted-foreground">AI Health Assistant</p>
+            <h3 className="font-medium">Jarvis</h3>
+            <p className="text-xs text-muted-foreground">Personal AI Assistant</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
