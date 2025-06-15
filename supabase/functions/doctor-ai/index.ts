@@ -1,10 +1,57 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+function random(arr: string[]) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+const handleConversationalTidbits = (message: string): string | null => {
+  const q = message.trim().toLowerCase();
+
+  // Greetings
+  if (/^(hi|hello|hey|yo)\b/.test(q) || q === 'good morning' || q === 'good afternoon' || q === 'good evening') {
+    // A simple way to get hours in a US timezone, can be improved.
+    const hour = new Date().getUTCHours() - 5; 
+    
+    if (q.includes('morning') || (hour < 12 && hour >= 5)) {
+      return "Good morning! I'm Dr. MediPredict. How can I help you today?";
+    }
+    if (q.includes('afternoon') || (hour >= 12 && hour < 18)) {
+      return "Good afternoon! I'm Dr. MediPredict. What's on your mind?";
+    }
+    if (q.includes('evening') || (hour >= 18 || hour < 5)) {
+      return "Good evening! I'm Dr. MediPredict. How may I assist you?";
+    }
+    return random([
+        "Hello! I'm Dr. MediPredict. How can I assist you with your health questions today?",
+        "Greetings! Dr. MediPredict at your service. What can I help you with?",
+    ]);
+  }
+
+  // Gratitude
+  if (q.match(/thank|thanks|great|awesome|good job|nice/)) {
+    return random([
+      "You're most welcome! Is there anything else I can help with?",
+      "I'm glad I could assist. Your health is important!",
+      "Happy to help. Don't hesitate to ask if you have more questions."
+    ]);
+  }
+  
+  // How are you?
+  if (q.match(/how are you|how's it going/)) {
+    return random([
+      "As an AI, I'm functioning optimally! But more importantly, how are you feeling today?",
+      "I'm ready to assist you. What can I help you with?",
+      "I'm here and ready to help. Let's focus on your health questions."
+    ]);
+  }
+
+  return null; // No conversational match, proceed to main logic
 };
 
 // Enhanced medical fallback responses for when API key is missing or rate limited
@@ -299,6 +346,18 @@ serve(async (req) => {
     console.log("Message received:", message);
     console.log("Chat history length:", chatHistory?.length || 0);
     
+    // Handle simple conversational tidbits first
+    const conversationalReply = handleConversationalTidbits(message);
+    if (conversationalReply) {
+      console.log("Replying with a conversational tidbit.");
+      return new Response(JSON.stringify({ 
+        reply: conversationalReply,
+        source: "conversational-handler"
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
     // Check for medical emergency keywords
     if (detectMedicalEmergency(message)) {
       console.log("DETECTED POTENTIAL MEDICAL EMERGENCY");
