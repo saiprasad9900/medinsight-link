@@ -1,1 +1,4 @@
 project_id = "atuafkshrqypvpsqgnxk"
+
+[functions.jarvis-ai]
+verify_jwt = true
