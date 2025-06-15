@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import RobotAvatar from "@/components/videochat/RobotAvatar";
 import { useSpeechRecognition } from "@/components/videochat/useSpeechRecognition";
@@ -60,7 +59,7 @@ const AiVideoChat: React.FC = () => {
     onError: onSpeechError,
   });
 
-  // --- UPDATED: Use 'jarvis-ai' for all questions, expects JARVIS-like, emotional/human responses ---
+  // --- UPDATED: Use 'doctor-ai' for all questions, expects JARVIS-like, emotional/human responses ---
   const handleAskAI = async (userQuestion: string) => {
     if (!userQuestion?.trim()) {
       setError("I didn't hear anything clearly. Could you please speak again?");
@@ -73,12 +72,12 @@ const AiVideoChat: React.FC = () => {
     setAnswer(null);
 
     try {
-      console.log("[JARVIS] Invoking jarvis-ai function with:", userQuestion);
-      const { data, error } = await supabase.functions.invoke('jarvis-ai', {
+      console.log("[AI-Doctor] Invoking doctor-ai function with:", userQuestion);
+      const { data, error } = await supabase.functions.invoke('doctor-ai', {
         body: { message: userQuestion }
       });
 
-      console.log("[JARVIS] Edge Function Response:", { data, error });
+      console.log("[AI-Doctor] Edge Function Response:", { data, error });
 
       if (error) {
         setError("Sorry, I couldn't get a reply. Try again. (Edge error)");
@@ -87,8 +86,8 @@ const AiVideoChat: React.FC = () => {
         return;
       }
       if (!data || !data.reply) {
-        setError("No response received from JARVIS. Please try again, or check the configuration.");
-        toast.error("JARVIS did not respond.", { description: JSON.stringify(data) });
+        setError("No response received from Dr. MediPredict. Please try again, or check the configuration.");
+        toast.error("Dr. MediPredict did not respond.", { description: JSON.stringify(data) });
         setIsThinking(false);
         return;
       }
@@ -96,7 +95,7 @@ const AiVideoChat: React.FC = () => {
       speak(data.reply);
     } catch (err: any) {
       setError("Service unavailable.");
-      console.error("[JARVIS] Exception:", err);
+      console.error("[AI-Doctor] Exception:", err);
     } finally {
       setIsThinking(false);
     }
@@ -108,7 +107,7 @@ const AiVideoChat: React.FC = () => {
         AI Doctor Video Chat
       </h1>
       <p className="text-muted-foreground mb-4 text-center max-w-lg">
-        Talk to Dr. MediPredict (JARVIS)! Ask your health, general, or random questions—get spoken, friendly answers.
+        Talk to Dr. MediPredict! Ask your health, general, or random questions—get spoken, friendly answers.
       </p>
       <div className="w-full flex flex-col md:flex-row items-center justify-center gap-8 pt-6 pb-2">
         {/* User Video */}
@@ -174,12 +173,12 @@ const AiVideoChat: React.FC = () => {
         {/* Show answer */}
         {answer && (
           <div className="bg-muted p-4 rounded-md mt-2 shadow text-center w-full max-w-md animate-fade-in">
-            <span className="font-semibold">JARVIS:</span>
+            <span className="font-semibold">Dr. MediPredict:</span>
             <div className="mt-2">{answer}</div>
           </div>
         )}
       </div>
-      <div className="mt-auto mb-6 opacity-60 text-xs">Powered by OpenAI via JARVIS-like assistant – info & empathy, not a substitute for professional advice.</div>
+      <div className="mt-auto mb-6 opacity-60 text-xs">Powered by OpenAI via Dr. MediPredict – info & empathy, not a substitute for professional advice.</div>
     </div>
   );
 };
