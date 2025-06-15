@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "sonner";
@@ -15,6 +14,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import AiDoctor from "./pages/AiDoctor";
+import AiVideoChat from "./pages/AiVideoChat";
 import Appointments from "./pages/Appointments";
 import DietPlanner from "./pages/DietPlanner";
 import HealthGames from "./pages/HealthGames"; // New games page
@@ -55,6 +55,7 @@ function App() {
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/appointments" element={<Appointments />} />
                   <Route path="/health-games" element={<HealthGames />} />
+                  <Route path="/ai-video-chat" element={<AiVideoChat />} />
                 </Route>
               </Route>
               
