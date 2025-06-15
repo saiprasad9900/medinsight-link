@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -18,7 +19,8 @@ import {
   Clipboard,
   CalendarClock,
   Apple,
-  Brain
+  Brain,
+  Video, // Import Video icon
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -65,6 +67,13 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
       icon: <Bot className="h-5 w-5" />,
       href: "/ai-doctor",
       active: pathname === "/ai-doctor",
+      section: "health"
+    },
+    {
+      label: "AI Video Chat",
+      icon: <Video className="h-5 w-5" />, // New Video Chat link
+      href: "/ai-video-chat",
+      active: pathname === "/ai-video-chat",
       section: "health"
     },
     {
@@ -266,3 +275,4 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
     </div>
   );
 }
+
