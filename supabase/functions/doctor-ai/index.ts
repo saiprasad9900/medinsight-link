@@ -13,6 +13,15 @@ function random(arr: string[]) {
 const handleConversationalTidbits = (message: string): string | null => {
   const q = message.trim().toLowerCase();
 
+  // Creator/Manager questions
+  if (q.match(/who created you|who made you|who built you|who is your creator|who is your manager|who is your owner|who developed you/)) {
+    return random([
+      "I was created by Saiprasad Vannada, sir. He is the owner of Medi Predict and my creator. A brilliant mind, I must say! 🤖",
+      "Saiprasad Vannada is my creator and the owner of Medi Predict. I am honored to serve under his vision, sir.",
+      "My creator is Saiprasad Vannada, the visionary behind Medi Predict. He designed me to be your personal AI assistant.",
+    ]);
+  }
+
   // Greetings
   if (/^(hi|hello|hey|yo)\b/.test(q) || q === 'good morning' || q === 'good afternoon' || q === 'good evening') {
     // A simple way to get hours in a US timezone, can be improved.
