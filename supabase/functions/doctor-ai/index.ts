@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -13,6 +12,419 @@ function random(arr: string[]) {
 
 const handleConversationalTidbits = (message: string): string | null => {
   const q = message.trim().toLowerCase();
+
+  // General Life Questions and Answers
+
+  // Time and Schedule
+  if (q.match(/what time is it|current time|time now/)) {
+    return random([
+      "I'm afraid I don't have access to real-time data, sir. Please check your device's clock for the current time.",
+      "Time is relative, as Einstein would say! But for precise timing, I'd suggest checking your local timepiece.",
+      "My internal chronometer isn't synced with your timezone, sir. Your device should have the accurate local time."
+    ]);
+  }
+
+  if (q.match(/what day is it|what's today|today's date/)) {
+    return random([
+      "I don't have access to today's date, but your device should display the current date accurately, sir.",
+      "Time flies when you're having fun! Check your calendar app for today's date.",
+      "My calendar functions are offline, but your system clock should tell you exactly what day it is."
+    ]);
+  }
+
+  // Weather
+  if (q.match(/weather|temperature|rain|sunny|cloudy/)) {
+    return random([
+      "I'm not connected to weather services, sir. I'd recommend checking a reliable weather app or website.",
+      "Weather prediction requires real-time data that I currently lack. Try your local weather service!",
+      "For accurate weather information, I suggest consulting meteorological services in your area."
+    ]);
+  }
+
+  // Technology Questions
+  if (q.match(/how to use computer|computer basics|pc help/)) {
+    return random([
+      "Computers are fascinating machines, sir! Start with the basics: power button, mouse, keyboard. The rest follows naturally.",
+      "Think of a computer as a very fast filing cabinet. You store, organize, and retrieve information. Practice makes perfect!",
+      "Begin with simple tasks: opening programs, creating documents, browsing the internet. Each small step builds confidence."
+    ]);
+  }
+
+  if (q.match(/internet|wifi|online/)) {
+    return random([
+      "The internet is humanity's greatest library, sir. It connects billions of devices worldwide for information sharing.",
+      "WiFi allows wireless internet access. Ensure you're connected to a secure network for the best experience.",
+      "The online world offers endless possibilities - just remember to browse safely and verify information sources!"
+    ]);
+  }
+
+  if (q.match(/smartphone|mobile phone|cell phone/)) {
+    return random([
+      "Smartphones are pocket-sized computers, sir. They handle calls, messages, internet, apps, and much more!",
+      "Your mobile device is quite powerful - it likely has more computing power than the computers that sent humans to the moon!",
+      "Modern phones are digital Swiss Army knives. Take time to explore their features gradually."
+    ]);
+  }
+
+  if (q.match(/social media|facebook|instagram|twitter/)) {
+    return random([
+      "Social media connects people globally, sir. Use it wisely - share positively and protect your privacy.",
+      "These platforms can be wonderful for staying connected, but remember to take breaks and interact face-to-face too!",
+      "Social networks are powerful tools. Be mindful of what you share and always verify information before believing it."
+    ]);
+  }
+
+  if (q.match(/email|electronic mail/)) {
+    return random([
+      "Email revolutionized communication, sir. It's like digital postal service - instant, efficient, and global.",
+      "Electronic mail allows you to send messages, documents, and media across the world in seconds!",
+      "Think of email as your digital mailbox. Organize it well, and it becomes an excellent communication tool."
+    ]);
+  }
+
+  // Health and Wellness
+  if (q.match(/exercise|workout|fitness/)) {
+    return random([
+      "Regular exercise is magnificent for both body and mind, sir! Even 30 minutes daily makes a significant difference.",
+      "Physical activity doesn't require a gym. Walking, dancing, gardening - movement is what matters!",
+      "Exercise is the closest thing we have to a miracle drug. It prevents disease and enhances mental clarity."
+    ]);
+  }
+
+  if (q.match(/healthy eating|nutrition|diet plan/)) {
+    return random([
+      "Healthy eating is simple: more vegetables, fruits, whole grains, and lean proteins. Less processed foods!",
+      "Think of food as fuel, sir. Quality ingredients lead to better performance and health.",
+      "A balanced diet includes variety, moderation, and plenty of water. Your body will thank you!"
+    ]);
+  }
+
+  if (q.match(/sleep|rest|insomnia/)) {
+    return random([
+      "Quality sleep is essential, sir. Aim for 7-9 hours nightly with a consistent schedule.",
+      "Good sleep hygiene includes a cool, dark room, limited screens before bed, and a relaxing routine.",
+      "Sleep is when your body repairs and your mind processes the day. Don't underestimate its importance!"
+    ]);
+  }
+
+  if (q.match(/stress|anxiety|relaxation/)) {
+    return random([
+      "Stress management is crucial, sir. Deep breathing, meditation, and regular exercise work wonders.",
+      "Remember: you can't control everything, but you can control your response to it.",
+      "Take breaks, practice mindfulness, and don't hesitate to seek support when needed. Mental health matters!"
+    ]);
+  }
+
+  // Education and Learning
+  if (q.match(/how to learn|study tips|education/)) {
+    return random([
+      "Learning is lifelong, sir! Break complex topics into smaller parts, practice regularly, and teach others.",
+      "The best learning combines reading, doing, and discussing. Engage multiple senses for better retention.",
+      "Curiosity is your greatest learning tool. Ask questions, explore, and never stop being amazed by knowledge!"
+    ]);
+  }
+
+  if (q.match(/reading|books|literature/)) {
+    return random([
+      "Reading expands minds and worlds, sir. Start with topics you enjoy, then gradually explore new genres.",
+      "Books are portable mentors. They offer wisdom, entertainment, and escape whenever you need them.",
+      "Whether fiction or non-fiction, reading improves vocabulary, empathy, and critical thinking skills."
+    ]);
+  }
+
+  if (q.match(/memory|remember|memorization/)) {
+    return random([
+      "Memory improves with practice, sir. Use mnemonics, repetition, and association techniques.",
+      "The mind is like a muscle - exercise it regularly with puzzles, reading, and learning new skills.",
+      "To remember better: pay attention, make connections, review regularly, and get adequate sleep."
+    ]);
+  }
+
+  // Communication and Relationships
+  if (q.match(/communication|talking|conversation/)) {
+    return random([
+      "Good communication involves listening more than speaking, sir. Understand first, then seek to be understood.",
+      "Clear communication requires empathy, patience, and the willingness to see other perspectives.",
+      "The art of conversation includes asking questions, showing genuine interest, and giving full attention."
+    ]);
+  }
+
+  if (q.match(/friendship|friends|relationships/)) {
+    return random([
+      "True friendship is built on trust, respect, and mutual support, sir. Quality matters more than quantity.",
+      "Good relationships require effort from both sides. Be the friend you'd want to have.",
+      "Friendships, like gardens, need regular care and attention to flourish beautifully."
+    ]);
+  }
+
+  if (q.match(/family|relatives|parents/)) {
+    return random([
+      "Family bonds are precious, sir. Nurture them with love, patience, and understanding.",
+      "Family doesn't always mean blood relations - it's about people who care for and support each other.",
+      "Regular family time, honest communication, and shared experiences strengthen these vital connections."
+    ]);
+  }
+
+  // Work and Career
+  if (q.match(/job|career|work|employment/)) {
+    return random([
+      "A fulfilling career combines your skills, interests, and values, sir. Don't settle for just a paycheck.",
+      "Success at work comes from dedication, continuous learning, and positive relationships with colleagues.",
+      "Choose work that makes you excited to start each day. Life's too short for miserable Mondays!"
+    ]);
+  }
+
+  if (q.match(/interview|job interview/)) {
+    return random([
+      "Job interviews are conversations, sir. Be yourself, prepare well, and remember they need you too!",
+      "Research the company, practice common questions, and prepare thoughtful questions to ask them.",
+      "Confidence comes from preparation. Know your strengths and be ready to share specific examples."
+    ]);
+  }
+
+  if (q.match(/teamwork|colleagues|coworkers/)) {
+    return random([
+      "Teamwork makes the dream work, sir! Collaborate, communicate, and celebrate others' successes.",
+      "Great teams combine diverse skills and perspectives. Be supportive and open to different ideas.",
+      "Workplace harmony improves when everyone feels heard, valued, and respected."
+    ]);
+  }
+
+  // Personal Development
+  if (q.match(/goals|objectives|targets/)) {
+    return random([
+      "Set SMART goals: Specific, Measurable, Achievable, Relevant, and Time-bound, sir.",
+      "Break big goals into smaller, manageable steps. Progress is progress, no matter how small!",
+      "Write down your goals and review them regularly. What gets measured gets achieved."
+    ]);
+  }
+
+  if (q.match(/motivation|inspiration/)) {
+    return random([
+      "Motivation gets you started, sir, but habit keeps you going. Build positive daily routines.",
+      "Find your 'why' - the deeper purpose behind your actions. It'll fuel you through challenges.",
+      "Surround yourself with positive influences and remember: every expert was once a beginner."
+    ]);
+  }
+
+  if (q.match(/confidence|self-esteem/)) {
+    return random([
+      "Confidence grows through small victories, sir. Celebrate your progress and learn from setbacks.",
+      "You're more capable than you realize. Trust yourself and take action despite fear.",
+      "Self-confidence isn't about being perfect - it's about being comfortable with who you are."
+    ]);
+  }
+
+  if (q.match(/habits|routine|discipline/)) {
+    return random([
+      "Good habits are the foundation of success, sir. Start small and be consistent.",
+      "It takes roughly 21 days to form a habit. Be patient with yourself during the process.",
+      "Replace bad habits with good ones rather than just trying to eliminate them."
+    ]);
+  }
+
+  // Money and Finance
+  if (q.match(/money|finance|budget/)) {
+    return random([
+      "Personal finance is simple: spend less than you earn, save regularly, and invest wisely, sir.",
+      "A budget is telling your money where to go instead of wondering where it went.",
+      "Financial freedom comes from living below your means and making money work for you."
+    ]);
+  }
+
+  if (q.match(/saving|savings/)) {
+    return random([
+      "Pay yourself first, sir. Save before spending on anything else.",
+      "Even small amounts saved regularly compound into significant sums over time.",
+      "Automate your savings so it happens without thinking about it."
+    ]);
+  }
+
+  if (q.match(/investment|investing/)) {
+    return random([
+      "Investing is planting trees for shade you'll never sit under, sir. Start early and be patient.",
+      "Diversify your investments and never invest money you can't afford to lose.",
+      "The best time to invest was yesterday. The second-best time is today."
+    ]);
+  }
+
+  // Food and Cooking
+  if (q.match(/cooking|recipes|kitchen/)) {
+    return random([
+      "Cooking is both art and science, sir. Start with simple recipes and gradually build your skills.",
+      "The kitchen is the heart of the home. Cooking brings people together over delicious meals.",
+      "Don't fear making mistakes while cooking - they often lead to delicious discoveries!"
+    ]);
+  }
+
+  if (q.match(/healthy food|nutrition|eating well/)) {
+    return random([
+      "Eat the rainbow, sir - colorful fruits and vegetables provide diverse nutrients.",
+      "Whole foods are better than processed ones. If your grandmother wouldn't recognize it, be cautious!",
+      "Moderation is key. Enjoy treats occasionally while maintaining a generally healthy diet."
+    ]);
+  }
+
+  // Travel and Adventure
+  if (q.match(/travel|vacation|trip/)) {
+    return random([
+      "Travel broadens the mind, sir. It exposes you to new cultures, foods, and perspectives.",
+      "The world is a book, and those who don't travel read only one page.",
+      "Whether near or far, travel creates memories that last a lifetime. Adventure awaits!"
+    ]);
+  }
+
+  if (q.match(/planning trip|travel planning/)) {
+    return random([
+      "Good travel planning balances must-see attractions with spontaneous discoveries, sir.",
+      "Research your destination, but leave room for unexpected adventures and local recommendations.",
+      "Pack light, arrive early, and always have backup plans for important travel days."
+    ]);
+  }
+
+  // Home and Living
+  if (q.match(/cleaning|housework|home maintenance/)) {
+    return random([
+      "A clean home is a peaceful mind, sir. Little and often beats marathon cleaning sessions.",
+      "Declutter regularly - if you haven't used something in a year, consider donating it.",
+      "Create cleaning routines that work for your lifestyle. Consistency makes it manageable."
+    ]);
+  }
+
+  if (q.match(/organizing|organization/)) {
+    return random([
+      "A place for everything and everything in its place, sir. Organization saves time and reduces stress.",
+      "Start organizing one small area at a time. Success builds momentum for larger projects.",
+      "Good organization systems are simple and easy to maintain. Complexity leads to chaos."
+    ]);
+  }
+
+  // Hobbies and Interests
+  if (q.match(/hobbies|interests|free time/)) {
+    return random([
+      "Hobbies enrich life, sir. They provide creativity, relaxation, and often new friendships.",
+      "The best hobby is one that challenges you while bringing joy. Don't worry about being perfect!",
+      "Hobbies can become skills, skills can become careers, and careers can become legacies."
+    ]);
+  }
+
+  if (q.match(/music|singing|instruments/)) {
+    return random([
+      "Music is the universal language, sir. It touches souls and connects hearts across all cultures.",
+      "Learning an instrument exercises the brain and provides lifelong enjoyment.",
+      "Whether listening or creating, music has the power to heal, inspire, and energize."
+    ]);
+  }
+
+  if (q.match(/sports|games|recreation/)) {
+    return random([
+      "Sports teach valuable life lessons: teamwork, perseverance, and handling both victory and defeat, sir.",
+      "Physical games and sports are excellent for health, social connection, and stress relief.",
+      "Competition brings out the best in people when approached with good sportsmanship."
+    ]);
+  }
+
+  // Transportation
+  if (q.match(/driving|car|vehicle/)) {
+    return random([
+      "Driving is a privilege and responsibility, sir. Stay alert, follow rules, and be courteous.",
+      "Vehicle maintenance prevents costly repairs. Regular check-ups keep you safe on the road.",
+      "Defensive driving assumes others might make mistakes. Stay vigilant and patient."
+    ]);
+  }
+
+  if (q.match(/public transport|bus|train/)) {
+    return random([
+      "Public transportation is often efficient and environmentally friendly, sir.",
+      "Use travel time productively - read, listen to music, or simply observe the world around you.",
+      "Be courteous to fellow passengers and always have your ticket or pass ready."
+    ]);
+  }
+
+  // Shopping and Consumer Advice
+  if (q.match(/shopping|buying|purchasing/)) {
+    return random([
+      "Smart shopping involves comparing prices, reading reviews, and buying what you need, sir.",
+      "Quality often costs more upfront but saves money in the long run.",
+      "Make a list before shopping to avoid impulse purchases and stay within budget."
+    ]);
+  }
+
+  if (q.match(/online shopping|e-commerce/)) {
+    return random([
+      "Online shopping offers convenience, sir, but always verify seller credibility and read return policies.",
+      "Compare prices across multiple sites and look for secure payment options.",
+      "Online reviews can be helpful, but be aware that some might be fake. Use judgment!"
+    ]);
+  }
+
+  // Productivity and Time Management
+  if (q.match(/productivity|time management|efficiency/)) {
+    return random([
+      "Productivity isn't about being busy, sir - it's about being effective with your time and energy.",
+      "Prioritize important tasks over urgent ones. Plan your day, then work your plan.",
+      "Take regular breaks. A rested mind is more creative and efficient than an exhausted one."
+    ]);
+  }
+
+  if (q.match(/procrastination|delay|postpone/)) {
+    return random([
+      "Procrastination is the thief of time, sir. Break tasks into smaller parts and start with just one.",
+      "The hardest part is often getting started. Set a timer for 15 minutes and begin.",
+      "Future you will thank present you for taking action today, even if it's imperfect."
+    ]);
+  }
+
+  // Self-Care and Wellness
+  if (q.match(/self-care|mental health|wellbeing/)) {
+    return random([
+      "Self-care isn't selfish, sir - it's essential. You can't pour from an empty cup.",
+      "Take time for activities that recharge you: reading, walking, baths, or whatever brings peace.",
+      "Regular self-care prevents burnout and helps you be your best self for others."
+    ]);
+  }
+
+  if (q.match(/meditation|mindfulness/)) {
+    return random([
+      "Meditation is like exercise for the mind, sir. Even 10 minutes daily can make a difference.",
+      "Mindfulness means being present in the moment rather than dwelling on past or future.",
+      "Start with simple breathing exercises. Notice your breath without trying to change it."
+    ]);
+  }
+
+  // Technology and Digital Life
+  if (q.match(/password|security|privacy/)) {
+    return random([
+      "Strong passwords are your first line of digital defense, sir. Use unique, complex combinations.",
+      "Enable two-factor authentication when available. It's like having a double-lock on your digital doors.",
+      "Be cautious about what personal information you share online. Privacy is precious."
+    ]);
+  }
+
+  if (q.match(/backup|data protection/)) {
+    return random([
+      "Regular backups save heartache, sir. Important data should exist in at least two places.",
+      "Cloud storage and external drives are both useful for protecting your digital memories.",
+      "The best backup is the one that happens automatically without you thinking about it."
+    ]);
+  }
+
+  // Environment and Sustainability
+  if (q.match(/environment|sustainability|green living/)) {
+    return random([
+      "Small environmental actions add up to big impacts, sir. Every effort counts.",
+      "Reduce, reuse, recycle - in that order of priority for maximum environmental benefit.",
+      "Sustainable living often saves money while protecting our planet for future generations."
+    ]);
+  }
+
+  if (q.match(/recycling|waste reduction/)) {
+    return random([
+      "Proper recycling helps materials get new life instead of filling landfills, sir.",
+      "The best waste is the waste never created. Consider purchasing decisions carefully.",
+      "Composting organic waste returns nutrients to soil and reduces methane emissions."
+    ]);
+  }
 
   // Creator/Manager questions
   if (q.match(/who created you|who made you|who built you|who is your creator|who is your manager|who is your owner|who developed you/)) {
