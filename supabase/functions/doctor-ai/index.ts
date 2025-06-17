@@ -13,6 +13,17 @@ function random(arr: string[]) {
 const handleConversationalTidbits = (message: string): string | null => {
   const q = message.trim().toLowerCase();
 
+  // Specific People Questions
+
+  // Soumya (Office Girl)
+  if (q.match(/who is soumya|about soumya|soumya|tell me about soumya/)) {
+    return random([
+      "Soumya is the lovely office girl of our company, sir! She takes excellent care of the office staff by providing tea and snacks. A true gem! ☕",
+      "Ah, Soumya! She's our wonderful office assistant who keeps everyone refreshed with tea and delicious snacks. The office wouldn't be the same without her!",
+      "Soumya is our dedicated office girl who ensures all staff members are well taken care of with tea and snacks. She's an essential part of our team! 🍵"
+    ]);
+  }
+
   // General Life Questions and Answers
 
   // Time and Schedule
@@ -812,7 +823,7 @@ const generateMedicalFallbackResponse = (message: string) => {
   // General fallback responses if no specific health category matches
   const generalResponses = [
     "I'm here to provide general health information. While I aim to be helpful, remember that personalized medical advice should come from healthcare professionals who know your specific situation.",
-    "Thank you for your health question. I can offer general information, but for specific medical concerns, it's best to consult with your healthcare provider for personalized advice.",
+    "Thank you for your health question. I can offer general information, but for specific medical concerns, it's best to consult with a healthcare provider for personalized advice.",
     "Health topics require individualized attention. While I can share general health information, your healthcare provider can offer guidance tailored to your specific needs and medical history.",
     "I'm happy to discuss general health topics, but remember that this information isn't a substitute for professional medical advice. Regular check-ups with healthcare providers are essential for optimal health.",
     "For general health maintenance, consider regular physical activity, a balanced diet, adequate sleep, stress management, and routine preventive care with your healthcare provider."
@@ -1132,7 +1143,7 @@ Your ultimate goal is to be the most helpful and personable AI assistant, ready 
           console.log("Rate limit or quota exceeded - using medical fallback response");
           const medicalFallback = generateMedicalFallbackResponse(message);
           
-          return new Response(JSON.stringify({
+          return new Response(JSON.stringify({ 
             reply: medicalFallback,
             source: "fallback",
             error: errorMessage
